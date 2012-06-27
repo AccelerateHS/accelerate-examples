@@ -34,6 +34,12 @@ import qualified Data.Array.Accelerate.CUDA             as CUDA
 import qualified Data.Array.Accelerate.OpenCL           as OpenCL
 #endif
 
+#ifdef ACCELERATE_SIMPLE_BACKEND
+import qualified Data.Array.Accelerate.SimpleInterp     as Simple
+#endif
+
+
+
 -- The Accelerate backends available to test, which should be no larger than the
 -- build configuration for the Accelerate library itself.
 --
@@ -44,6 +50,9 @@ data Backend
 #endif
 #ifdef ACCELERATE_OPENCL_BACKEND
   | OpenCL
+#endif
+#ifdef ACCELERATE_SIMPLE_BACKEND
+  | SimpleInterp
 #endif
   deriving (Show, Data, Typeable)
 
@@ -60,6 +69,10 @@ backend cfg =
 #ifdef ACCELERATE_OPENCL_BACKEND
     OpenCL      -> OpenCL.run
 #endif
+#ifdef ACCELERATE_SIMPLE_BACKEND
+    SimpleInterp -> Simple.run
+#endif
+
 
 --
 -- -----------------------------------------------------------------------------
@@ -110,6 +123,12 @@ defaultConfig testPrograms =
         &= explicit
         &= name "opencl"
         &= help "Implementation for OpenCL (parallel)"
+#endif
+#ifdef ACCELERATE_SIMPLE_BACKEND
+    , SimpleInterp
+        &= explicit
+        &= name "simple"
+        &= help "Interpreter for simplified Accelerate backend AST (sequential)"
 #endif
 
     ]

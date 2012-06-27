@@ -42,6 +42,10 @@ Flag opencl
   Description:          Enable the OpenCL parallel backend
   Default:              True
 
+Flag simple
+  Description:          Enable the Simplified-AST backend
+  Default:              False
+
 Flag io
   Description:          Provide access to the block copy I/O functionality
   Default:              True
@@ -80,6 +84,10 @@ Executable accelerate-quickcheck
   if flag(opencl)
     CPP-options:        -DACCELERATE_OPENCL_BACKEND
     build-depends:      accelerate-opencl               == 0.1.*
+
+  if flag(simple)
+    CPP-options:        -DACCELERATE_SIMPLE_BACKEND
+    build-depends:      accelerate-backend-kit          >= 0.13
 
   build-depends:        accelerate                      >= 0.13,
                         QuickCheck                      >= 2.0,
@@ -132,6 +140,10 @@ Executable accelerate-examples
     CPP-options:        -DACCELERATE_OPENCL_BACKEND
     build-depends:      accelerate-opencl       == 0.1.*
 
+  if flag(simple)
+    CPP-options:        -DACCELERATE_SIMPLE_BACKEND
+    build-depends:      accelerate-backend-kit  >= 0.13
+
   if flag(io)
     CPP-options:        -DACCELERATE_IO
 
@@ -177,7 +189,11 @@ Executable accelerate-crystal
   if flag(opencl)
     CPP-options:        -DACCELERATE_OPENCL_BACKEND
     build-depends:      accelerate-opencl       == 0.1.*
-
+  
+  if flag(simple)
+    CPP-options:        -DACCELERATE_SIMPLE_BACKEND
+    build-depends:      accelerate-backend-kit  >= 0.13
+    
   build-depends:        accelerate              >= 0.13,
                         base                    == 4.*,
                         criterion               >= 0.5,
@@ -204,7 +220,11 @@ Executable accelerate-mandelbrot
   if flag(opencl)
     CPP-options:        -DACCELERATE_OPENCL_BACKEND
     build-depends:      accelerate-opencl       == 0.1.*
-
+  
+  if flag(simple)
+    CPP-options:        -DACCELERATE_SIMPLE_BACKEND
+    build-depends:      accelerate-backend-kit  >= 0.13
+    
   build-depends:        accelerate              >= 0.13,
                         base                    == 4.*,
                         criterion               >= 0.5,
