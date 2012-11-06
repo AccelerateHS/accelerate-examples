@@ -8,7 +8,8 @@
 
 module Main where
 
-import Config
+import qualified Config                                 as C
+--import Config                                           ( run, optSize, optZoom, optScale, optDegree, )
 
 import Data.Word
 import Data.Label
@@ -167,17 +168,17 @@ frame render size zoom time = G.scale zoom' zoom' pic
 -- Main -----------------------------------------------------------------------
 main :: IO ()
 main
-  = do  (config, nops) <- processArgs =<< getArgs
-        let size        = get optSize config
-            zoom        = get optZoom config
-            scale       = get optScale config
-            degree      = get optDegree config
-            render      = run config $ makeImage size scale degree
+  = do  (config, nops) <- C.processArgs =<< getArgs
+        let size        = get C.optSize config
+            zoom        = get C.optZoom config
+            scale       = get C.optScale config
+            degree      = get C.optDegree config
+            render      = C.run config $ makeImage size scale degree
             force arr   = A.indexArray arr (Z:.0:.0) `seq` arr
 
         void . evaluate $ render (A.fromList Z [0])
 
-        if get optBench config
+        if get C.optBench config
            then withArgs nops $ defaultMain
                     [ bench "crystal" $ whnf (force . render) (A.fromList Z [1.0]) ]
 
