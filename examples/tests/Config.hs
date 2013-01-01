@@ -34,8 +34,8 @@ import qualified Data.Array.Accelerate.CUDA             as CUDA
 import qualified Data.Array.Accelerate.OpenCL           as OpenCL
 #endif
 
-#ifdef ACCELERATE_SIMPLE_BACKEND
-import qualified Data.Array.Accelerate.SimpleInterp     as Simple
+#ifdef ACCELERATE_CILK_BACKEND
+import qualified Data.Array.Accelerate.Cilk             as Cilk
 #endif
 
 
@@ -51,8 +51,8 @@ data Backend
 #ifdef ACCELERATE_OPENCL_BACKEND
   | OpenCL
 #endif
-#ifdef ACCELERATE_SIMPLE_BACKEND
-  | SimpleInterp
+#ifdef ACCELERATE_CILK_BACKEND
+  | Cilk
 #endif
   deriving (Show, Data, Typeable)
 
@@ -69,8 +69,8 @@ backend cfg =
 #ifdef ACCELERATE_OPENCL_BACKEND
     OpenCL      -> OpenCL.run
 #endif
-#ifdef ACCELERATE_SIMPLE_BACKEND
-    SimpleInterp -> Simple.run
+#ifdef ACCELERATE_CILK_BACKEND
+    Cilk        -> Cilk.run
 #endif
 
 
@@ -124,11 +124,11 @@ defaultConfig testPrograms =
         &= name "opencl"
         &= help "Implementation for OpenCL (parallel)"
 #endif
-#ifdef ACCELERATE_SIMPLE_BACKEND
-    , SimpleInterp
+#ifdef ACCELERATE_CILK_BACKEND
+    , Cilk
         &= explicit
-        &= name "simple"
-        &= help "Interpreter for simplified Accelerate backend AST (sequential)"
+        &= name "cilk"
+        &= help "Implementation for Cilk/ICC (CPU,parallel)"
 #endif
 
     ]

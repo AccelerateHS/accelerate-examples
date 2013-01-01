@@ -42,8 +42,8 @@ Flag opencl
   Description:          Enable the OpenCL parallel backend
   Default:              True
 
-Flag simple
-  Description:          Enable the Simplified-AST backend
+Flag cilk
+  Description:          Enable the Cilk/ICC backend
   Default:              False
 
 Flag io
@@ -85,8 +85,8 @@ Executable accelerate-quickcheck
     CPP-options:        -DACCELERATE_OPENCL_BACKEND
     build-depends:      accelerate-opencl               == 0.1.*
 
-  if flag(simple)
-    CPP-options:        -DACCELERATE_SIMPLE_BACKEND
+  if flag(cilk)
+    CPP-options:        -DACCELERATE_CILK_BACKEND
     build-depends:      accelerate-backend-kit          >= 0.13
 
   build-depends:        accelerate                      >= 0.13,
@@ -140,8 +140,8 @@ Executable accelerate-examples
     CPP-options:        -DACCELERATE_OPENCL_BACKEND
     build-depends:      accelerate-opencl       == 0.1.*
 
-  if flag(simple)
-    CPP-options:        -DACCELERATE_SIMPLE_BACKEND
+  if flag(cilk)
+    CPP-options:        -DACCELERATE_CILK_BACKEND
     build-depends:      accelerate-backend-kit  >= 0.13
 
   if flag(io)
@@ -190,8 +190,8 @@ Executable accelerate-crystal
     CPP-options:        -DACCELERATE_OPENCL_BACKEND
     build-depends:      accelerate-opencl       == 0.1.*
   
-  if flag(simple)
-    CPP-options:        -DACCELERATE_SIMPLE_BACKEND
+  if flag(cilk)
+    CPP-options:        -DACCELERATE_CILK_BACKEND
     build-depends:      accelerate-backend-kit  >= 0.13
     
   build-depends:        accelerate              >= 0.13,
@@ -221,8 +221,8 @@ Executable accelerate-mandelbrot
     CPP-options:        -DACCELERATE_OPENCL_BACKEND
     build-depends:      accelerate-opencl       == 0.1.*
   
-  if flag(simple)
-    CPP-options:        -DACCELERATE_SIMPLE_BACKEND
+  if flag(cilk)
+    CPP-options:        -DACCELERATE_CILK_BACKEND
     build-depends:      accelerate-backend-kit  >= 0.13
     
   build-depends:        accelerate              >= 0.13,
