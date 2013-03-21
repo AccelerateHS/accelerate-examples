@@ -6,6 +6,7 @@ module Common.World (
 ) where
 
 import Common.Type
+import Common.Util
 import Common.Body
 
 import Data.Array.Accelerate                    as A
@@ -33,8 +34,8 @@ advanceBodies calcAccels timeStep bodies
         accels          = calcAccels bodies
 
         -- Apply the accelerations to the bodies and advance them
-        advance b a     = let (ax, ay)  = unlift a              :: (Exp R, Exp R)
-                              a'        = lift (-ax, -ay)
+        advance b a     = let m         = massOfPointMass (pointMassOfBody b)
+                              a'        = m *. a
                           in advanceBody (the timeStep) (setAccelOfBody a' b)
     in
     A.zipWith advance bodies accels

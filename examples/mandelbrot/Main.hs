@@ -18,7 +18,7 @@ import Data.Array.Accelerate.Array.Data         ( ptrsOfArrayData )
 import Data.Array.Accelerate.Array.Sugar        ( Array(..) )
 
 import Prelude                                  as P
-import Data.Array.Accelerate                    as A hiding ( size )
+import Data.Array.Accelerate                    as A
 import qualified Graphics.Gloss                 as G
 
 
@@ -36,18 +36,23 @@ makePicture world = pic
                   in
                   unsafePerformIO       $ newForeignPtr_ (castPtr ptr)
 
-    pic         = G.bitmapOfForeignPtr h w rawData False
+    pic         = G.bitmapOfForeignPtr w h rawData False
 
 
 main :: IO ()
 main
   = do
-        (config, critConf, nops) <- processArgs =<< getArgs
+        (config, critConf, nops) <- parseArgs =<< getArgs
 
         let world       = initialWorld config view
             fps         = get optFramerate config
-            size        = get optSize config
-            view        = (-0.25, -1.0, 0.0, -0.75)
+            width       = get optWidth config
+            height      = get optHeight config
+
+            -- Centre coordinates: Re(c) = -0.7; Im(c) = 0
+            -- View width: 3.0769
+            --
+            view        = (-2.23, -1.15, 0.83, 1.15)
 
             force arr   = indexArray arr (Z:.0:.0) `seq` arr
 
@@ -58,13 +63,13 @@ main
 #ifdef ACCELERATE_ENABLE_GUI
               | fps == 0
               = G.display
-                    (G.InWindow "Mandelbrot" (size, size) (10, 10))
+                    (G.InWindow "Mandelbrot" (width, height) (10, 10))
                     G.black
                     (makePicture world)
 
               | fps > 0
               = G.play
-                    (G.InWindow "Mandelbrot" (size, size) (10, 10))
+                    (G.InWindow "Mandelbrot" (width, height) (10, 10))
                     G.black
                     fps
                     world

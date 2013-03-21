@@ -40,7 +40,7 @@ Flag cuda
 
 Flag opencl
   Description:          Enable the OpenCL parallel backend
-  Default:              True
+  Default:              False
 
 Flag simple
   Description:          Enable the Simplified-AST backend
@@ -128,9 +128,12 @@ Executable accelerate-examples
   c-sources:            examples/tests/io/fill_with_values.cpp
   extra-libraries:      stdc++
 
-  ghc-options:          -Wall -O2
+  ghc-options:          -Wall -O2 -threaded
   if impl(ghc >= 7.0)
     ghc-options:        -rtsopts
+
+  if impl(ghc >= 7.6)
+    ghc-options:        -fsimpl-tick-factor=130
 
   if flag(cuda)
     CPP-options:        -DACCELERATE_CUDA_BACKEND
@@ -175,7 +178,7 @@ Executable accelerate-crystal
   hs-source-dirs:       examples/crystal
   Main-is:              Main.hs
   other-modules:        Config
-  ghc-options:          -O2 -Wall
+  ghc-options:          -O2 -Wall -threaded
   if impl(ghc >= 7.0)
     ghc-options:        -rtsopts
 
@@ -206,7 +209,7 @@ Executable accelerate-mandelbrot
   hs-source-dirs:       examples/mandelbrot
   Main-is:              Main.hs
   other-modules:        Config World Mandel
-  ghc-options:          -O2 -Wall
+  ghc-options:          -O2 -Wall -threaded
   if impl(ghc >= 7.0)
     ghc-options:        -rtsopts
 
@@ -243,7 +246,9 @@ Executable accelerate-fluid
                         Type
                         World
 
-  ghc-options:          -O2 -Wall
+  ghc-options:          -O2 -Wall -threaded
+  if impl(ghc >= 7.0)
+    ghc-options:        -rtsopts
 
   if flag(gui)
     CPP-options:        -DACCELERATE_ENABLE_GUI
@@ -259,6 +264,9 @@ Executable accelerate-fluid
                         criterion               >= 0.5,
                         fclabels                >= 1.0,
                         gloss                   >= 1.7
+
+
+-- Simulation of gravitational attraction between solid particles
 
 Executable accelerate-nbody
   Main-is:              Main.hs
@@ -278,6 +286,10 @@ Executable accelerate-nbody
                         Solver.BarnsHut
                         Solver.Naive
 
+  ghc-options:          -O2 -Wall -threaded
+  if impl(ghc >= 7.0)
+    ghc-options:        -rtsopts
+
   if flag(gui)
     cpp-options:        -DACCELERATE_ENABLE_GUI
 
@@ -286,6 +298,37 @@ Executable accelerate-nbody
     build-depends:      accelerate-cuda         >= 0.13
 
   Build-depends:        accelerate              >= 0.13,
+                        base                    == 4.*,
+                        criterion               >= 0.5,
+                        fclabels                >= 1.0,
+                        gloss                   >= 1.7
+
+
+-- A celular automata
+
+Executable accelerate-smoothlife
+  Main-is:              Main.hs
+  hs-source-dirs:       examples/smoothlife
+  other-modules:        Config
+                        SmoothLife
+                        Gloss.Draw
+                        Gloss.Event
+                        Gloss.Simulate
+                        Random.Array
+
+  ghc-options:          -O2 -Wall -threaded
+  if impl(ghc >= 7.0)
+    ghc-options:        -rtsopts
+
+  if flag(gui)
+    cpp-options:        -DACCELERATE_ENABLE_GUI
+
+  if flag(cuda)
+    cpp-options:        -DACCELERATE_CUDA_BACKEND
+    build-depends:      accelerate-cuda         >= 0.13
+
+  Build-depends:        accelerate              >= 0.13,
+                        accelerate-fft          >= 0.13,
                         base                    == 4.*,
                         criterion               >= 0.5,
                         fclabels                >= 1.0,

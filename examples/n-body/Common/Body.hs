@@ -28,28 +28,57 @@ import Data.Array.Accelerate            as A
 -- Acceleration ----------------------------------------------------------------
 --
 -- | Calculate the acceleration on a point due to some other point as an inverse
---   separation-squared relation.
+--   separation-squared relation. The force on a body i caused by its
+--   gravitational attraction to a body j is given by:
+--
+--                m_i m_j     r_ij
+--      f_ij = G --------- . ------
+--                |r_ij|^2   |r_ij|
+--
+--   The total force on a body F is given by this interaction to all other
+--   bodies:
+--
+--      F_i = Sum_{i/=j} f_ij
+--
+--                               m_j r_ij
+--          = G m_i . Sum_{j/=i} --------
+--                                |r_ij|^3
+--
+--   As the bodies approach each other, the force between them grows without
+--   bound, which is an undesirable situation for numerical integration. Since
+--   collisions between bodies are precluded, a softening factor (epsilon^2 > 0)
+--   is added:
+--
+--                                  m_j r_ij
+--      F_i = G m_i . Sum -----------------------------
+--                        ( |r_ij|^2 + epsilon^2) ^ 3/2
+--
+--   Note that the condition (i /= j) is no longer required, because (f_ii = 0)
+--   when (epsilon^2 > 0). The softening factor models the interaction between
+--   two Plummer point masses: bodies that behave as if they were spherical
+--   galaxies (and thus may pass through each other).
+--
+--   To integrate over time, we need the acceleration (a_i = F_i / m_i), and so
+--   the above can be simplified by removing m_i from the RHS. This function
+--   computes the component of the Sum for two bodies i and j.
 --
 accel   :: Exp R                -- ^ Smoothing parameter
         -> Exp Body             -- ^ The point being accelerated
         -> Exp Body             -- ^ Neighbouring point
         -> Exp Accel
 
-accel epsilon body1 body2
-  = lift (aabs * dx / r , aabs * dy / r)
+accel epsilon bodyi bodyj = s *. r
   where
-    (x1, y1)    = unlift $ positionOfPointMass mp1
-    (x2, y2)    = unlift $ positionOfPointMass mp2
-    mp1         = pointMassOfBody body1
-    mp2         = pointMassOfBody body2
-    m1          = massOfPointMass mp1
-    m2          = massOfPointMass mp2
+    pmi         = pointMassOfBody bodyi
+    pmj         = pointMassOfBody bodyj
+    mj          = massOfPointMass pmj
 
-    dx          = x1 - x2
-    dy          = y1 - y2
-    rsqr        = (dx * dx) + (dy * dy) + epsilon * epsilon
-    aabs        = (m1 + m2) / rsqr
-    r           = sqrt rsqr
+    r           = positionOfPointMass pmj .-. positionOfPointMass pmi
+    rsqr        = dot r r + epsilon * epsilon
+    invr        = 1 / sqrt rsqr
+    invr3       = invr * invr * invr
+
+    s           = mj * invr3
 
 
 -- Body ------------------------------------------------------------------------
@@ -57,11 +86,10 @@ accel epsilon body1 body2
 
 -- | Make a stationary Body of unit mass
 --
-unitBody :: Exp R -> Exp R -> Exp Body
-unitBody x y = lift (pointmass, constant (0,0), constant (0,0))
+unitBody :: Exp (Vec R) -> Exp Body
+unitBody pos = lift (pointmass, vec 0, vec 0)
   where
-    pos         = lift (x, y)                   :: Exp Position
-    pointmass   = lift (pos, constant 1)        :: Exp PointMass
+    pointmass = lift (pos, constant 1)          :: Exp PointMass
 
 
 -- | Take the Velocity of a Body
@@ -128,11 +156,11 @@ setStartVelOfBody startVel body = lift (pm, vel'', acc)
     acc         = accelOfBody body
     pos         = positionOfPointMass pm
 
-    pos'        = normaliseV pos
-    vel'        = lift (y', -x')
-    vel''       = mulSV (sqrt (magV pos) * startVel) vel'
+    pos'        = normalise pos
+    vel'        = lift (y', -x', z')
+    vel''       = (sqrt (magnitude pos) * startVel) *. vel'
 
-    (x', y')    = unlift pos'   :: (Exp R, Exp R)
+    (x',y',z')  = unlift pos'   :: Vec (Exp R)
 
 
 -- | Advance a body forwards in time.
@@ -141,13 +169,12 @@ advanceBody :: Exp Time -> Exp Body -> Exp Body
 advanceBody time body = lift ( pm', vel', acc )
   where
     pm          = pointMassOfBody body
-    mass        = massOfPointMass pm
+    pos         = positionOfPointMass pm
+    vel         = velocityOfBody body
     acc         = accelOfBody body
-    (px, py)    = unlift $ positionOfPointMass pm
-    (vx, vy)    = unlift $ velocityOfBody body
-    (ax, ay)    = unlift acc
+    mass        = massOfPointMass pm
 
-    pm'         = lift (pos', mass)                     :: Exp PointMass
-    pos'        = lift (px + time * vx, py + time * vy) :: Exp Velocity
-    vel'        = lift (vx + time * ax, vy + time * ay) :: Exp Accel
+    pm'         = lift (pos', mass)             :: Exp PointMass
+    pos'        = pos .+. time *. vel
+    vel'        = vel .+. time *. acc
 

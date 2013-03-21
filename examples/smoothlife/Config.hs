@@ -2,35 +2,31 @@
 {-# LANGUAGE PatternGuards   #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module Config (
+module Config
+  where
 
-  Config, Solver(..),
-  configBackend, configSolver, configWindowSize, configShouldDrawTree,
-  configRate, configBodyCount, configBodyMass, configTimeStep, configEpsilon,
-  configStartDiscSize, configStartSpeed, configMaxSteps, configBenchmark,
-  configDumpFinal,
-
-  parseArgs,
-  run,
-  run1,
-
-) where
-
-import Common.Type
-
+import Prelude                                          as P hiding ((.), id, fst, snd)
+import qualified Prelude                                as P
 import Data.Char
 import Data.List
 import Data.Label
 import System.Exit
+import Control.Category
 import System.Console.GetOpt
 import qualified Criterion.Main                         as Criterion
 import qualified Criterion.Config                       as Criterion
 
-import Data.Array.Accelerate                            ( Arrays, Acc )
+import Data.Array.Accelerate                            ( Array, Arrays, Acc, DIM2 )
+import Data.Array.Accelerate.Math.Complex               as A
 import qualified Data.Array.Accelerate.Interpreter      as Interp
 #ifdef ACCELERATE_CUDA_BACKEND
 import qualified Data.Array.Accelerate.CUDA             as CUDA
 #endif
+
+-- | Types
+type R          = Float
+type C          = Complex R
+type Matrix a   = Array DIM2 a
 
 
 -- | Program configuration
@@ -42,68 +38,52 @@ data Backend = Interpreter
   deriving (Bounded, Show)
 
 
-data Solver = Naive | BarnsHut
-  deriving (Enum, Bounded, Show)
-
-
-data Config
-  = Config
+data Config = Config
   {
     -- How to execute the simulation
     _configBackend              :: Backend
-  , _configSolver               :: Solver
 
     -- How to present the output
   , _configWindowSize           :: Int
-  , _configShouldDrawTree       :: Bool
-  , _configRate                 :: Int
-
-    -- System setup
-  , _configBodyCount            :: Int
-  , _configBodyMass             :: R
-  , _configTimeStep             :: R
-  , _configEpsilon              :: R
+  , _configWindowZoom           :: Int
+  , _configFramerate            :: Int
+  , _configTimestep             :: Float
 
     -- Initial conditions
-  , _configStartDiscSize        :: R
-  , _configStartSpeed           :: R
+  , _configRim                  :: R            -- b
+  , _configDiscRadius           :: (R,R)        -- (ri, ra)
+  , _configBirthInterval        :: (R,R)        -- (b1, b2)
+  , _configDeathInterval        :: (R,R)        -- (d1, d2)
+  , _configStep                 :: (R,R)        -- (alpha_n, alpha_m)
 
     -- Terminating conditions
   , _configMaxSteps             :: Maybe Int
   , _configBenchmark            :: Bool
   , _configHelp                 :: Bool
-
-    -- Dump final particle locations to file
-  , _configDumpFinal            :: Maybe FilePath
   }
-  deriving Show
 
 $(mkLabels [''Config])
-
 
 defaultConfig :: Config
 defaultConfig = Config
   {
     _configBackend              = maxBound
-  , _configSolver               = Naive         -- no barns-hut yet!
 
-  , _configWindowSize           = 1000
-  , _configShouldDrawTree       = False         -- no barns-hut yet!
-  , _configRate                 = 30
+  , _configWindowSize           = 256
+  , _configWindowZoom           = 3
+  , _configFramerate            = 10
+  , _configTimestep             = 0.1
 
-  , _configBodyCount            = 200
-  , _configBodyMass             = 100
-  , _configTimeStep             = 1
-  , _configEpsilon              = 50
-
-  , _configStartDiscSize        = 350
-  , _configStartSpeed           = 0.5
+  -- generic smooth glider
+  , _configRim                  = 1
+  , _configDiscRadius           = (3, 12)
+  , _configBirthInterval        = (0.278, 0.365)
+  , _configDeathInterval        = (0.267, 0.445)
+  , _configStep                 = (0.028, 0.147)
 
   , _configMaxSteps             = Nothing
   , _configBenchmark            = False
   , _configHelp                 = False
-
-  , _configDumpFinal            = Nothing
   }
 
 
@@ -126,8 +106,7 @@ run1 config f =
     CUDA        -> CUDA.run1 f
 #endif
 
-
--- | The set of backends available to execute the program
+-- | The set of available command-line options
 --
 backends :: [OptDescr (Config -> Config)]
 backends =
@@ -143,49 +122,59 @@ backends =
   ]
 
 
--- | The set of available command-line options
---
 defaultOptions :: [OptDescr (Config -> Config)]
 defaultOptions = backends ++
-  [ Option  ['s'] ["solver"]
-            (ReqArg (set configSolver . solver) "ALGORITHM")
-            ("solver to use, one of: " ++ intercalate ", " (map show [minBound .. maxBound :: Solver]))
-
-  , Option  [] ["size"]
+  [ Option  [] ["size"]
             (ReqArg (set configWindowSize . read) "INT")
             (describe configWindowSize "visualisation size")
 
+  , Option  [] ["zoom"]
+            (ReqArg (set configWindowZoom . read) "INT")
+            (describe configWindowZoom "visualisation pixel replication factor")
+
   , Option  [] ["framerate"]
-            (ReqArg (set configRate . read) "INT")
-            (describe configRate "visualisation frame rate")
-
-  , Option  [] ["draw-tree"]
-            (NoArg (set configShouldDrawTree True))
-            "draw the Barns-Hut quad tree"
-
-  , Option  ['n'] ["bodies"]
-            (ReqArg (set configBodyCount . read) "INT")
-            (describe configBodyCount "number of bodies in the simulation")
-
-  , Option  [] ["mass"]
-            (ReqArg (set configBodyMass . read) "FLOAT")
-            (describe configBodyMass "mass of each body")
+            (ReqArg (set configFramerate . read) "INT")
+            (describe configFramerate "visualisation frame rate")
 
   , Option  [] ["timestep"]
-            (ReqArg (set configTimeStep . read) "FLOAT")
-            (describe configTimeStep "time step between simulation states")
+            (ReqArg (set configTimestep . read) "Float")
+            (describe configTimestep "simulation timestep")
 
-  , Option  [] ["epsilon"]
-            (ReqArg (set configEpsilon . read) "FLOAT")
-            (describe configEpsilon "smoothing parameter")
+  , Option  [] ["b", "rim"]
+            (ReqArg (set configRim . read) "FLOAT")
+            (describe configRim "anti-aliasing zone around the rim")
 
-  , Option  [] ["disc"]
-            (ReqArg (set configStartDiscSize . read) "FLOAT")
-            (describe configStartDiscSize "initial size of particle disc")
+  , Option  [] ["ri", "inner-radius"]
+            (ReqArg (set (fst . configDiscRadius) . read) "FLOAT")
+            (describe (fst . configDiscRadius) "inner radius")
 
-  , Option  [] ["speed"]
-            (ReqArg (set configStartSpeed . read) "FLOAT")
-            (describe configStartSpeed "initial rotation speed of the disc")
+  , Option  [] ["ra", "outer-radius"]
+            (ReqArg (set (snd . configDiscRadius) . read) "FLOAT")
+            (describe (snd . configDiscRadius) "outer radius")
+
+  , Option  [] ["b1", "birth-low"]
+            (ReqArg (set (fst . configBirthInterval) . read) "FLOAT")
+            (describe (fst . configBirthInterval) "lower birth interval")
+
+  , Option  [] ["b2", "birth-high"]
+            (ReqArg (set (snd . configBirthInterval) . read) "FLOAT")
+            (describe (snd . configBirthInterval) "upper birth interval")
+
+  , Option  [] ["d1", "death-low"]
+            (ReqArg (set (fst . configDeathInterval) . read) "FLOAT")
+            (describe (fst . configDeathInterval) "lower death interval")
+
+  , Option  [] ["d2", "death-high"]
+            (ReqArg (set (snd . configDeathInterval) . read) "FLOAT")
+            (describe (snd . configDeathInterval) "upper death interval")
+
+  , Option  [] ["sn", "alpha_n"]
+            (ReqArg (set (fst . configStep) . read) "FLOAT")
+            (describe (fst . configStep) "lower step interval")
+
+  , Option  [] ["sm", "alpha_m"]
+            (ReqArg (set (snd . configStep) . read) "FLOAT")
+            (describe (snd . configStep) "upper step interval")
 
   , Option  [] ["max-steps"]
             (ReqArg (set configMaxSteps . read) "INT")
@@ -195,34 +184,22 @@ defaultOptions = backends ++
             (NoArg (set configBenchmark True))
             (describe configBenchmark "benchmark instead of displaying animation")
 
-  , Option  [] ["dump-final"]
-            (ReqArg (set configDumpFinal . Just) "FILE")
-            "dump final body positions to file"
-
-  , Option  ['h', '?'] ["help"]
+  , Option  "h?" ["help"]
             (NoArg (set configHelp True))
             "show this help message"
   ]
   where
-    solver algorithm
-      | a `elem` ["n",  "naive"]                        = Naive
-      | a `elem` ["bh", "barnshut", "barns-hut"]        = BarnsHut
-      | otherwise                                       = error $ "Unknown solver method: " ++ algorithm
-      where
-        a = map toLower algorithm
-
     describe f msg
       = msg ++ " (" ++ show (get f defaultConfig) ++ ")"
 
-
--- | Process the command line options
---
+    fst = lens P.fst (\a (_,b) -> (a,b))
+    snd = lens P.snd (\b (a,_) -> (a,b))
 
 basicHeader :: String
 basicHeader = unlines
-  [ "accelerate-nbody (c) [2012..2013] The Accelerate Team"
+  [ "accelerate-smoothlife (c) [2012..2013] The Accelerate Team"
   , ""
-  , "Usage: accelerate-nbody [OPTIONS]"
+  , "Usage: accelerate-smoothlife [OPTIONS]"
   ]
 
 fancyHeader :: Config -> String
@@ -245,11 +222,11 @@ fancyHeader opts = unlines (header : table)
 
 
 parseArgs :: [String] -> IO (Config, Criterion.Config, [String])
-parseArgs argv =
-  let
-      helpMsg err = concat err
-        ++ usageInfo basicHeader                    defaultOptions
-        ++ usageInfo "\nGeneric criterion options:" Criterion.defaultOptions
+parseArgs argv
+  = let
+        helpMsg err = concat err
+          ++ usageInfo basicHeader                    defaultOptions
+          ++ usageInfo "\nGeneric criterion options:" Criterion.defaultOptions
 
   in case getOpt' Permute defaultOptions argv of
       (o,_,n,[])  -> do
