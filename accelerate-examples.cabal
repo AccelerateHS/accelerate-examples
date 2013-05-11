@@ -1,7 +1,7 @@
 Name:                   accelerate-examples
 Version:                0.13.0.0
 Cabal-version:          >=1.6
-Tested-with:            GHC >= 7.4
+Tested-with:            GHC >= 7.6
 Build-type:             Simple
 
 Synopsis:               Examples using the Accelerate library
@@ -66,17 +66,17 @@ Executable accelerate-quickcheck
 
   if flag(cuda)
     CPP-options:        -DACCELERATE_CUDA_BACKEND
-    build-depends:      accelerate-cuda                 >= 0.13,
-                        cuda                            >= 0.5
+    build-depends:      accelerate-cuda                 == 0.13.*,
+                        cuda                            >= 0.5  && < 0.6
 
   if flag(opencl)
     CPP-options:        -DACCELERATE_OPENCL_BACKEND
     build-depends:      accelerate-opencl               == 0.1.*
 
-  build-depends:        accelerate                      >= 0.13,
-                        QuickCheck                      >= 2.0,
-                        test-framework                  >= 0.5,
-                        test-framework-quickcheck2      >= 0.2,
+  build-depends:        accelerate                      == 0.13.*,
+                        QuickCheck                      >= 2.0  && < 2.6,
+                        test-framework                  >= 0.5  && < 0.9,
+                        test-framework-quickcheck2      >= 0.2  && < 0.4,
                         random
 
 
@@ -121,32 +121,32 @@ Executable accelerate-examples
 
   if flag(cuda)
     CPP-options:        -DACCELERATE_CUDA_BACKEND
-    build-depends:      accelerate-cuda         >= 0.13
+    build-depends:      accelerate-cuda         == 0.13.*
 
   if flag(opencl)
     CPP-options:        -DACCELERATE_OPENCL_BACKEND
     build-depends:      accelerate-opencl       == 0.1.*
 
-  build-depends:        accelerate              >= 0.13,
-                        accelerate-io           >= 0.13,
-                        array                   >= 0.3,
-                        attoparsec              >= 0.10,
+  build-depends:        accelerate              == 0.13.*,
+                        accelerate-io           == 0.13.*,
                         base                    == 4.*,
-                        bytestring              >= 0.9,
-                        bytestring-lexing       >= 0.2,
-                        cmdargs                 >= 0.6,
-                        criterion               >= 0.5,
-                        deepseq                 >= 1.1,
-                        directory               >= 1.0,
-                        filepath                >= 1.0,
-                        hashtables              >= 1.0.1,
-                        mtl                     >= 1.1,
-                        mwc-random              >= 0.8,
-                        pgm                     >= 0.1,
-                        pretty                  >= 1.0,
-                        repa                    >= 3.1,
-                        vector                  >= 0.7,
-                        vector-algorithms       >= 0.4
+                        array                   >= 0.3  && < 0.5,
+                        attoparsec              >= 0.10 && < 0.11,
+                        bytestring              >= 0.9  && < 0.11,
+                        bytestring-lexing       >= 0.2  && < 0.5,
+                        cmdargs                 >= 0.6  && < 0.11,
+                        criterion               >= 0.5  && < 0.9,
+                        deepseq                 >= 1.1  && < 1.4,
+                        directory               >= 1.0  && < 1.3,
+                        filepath                >= 1.0  && < 1.4,
+                        hashtables              >= 1.0  && < 1.2,
+                        mtl                     >= 1.1  && < 2.2,
+                        mwc-random              >= 0.8  && < 0.13,
+                        pgm                     >= 0.1  && < 0.2,
+                        pretty                  >= 1.0  && < 1.2,
+                        repa                    >= 3.1  && < 3.3,
+                        vector                  >= 0.7  && < 0.11,
+                        vector-algorithms       >= 0.4  && < 0.6
 
 
 -- A quasicrystal demo as the sum of waves in a plane
@@ -165,17 +165,17 @@ Executable accelerate-crystal
 
   if flag(cuda)
     CPP-options:        -DACCELERATE_CUDA_BACKEND
-    build-depends:      accelerate-cuda         >= 0.13
+    build-depends:      accelerate-cuda         == 0.13.*
 
   if flag(opencl)
     CPP-options:        -DACCELERATE_OPENCL_BACKEND
     build-depends:      accelerate-opencl       == 0.1.*
 
-  build-depends:        accelerate              >= 0.13,
+  build-depends:        accelerate              == 0.13.*,
                         base                    == 4.*,
-                        criterion               >= 0.5,
-                        fclabels                >= 1.0,
-                        gloss                   >= 1.7
+                        criterion               >= 0.5  && < 0.9,
+                        fclabels                >= 1.0  && < 1.2,
+                        gloss                   >= 1.7  && < 1.8
 
 
 -- Image edge detection
@@ -192,20 +192,20 @@ Executable accelerate-canny
 
   if flag(cuda)
     CPP-options:        -DACCELERATE_CUDA_BACKEND
-    build-depends:      accelerate-cuda         >= 0.13
+    build-depends:      accelerate-cuda         == 0.13.*
 
   if flag(opencl)
     CPP-options:        -DACCELERATE_OPENCL_BACKEND
     build-depends:      accelerate-opencl       == 0.1.*
 
-  build-depends:        accelerate              >= 0.13,
-                        accelerate-io           >= 0.13,
+  build-depends:        accelerate              == 0.13.*,
+                        accelerate-io           == 0.13.*,
                         base                    == 4.*,
-                        criterion               >= 0.5,
-                        fclabels                >= 1.0,
-                        repa                    >= 3.1,
-                        repa-io                 >= 3.1,
-                        vector                  >= 0.7
+                        criterion               >= 0.5  && < 0.9,
+                        fclabels                >= 1.0  && < 1.2,
+                        repa                    >= 3.1  && < 3.3,
+                        repa-io                 >= 3.1  && < 3.3,
+                        vector                  >= 0.7  && < 0.11
 
 
 -- A simple mandelbrot generator
@@ -224,17 +224,17 @@ Executable accelerate-mandelbrot
 
   if flag(cuda)
     CPP-options:        -DACCELERATE_CUDA_BACKEND
-    build-depends:      accelerate-cuda         >= 0.13
+    build-depends:      accelerate-cuda         == 0.13.*
 
   if flag(opencl)
     CPP-options:        -DACCELERATE_OPENCL_BACKEND
     build-depends:      accelerate-opencl       == 0.1.*
 
-  build-depends:        accelerate              >= 0.13,
+  build-depends:        accelerate              == 0.13.*,
                         base                    == 4.*,
-                        criterion               >= 0.5,
-                        fclabels                >= 1.0,
-                        gloss                   >= 1.7
+                        criterion               >= 0.5  && < 0.9,
+                        fclabels                >= 1.0  && < 1.2,
+                        gloss                   >= 1.7  && < 1.8
 
 
 -- A stable fluid simulation
@@ -259,15 +259,15 @@ Executable accelerate-fluid
 
   if flag(cuda)
     cpp-options:        -DACCELERATE_CUDA_BACKEND
-    build-depends:      accelerate-cuda         >= 0.13
+    build-depends:      accelerate-cuda         == 0.13.*
 
-  Build-depends:        accelerate              >= 0.13,
-                        accelerate-io           >= 0.13,
+  Build-depends:        accelerate              == 0.13.*,
+                        accelerate-io           == 0.13.*,
                         base                    == 4.*,
-                        bmp                     >= 1.2,
-                        criterion               >= 0.5,
-                        fclabels                >= 1.0,
-                        gloss                   >= 1.7
+                        bmp                     >= 1.2  && < 1.3,
+                        criterion               >= 0.5  && < 0.9,
+                        fclabels                >= 1.0  && < 1.2,
+                        gloss                   >= 1.7  && < 1.8
 
 
 -- Simulation of gravitational attraction between solid particles
@@ -301,13 +301,13 @@ Executable accelerate-nbody
 
   if flag(cuda)
     cpp-options:        -DACCELERATE_CUDA_BACKEND
-    build-depends:      accelerate-cuda         >= 0.13
+    build-depends:      accelerate-cuda         == 0.13.*
 
-  Build-depends:        accelerate              >= 0.13,
+  Build-depends:        accelerate              == 0.13.*,
                         base                    == 4.*,
-                        criterion               >= 0.5,
-                        fclabels                >= 1.0,
-                        gloss                   >= 1.7
+                        criterion               >= 0.5  && < 0.9,
+                        fclabels                >= 1.0  && < 1.2,
+                        gloss                   >= 1.7  && < 1.8
 
 
 -- A celular automata
@@ -334,14 +334,14 @@ Executable accelerate-smoothlife
 
   if flag(cuda)
     cpp-options:        -DACCELERATE_CUDA_BACKEND
-    build-depends:      accelerate-cuda         >= 0.13
+    build-depends:      accelerate-cuda         == 0.13.*
 
-  Build-depends:        accelerate              >= 0.13,
-                        accelerate-fft          >= 0.13,
+  Build-depends:        accelerate              == 0.13.*,
+                        accelerate-fft          == 0.13.*,
                         base                    == 4.*,
-                        criterion               >= 0.5,
-                        fclabels                >= 1.0,
-                        gloss                   >= 1.7
+                        criterion               >= 0.5  && < 0.9,
+                        fclabels                >= 1.0  && < 1.2,
+                        gloss                   >= 1.7  && < 1.8
 
 
 -- A password recovery tool
@@ -362,15 +362,15 @@ Executable accelerate-hashcat
 
   if flag(cuda)
     cpp-options:        -DACCELERATE_CUDA_BACKEND
-    build-depends:      accelerate-cuda         >= 0.13
+    build-depends:      accelerate-cuda         == 0.13.*
 
-  Build-depends:        accelerate              >= 0.13,
+  Build-depends:        accelerate              == 0.13.*,
                         base                    == 4.*,
-                        bytestring              >= 0.9,
-                        bytestring-lexing       >= 0.2,
-                        cereal                  >= 0.3,
-                        criterion               >= 0.5,
-                        fclabels                >= 1.0
+                        bytestring              >= 0.9  && < 0.11,
+                        bytestring-lexing       >= 0.2  && < 0.5,
+                        cereal                  >= 0.3  && < 0.4,
+                        criterion               >= 0.5  && < 0.9,
+                        fclabels                >= 1.0  && < 1.2
 
 
 source-repository head
