@@ -37,10 +37,6 @@ Flag opencl
   Description:          Enable the OpenCL parallel backend
   Default:              False
 
-Flag io
-  Description:          Provide access to the block copy I/O functionality
-  Default:              True
-
 
 -- Run some basic randomised tests of the primitive library operations, and unit
 -- tests of known (hopefully prior) failures.
@@ -130,9 +126,6 @@ Executable accelerate-examples
   if flag(opencl)
     CPP-options:        -DACCELERATE_OPENCL_BACKEND
     build-depends:      accelerate-opencl       == 0.1.*
-
-  if flag(io)
-    CPP-options:        -DACCELERATE_IO
 
   build-depends:        accelerate              >= 0.13,
                         accelerate-io           >= 0.13,
