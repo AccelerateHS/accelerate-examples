@@ -112,7 +112,7 @@ Executable accelerate-nofib
 
   if flag(cuda)
     CPP-options:        -DACCELERATE_CUDA_BACKEND
-    build-depends:      accelerate-cuda                 >= 0.14
+    build-depends:      accelerate-cuda                 == 0.14.*
     other-modules:      Test.Foreign
 
   if flag(opencl)
@@ -121,24 +121,24 @@ Executable accelerate-nofib
 
   if flag(ekg)
     CPP-options:        -DACCELERATE_ENABLE_EKG
-    build-depends:      ekg                             >= 0.3
+    build-depends:      ekg                             >= 0.3          && < 0.4
     ghc-options:        -with-rtsopts=-T
 
   if !flag(nofib)
     buildable:          False
   else
-    build-depends:      accelerate                      >= 0.14,
-                        accelerate-io                   >= 0.14,
+    build-depends:      accelerate                      == 0.14.*,
+                        accelerate-io                   == 0.14.*,
                         base                            == 4.6.*,
                         array                           >= 0.3,
                         containers                      >= 0.5,
-                        criterion                       >= 0.5,
-                        fclabels                        >= 2.0,
-                        HUnit                           >= 1.2,
-                        QuickCheck                      >= 2.0,
-                        test-framework                  >= 0.5,
-                        test-framework-hunit            >= 0.3,
-                        test-framework-quickcheck2      >= 0.2,
+                        criterion                       >= 0.5          && < 0.9,
+                        fclabels                        >= 2.0          && < 2.1,
+                        HUnit                           >= 1.2          && < 1.3,
+                        QuickCheck                      >= 2.0          && < 2.7,
+                        test-framework                  >= 0.5          && < 0.9,
+                        test-framework-hunit            >= 0.3          && < 0.4,
+                        test-framework-quickcheck2      >= 0.2          && < 0.4,
                         random
 
 
@@ -165,7 +165,7 @@ Executable accelerate-smvm
 
   if flag(cuda)
     CPP-options:        -DACCELERATE_CUDA_BACKEND
-    build-depends:      accelerate-cuda         >= 0.14
+    build-depends:      accelerate-cuda         == 0.14.*
 
   if flag(opencl)
     CPP-options:        -DACCELERATE_OPENCL_BACKEND
@@ -173,23 +173,23 @@ Executable accelerate-smvm
 
   if flag(ekg)
     CPP-options:        -DACCELERATE_ENABLE_EKG
-    build-depends:      ekg                     >= 0.3
+    build-depends:      ekg                     >= 0.3          && < 0.4
     ghc-options:        -with-rtsopts=-T
 
   if !flag(smvm)
     buildable:          False
   else
-    build-depends:      accelerate              >= 0.14,
+    build-depends:      accelerate              == 0.14.*,
                         base                    == 4.6.*,
-                        attoparsec              >= 0.10,
-                        bytestring              >= 0.9,
-                        bytestring-lexing       >= 0.2,
-                        criterion               >= 0.5,
-                        fclabels                >= 2.0,
-                        primitive               >= 0.5,
-                        mwc-random              >= 0.8,
-                        vector                  >= 0.7,
-                        vector-algorithms       >= 0.4
+                        attoparsec              >= 0.10         && < 0.11,
+                        bytestring              >= 0.9          && < 0.11,
+                        bytestring-lexing       >= 0.2          && < 0.5,
+                        criterion               >= 0.5          && < 0.9,
+                        fclabels                >= 2.0          && < 2.1,
+                        primitive               >= 0.5          && < 0.6,
+                        mwc-random              >= 0.8          && < 0.14,
+                        vector                  >= 0.7          && < 0.11,
+                        vector-algorithms       >= 0.4          && < 0.6
 
 
 -- A quasicrystal demo as the sum of waves in a plane
@@ -211,7 +211,7 @@ Executable accelerate-crystal
 
   if flag(cuda)
     CPP-options:        -DACCELERATE_CUDA_BACKEND
-    build-depends:      accelerate-cuda         >= 0.14
+    build-depends:      accelerate-cuda         == 0.14.*
 
   if flag(opencl)
     CPP-options:        -DACCELERATE_OPENCL_BACKEND
@@ -219,17 +219,17 @@ Executable accelerate-crystal
 
   if flag(ekg)
     CPP-options:        -DACCELERATE_ENABLE_EKG
-    build-depends:      ekg                     >= 0.3
+    build-depends:      ekg                     >= 0.3          && < 0.4
     ghc-options:        -with-rtsopts=-T
 
   if !flag(crystal)
     buildable:          False
   else
-    build-depends:      accelerate              >= 0.14,
+    build-depends:      accelerate              == 0.14.*,
                         base                    == 4.6.*,
-                        criterion               >= 0.5,
-                        fclabels                >= 2.0,
-                        gloss-raster-accelerate >= 1.7
+                        criterion               >= 0.5          && < 0.9,
+                        fclabels                >= 2.0          && < 2.1,
+                        gloss-raster-accelerate >= 1.8          && < 1.9
 
 
 -- Image edge detection
@@ -248,7 +248,7 @@ Executable accelerate-canny
 
   if flag(cuda)
     CPP-options:        -DACCELERATE_CUDA_BACKEND
-    build-depends:      accelerate-cuda         >= 0.14
+    build-depends:      accelerate-cuda         == 0.14.*
 
   if flag(opencl)
     CPP-options:        -DACCELERATE_OPENCL_BACKEND
@@ -256,20 +256,20 @@ Executable accelerate-canny
 
   if flag(ekg)
     CPP-options:        -DACCELERATE_ENABLE_EKG
-    build-depends:      ekg                     >= 0.3
+    build-depends:      ekg                     >= 0.3          && < 0.4
     ghc-options:        -with-rtsopts=-T
 
   if !flag(canny)
     buildable:          False
   else
-    build-depends:      accelerate              >= 0.14,
-                        accelerate-io           >= 0.14,
+    build-depends:      accelerate              == 0.14.*,
+                        accelerate-io           == 0.14.*,
                         base                    == 4.6.*,
-                        criterion               >= 0.5,
-                        fclabels                >= 2.0,
-                        repa                    >= 3.1,
-                        repa-io                 >= 3.1,
-                        vector                  >= 0.7
+                        criterion               >= 0.5          && < 0.9,
+                        fclabels                >= 2.0          && < 2.1,
+                        repa                    >= 3.1          && < 3.3,
+                        repa-io                 >= 3.1          && < 3.3,
+                        vector                  >= 0.7          && < 0.11
 
 
 -- A simple mandelbrot generator
@@ -291,7 +291,7 @@ Executable accelerate-mandelbrot
 
   if flag(cuda)
     CPP-options:        -DACCELERATE_CUDA_BACKEND
-    build-depends:      accelerate-cuda         >= 0.14
+    build-depends:      accelerate-cuda         == 0.14.*
 
   if flag(opencl)
     CPP-options:        -DACCELERATE_OPENCL_BACKEND
@@ -299,20 +299,20 @@ Executable accelerate-mandelbrot
 
   if flag(ekg)
     CPP-options:        -DACCELERATE_ENABLE_EKG
-    build-depends:      ekg                     >= 0.3
+    build-depends:      ekg                     >= 0.3          && < 0.4
     ghc-options:        -with-rtsopts=-T
 
   if !flag(mandelbrot)
     buildable:          False
   else
-    build-depends:      accelerate              >= 0.14,
-                        accelerate-fft          >= 0.14,
-                        accelerate-io           >= 0.14,
+    build-depends:      accelerate              == 0.14.*,
+                        accelerate-fft          == 0.14.*,
+                        accelerate-io           == 0.14.*,
                         base                    == 4.6.*,
-                        criterion               >= 0.5,
-                        fclabels                >= 2.0,
-                        gloss                   >= 1.7,
-                        gloss-accelerate        >= 1.7
+                        criterion               >= 0.5          && < 0.9,
+                        fclabels                >= 2.0          && < 2.1,
+                        gloss                   >= 1.7          && < 1.9,
+                        gloss-accelerate        >= 1.7          && < 1.9
 
 
 -- A stable fluid simulation
@@ -338,23 +338,23 @@ Executable accelerate-fluid
 
   if flag(cuda)
     cpp-options:        -DACCELERATE_CUDA_BACKEND
-    build-depends:      accelerate-cuda         >= 0.14
+    build-depends:      accelerate-cuda         == 0.14.*
 
   if flag(ekg)
     CPP-options:        -DACCELERATE_ENABLE_EKG
-    build-depends:      ekg                     >= 0.3
+    build-depends:      ekg                     >= 0.3          && < 0.4
     ghc-options:        -with-rtsopts=-T
 
   if !flag(fluid)
     buildable:          False
   else
-    build-depends:      accelerate              >= 0.14,
-                        accelerate-io           >= 0.14,
+    build-depends:      accelerate              == 0.14.*,
+                        accelerate-io           == 0.14.*,
                         base                    == 4.6.*,
                         bmp                     >= 1.2,
-                        criterion               >= 0.5,
-                        fclabels                >= 2.0,
-                        gloss                   >= 1.7
+                        criterion               >= 0.5          && < 0.9,
+                        fclabels                >= 2.0          && < 2.1,
+                        gloss                   >= 1.7          && < 1.9
 
 
 -- Simulation of gravitational attraction between solid particles
@@ -390,22 +390,22 @@ Executable accelerate-nbody
 
   if flag(cuda)
     cpp-options:        -DACCELERATE_CUDA_BACKEND
-    build-depends:      accelerate-cuda         >= 0.14
+    build-depends:      accelerate-cuda         == 0.14.*
 
   if flag(ekg)
     CPP-options:        -DACCELERATE_ENABLE_EKG
-    build-depends:      ekg                     >= 0.3
+    build-depends:      ekg                     >= 0.3          && < 0.4
     ghc-options:        -with-rtsopts=-T
 
   if !flag(nbody)
     buildable:          False
   else
-    build-depends:      accelerate              >= 0.14,
+    build-depends:      accelerate              == 0.14.*,
                         base                    == 4.6.*,
-                        criterion               >= 0.5,
-                        fclabels                >= 2.0,
-                        gloss                   >= 1.7,
-                        mwc-random              >= 0.8
+                        criterion               >= 0.5          && < 0.9,
+                        fclabels                >= 2.0          && < 2.1,
+                        gloss                   >= 1.7          && < 1.9,
+                        mwc-random              >= 0.8          && < 0.14
 
 
 -- A celular automata
@@ -433,25 +433,25 @@ Executable accelerate-smoothlife
 
   if flag(cuda)
     cpp-options:        -DACCELERATE_CUDA_BACKEND
-    build-depends:      accelerate-cuda         >= 0.14
+    build-depends:      accelerate-cuda         == 0.14.*
 
   if flag(ekg)
     CPP-options:        -DACCELERATE_ENABLE_EKG
-    build-depends:      ekg                     >= 0.3
+    build-depends:      ekg                     >= 0.3          && < 0.4
     ghc-options:        -with-rtsopts=-T
 
   if !flag(smoothlife)
     buildable:          False
   else
-    build-depends:      accelerate              >= 0.14,
-                        accelerate-fft          >= 0.14,
-                        accelerate-io           >= 0.14,
+    build-depends:      accelerate              == 0.14.*,
+                        accelerate-fft          == 0.14.*,
+                        accelerate-io           == 0.14.*,
                         base                    == 4.6.*,
-                        criterion               >= 0.5,
-                        fclabels                >= 2.0,
-                        gloss                   >= 1.7,
-                        gloss-accelerate        >= 1.7,
-                        mwc-random              >= 0.8
+                        criterion               >= 0.5          && < 0.9,
+                        fclabels                >= 2.0          && < 2.1,
+                        gloss                   >= 1.7          && < 1.9,
+                        gloss-accelerate        >= 1.7          && < 1.9,
+                        mwc-random              >= 0.8          && < 0.14
 
 
 -- A password recovery tool
@@ -473,24 +473,24 @@ Executable accelerate-hashcat
 
   if flag(cuda)
     cpp-options:        -DACCELERATE_CUDA_BACKEND
-    build-depends:      accelerate-cuda         >= 0.14
+    build-depends:      accelerate-cuda         == 0.14.*
 
   if flag(ekg)
     CPP-options:        -DACCELERATE_ENABLE_EKG
-    build-depends:      ekg                     >= 0.3
+    build-depends:      ekg                     >= 0.3          && < 0.4
     ghc-options:        -with-rtsopts=-T
 
   if !flag(hashcat)
     buildable:          False
   else
-    build-depends:      accelerate              >= 0.14,
+    build-depends:      accelerate              == 0.14.*,
                         base                    == 4.6.*,
-                        bytestring              >= 0.9,
-                        bytestring-lexing       >= 0.2,
-                        cereal                  >= 0.3,
-                        criterion               >= 0.5,
-                        fclabels                >= 2.0,
-                        mwc-random              >= 0.8
+                        bytestring              >= 0.9          && < 0.11,
+                        bytestring-lexing       >= 0.2          && < 0.5,
+                        cereal                  >= 0.3          && < 0.5,
+                        criterion               >= 0.5          && < 0.9,
+                        fclabels                >= 2.0          && < 2.1,
+                        mwc-random              >= 0.8          && < 0.14
 
 -- FFT examples
 -- ------------
@@ -509,17 +509,17 @@ Executable accelerate-fft
 
   if flag(cuda)
     cpp-options:        -DACCELERATE_CUDA_BACKEND
-    build-depends:      accelerate-cuda         >= 0.14
+    build-depends:      accelerate-cuda         == 0.14.*
 
   if !flag(fft)
     buildable:          False
   else
-    build-depends:      accelerate              >= 0.14,
-                        accelerate-io           >= 0.14,
-                        accelerate-fft          >= 0.14,
+    build-depends:      accelerate              == 0.14.*,
+                        accelerate-io           == 0.14.*,
+                        accelerate-fft          == 0.14.*,
                         base                    == 4.6.*,
-                        criterion               >= 0.5,
-                        fclabels                >= 2.0,
+                        criterion               >= 0.5          && < 0.9,
+                        fclabels                >= 2.0          && < 2.1,
                         filepath                >= 1.0
 
 
