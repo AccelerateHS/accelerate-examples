@@ -25,6 +25,9 @@ import qualified Data.Array.Accelerate.Interpreter      as Interp
 #ifdef ACCELERATE_CUDA_BACKEND
 import qualified Data.Array.Accelerate.CUDA             as CUDA
 #endif
+#ifdef ACCELERATE_MULTI_BACKEND
+import qualified Data.Array.Accelerate.CUDA             as CUDA
+#endif
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
 import qualified Data.Array.Accelerate.LLVM.Native      as CPU
 #endif
@@ -43,6 +46,9 @@ run Interpreter = Interp.run
 #ifdef ACCELERATE_CUDA_BACKEND
 run CUDA        = CUDA.run
 #endif
+#ifdef ACCELERATE_MULTI_BACKEND
+run CUDA        = CUDA.runMulti
+#endif
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
 run CPU         = CPU.run
 #endif
@@ -58,6 +64,9 @@ run1 :: (Arrays a, Arrays b) => Backend -> (Acc a -> Acc b) -> a -> b
 run1 Interpreter f = Interp.run1 f
 #ifdef ACCELERATE_CUDA_BACKEND
 run1 CUDA        f = CUDA.run1 f
+#endif
+#ifdef ACCELERATE_MULTI_BACKEND
+run1 CUDA        f = CUDA.run . f . use
 #endif
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
 run1 CPU         f = CPU.run1 f
@@ -78,6 +87,9 @@ run2 backend f x y = run1 backend (A.uncurry f) (x,y)
 data Backend = Interpreter
 #ifdef ACCELERATE_CUDA_BACKEND
              | CUDA
+#endif
+#ifdef ACCELERATE_MULTI_BACKEND
+             | MULTI
 #endif
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
              | CPU
@@ -101,6 +113,9 @@ instance Show Backend where
   show Interpreter      = "interpreter"
 #ifdef ACCELERATE_CUDA_BACKEND
   show CUDA             = "cuda"
+#endif
+#ifdef ACCELERATE_MULTI_BACKEND
+  show MULTI             = "MULTI"
 #endif
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
   show CPU              = "llvm-cpu"

@@ -48,6 +48,10 @@ Flag cuda
   Description:          Enable the CUDA parallel backend for NVIDIA GPUs
   Default:              True
 
+Flag multi
+  Description:          Enable the MULTI parallel backend for NVIDIA GPUs
+  Default:              False
+
 Flag llvm-cpu
   Description:          Enable the LLVM backend for multicore CPUs
   Default:              False
@@ -159,6 +163,10 @@ Library
     CPP-options:        -DACCELERATE_CUDA_BACKEND
     build-depends:      accelerate-cuda                 == 2.0.*
 
+  if flag(multi) 
+    CPP-options:        -DACCELERATE_MULTI_BACKEND 
+    build-depends:      accelerate-cuda                 == 2.0.* 
+
   if flag(llvm-cpu)
     CPP-options:        -DACCELERATE_LLVM_NATIVE_BACKEND
     build-depends:      accelerate-llvm-native          == 2.0.*
@@ -259,6 +267,12 @@ Executable accelerate-nofib
     CPP-options:        -DACCELERATE_CUDA_BACKEND
     build-depends:      accelerate-cuda                 == 2.0.*
     other-modules:      Test.Foreign.CUDA
+
+  if flag(multi)
+    CPP-options:        -DACCELERATE_MULTI_BACKEND
+    build-depends:      accelerate-cuda                 == 2.0.*
+    other-modules:      Test.Foreign.CUDA
+
 
   if flag(ekg)
     ghc-options:        -with-rtsopts=-T
@@ -493,6 +507,10 @@ Executable accelerate-smoothlife
 
   if flag(cuda)
     cpp-options:        -DACCELERATE_CUDA_BACKEND
+    build-depends:      accelerate-cuda                 == 2.0.*
+
+  if flag(multi)
+    cpp-options:        -DACCELERATE_MULTI_BACKEND
     build-depends:      accelerate-cuda                 == 2.0.*
 
   if flag(ekg)
