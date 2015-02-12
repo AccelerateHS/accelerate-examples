@@ -55,9 +55,9 @@ test_permute backend opt = testGroup "permute" $ catMaybes
       | otherwise               = Just $ testGroup (show (typeOf (undefined :: e)))
           [
             test_fill (undefined :: e)
-          , testProperty "scatter"   (test_scatter :: e -> Property)
-          , testProperty "scatterIf" (test_scatterIf :: e -> Property)
-          , testProperty "histogram" (test_histogram A.fromIntegral P.fromIntegral :: Vector e -> Property)
+--          , testProperty "scatter"   (test_scatter :: e -> Property)
+--          , testProperty "scatterIf" (test_scatterIf :: e -> Property)
+--          , testProperty "histogram" (test_histogram A.fromIntegral P.fromIntegral :: Vector e -> Property)
           ]
 
     testFloatingElt :: forall e. (Elt e, RealFrac e, IsFloating e, Arbitrary e, Similar e) => (Config :-> Bool) -> e -> Maybe Test
@@ -66,9 +66,9 @@ test_permute backend opt = testGroup "permute" $ catMaybes
       | otherwise               = Just $ testGroup (show (typeOf (undefined :: e)))
           [
             test_fill (undefined :: e)
-          , testProperty "scatter"   (test_scatter :: e -> Property)
-          , testProperty "scatterIf" (test_scatterIf :: e -> Property)
-          , testProperty "histogram" (test_histogram A.floor P.floor :: Vector e -> Property)
+--          , testProperty "scatter"   (test_scatter :: e -> Property)
+--          , testProperty "scatterIf" (test_scatterIf :: e -> Property)
+--          , testProperty "histogram" (test_histogram A.floor P.floor :: Vector e -> Property)
           ]
 
     -- Test is permutation works by just copying elements directly from one
@@ -91,6 +91,7 @@ test_permute backend opt = testGroup "permute" $ catMaybes
           in
           run backend (permute const zeros id xs') ~?= xs
 
+{--
     -- Test if the combining operation for forward permutation works, by
     -- building a histogram. Often tricky for parallel backends.
     --
@@ -134,6 +135,7 @@ test_permute backend opt = testGroup "permute" $ catMaybes
         toList (run backend $ A.scatterIf (use mapV) (use maskV) A.even (use defaultV) (use inputV))
         ~?=
         IArray.elems (scatterIfRef (toIArray mapV) (toIArray maskV) P.even (toIArray defaultV) (toIArray inputV))
+--}
 
 
 --

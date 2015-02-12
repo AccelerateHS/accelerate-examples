@@ -54,7 +54,8 @@ test_replicate backend opt = testGroup "replicate" $ catMaybes
         arr :: Acc (Array DIM2 e)
         arr = use $ fromList (Z:.2:.2) [1,2,3,4]
 
-        run' = toIArray . run backend
+        run' = error "TODO: toIArray"
+        -- run' = toIArray . run backend
 
         -- Replicate into z-axis
         -- should produce [1,2,3,4,1,2,3,4]
