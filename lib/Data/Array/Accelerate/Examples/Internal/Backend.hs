@@ -47,7 +47,7 @@ run Interpreter = Interp.run
 run CUDA        = CUDA.run
 #endif
 #ifdef ACCELERATE_MULTI_BACKEND
-run CUDA        = CUDA.runMulti
+run MULTI        = CUDA.runMulti
 #endif
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
 run CPU         = CPU.run
@@ -66,7 +66,7 @@ run1 Interpreter f = Interp.run1 f
 run1 CUDA        f = CUDA.run1 f
 #endif
 #ifdef ACCELERATE_MULTI_BACKEND
-run1 CUDA        f = CUDA.run . f . use
+run1 MULTI        f = CUDA.run . f . use
 #endif
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
 run1 CPU         f = CPU.run1 f
