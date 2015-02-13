@@ -66,7 +66,7 @@ run1 Interpreter f = Interp.run1 f
 run1 CUDA        f = CUDA.run1 f
 #endif
 #ifdef ACCELERATE_MULTI_BACKEND
-run1 MULTI        f = CUDA.run . f . use
+run1 MULTI        f = CUDA.runMulti . f . use
 #endif
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
 run1 CPU         f = CPU.run1 f
@@ -155,6 +155,11 @@ availableBackends optBackend =
   , Option  [] [show CUDA]
             (NoArg (set optBackend CUDA))
             "implementation for NVIDIA GPUs (parallel)"
+#endif
+#ifdef ACCELERATE_MULTI_BACKEND
+  , Option  [] [show MULTI]
+            (NoArg (set optBackend MULTI))
+            "implementation for NVIDIA GPUs (mulit-parallel)"
 #endif
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
   , Option  [] [show CPU]
