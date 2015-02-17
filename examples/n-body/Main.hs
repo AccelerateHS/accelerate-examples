@@ -18,6 +18,8 @@ import qualified Solver.BarnsHut                        as BarnsHut
 import Data.Array.Accelerate                            as A hiding ( size )
 import Data.Array.Accelerate.Examples.Internal          as A
 
+import Data.Array.Accelerate.Debug 
+
 -- system
 import Prelude                                          as P
 import Data.Label
@@ -30,6 +32,8 @@ main
   = do  beginMonitoring
         argv                    <- getArgs
         (conf, opts, rest)      <- parseArgs options defaults header footer argv
+
+--        setFlags [dump_gc, dump_cc, verbose] 
 
         let solver      = case get configSolver conf of
                             Naive1      -> Naive1.calcAccels

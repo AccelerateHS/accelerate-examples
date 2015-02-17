@@ -17,6 +17,7 @@ import Data.Array.Accelerate                            as A hiding ( size )
 import Data.Array.Accelerate.Examples.Internal          as A
 import Graphics.Gloss.Accelerate.Raster.Field           as G
 
+import Data.Array.Accelerate.Debug 
 
 -- Types ----------------------------------------------------------------------
 -- | Angle in radians.
@@ -93,6 +94,8 @@ main = do
   beginMonitoring
   argv                  <- getArgs
   (conf, opts, rest)    <- parseArgs options defaults header footer argv
+
+  setFlag dump_gc 
 
   let size      = get configSize conf
       zoom      = get configZoom conf

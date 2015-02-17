@@ -115,7 +115,7 @@ instance Show Backend where
   show CUDA             = "cuda"
 #endif
 #ifdef ACCELERATE_MULTI_BACKEND
-  show MULTI             = "MULTI"
+  show MULTI             = "multi"
 #endif
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
   show CPU              = "llvm-cpu"
