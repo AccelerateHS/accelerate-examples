@@ -690,3 +690,27 @@ source-repository head
   type:                 git
   location:             https://github.com/AccelerateHS/accelerate-examples
 
+
+
+
+-- Megapar 
+Executable megapar
+  Main-is:              Main.hs
+  hs-source-dirs:       examples/megapar
+  other-modules:        Config
+                       
+  ghc-options:          -O2 -Wall -threaded -eventlog -rtsopts
+  ghc-prof-options:     -auto-all
+
+  if flag(ekg)
+    ghc-options:        -with-rtsopts=-T
+
+  if !flag(nbody)
+    buildable:          False
+  else
+    build-depends:      accelerate                      == 2.0.*,
+                        accelerate-examples             == 2.0.*,
+                        base                            == 4.7.*,
+                        fclabels                        >= 2.0,
+                        gloss                           >= 1.7,
+                        mwc-random                      >= 0.8
