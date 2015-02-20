@@ -54,21 +54,14 @@ loop ticks = A.while (\i -> i <* clockRate * ticks) (+1) 0
   where
     clockRate   = 900000
 
+
 {-# NOINLINE megapar #-}
 megapar :: Int -> Acc ( Vector Int
-                      , Vector Int
-                      , Vector Int
-                      , Vector Int
-                      , Vector Int
                       , Vector Int
                       , Vector Int
                       , Vector Int)
 megapar d = 
   lift ( compute $ A.map loop (use $ fromList (Z:.1) [d])
-       , compute $ A.map loop (use $ fromList (Z:.1) [d])
-       , compute $ A.map loop (use $ fromList (Z:.1) [d])
-       , compute $ A.map loop (use $ fromList (Z:.1) [d])
-       , compute $ A.map loop (use $ fromList (Z:.1) [d])
        , compute $ A.map loop (use $ fromList (Z:.1) [d])
        , compute $ A.map loop (use $ fromList (Z:.1) [d])
        , compute $ A.map loop (use $ fromList (Z:.1) [d]))
