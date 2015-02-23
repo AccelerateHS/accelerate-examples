@@ -63,7 +63,7 @@ run Cilk        = Cilk.run
 run1 :: (Arrays a, Arrays b) => Backend -> (Acc a -> Acc b) -> a -> b
 run1 Interpreter f = Interp.run1 f
 #ifdef ACCELERATE_CUDA_BACKEND
-run1 CUDA        f = CUDA.run1 f
+run1 CUDA        f = CUDA.run . f . use
 #endif
 #ifdef ACCELERATE_MULTI_BACKEND
 run1 MULTI        f = CUDA.runMulti . f . use
