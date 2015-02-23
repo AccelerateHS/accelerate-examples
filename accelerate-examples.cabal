@@ -488,6 +488,44 @@ Executable accelerate-nbody
                         gloss                           >= 1.7,
                         mwc-random                      >= 0.8
 
+-- n-body-duped 
+-- ------------ 
+Executable accelerate-nbody-duped
+  Main-is:              Main_duped.hs
+  hs-source-dirs:       examples/n-body
+  other-modules:        Common.Body
+                        Common.Dump
+                        Common.Tree
+                        Common.Type
+                        Common.Util
+                        Common.World
+                        Config
+                        Gloss.Draw
+                        Gloss.Event
+                        Gloss.Simulate
+                        Random.Position
+                        Solver.BarnsHut
+                        Solver.Naive1
+                        Solver.Naive2
+                        Test
+
+  ghc-options:          -O2 -Wall -threaded -eventlog -rtsopts
+  ghc-prof-options:     -auto-all
+  CPP-options:          -DNBODY_DUPED
+
+  if flag(ekg)
+    ghc-options:        -with-rtsopts=-T
+
+  if !flag(nbody)
+    buildable:          False
+  else
+    build-depends:      accelerate                      == 2.0.*,
+                        accelerate-examples             == 2.0.*,
+                        base                            == 4.7.*,
+                        fclabels                        >= 2.0,
+                        gloss                           >= 1.7,
+                        mwc-random                      >= 0.8
+
 
 -- A celular automata
 -- ------------------

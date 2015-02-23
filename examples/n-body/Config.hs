@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE CPP #-} 
 
 module Config where
 
@@ -40,6 +41,9 @@ data Config
 
     -- Dump final particle locations to file
   , _configDumpFinal            :: Maybe FilePath
+#ifdef NBODY_DUPED           
+  , _configDuped               :: Bool
+#endif 
   }
   deriving Show
 
@@ -65,6 +69,10 @@ defaults = Config
 
   , _configMaxSteps             = Nothing
   , _configDumpFinal            = Nothing
+#ifdef NBODY_DUPED           
+  , _configDuped               = False
+#endif 
+
   }
 
 
@@ -119,6 +127,13 @@ options =
   , Option  [] ["dump-final"]
             (ReqArg (set configDumpFinal . Just) "FILE")
             "dump final body positions to file"
+
+#ifdef NBODY_DUPED           
+  , Option [] ["duped"]
+            (NoArg (set configDuped True))
+            "duplicate the work"              
+#endif 
+
   ]
   where
     solver algorithm
