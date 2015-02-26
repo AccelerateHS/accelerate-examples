@@ -35,7 +35,7 @@ main
         --
 
         runBenchmarks opts rest
-          [ bench "megapar" $ whnf (run backend . (megapar m)) n ]
+          [ bench "fatmegapar" $ whnf (run backend . (megapar m)) n ]
 
 
 
