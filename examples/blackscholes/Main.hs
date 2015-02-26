@@ -25,7 +25,6 @@ main
             options'    :: Acc (Vector (Float,Float,Float))
             options'    = A.use $ randomArray (uniformR ((5,1,0.25),(30,100,10))) (Z :. n)
 
-
         runBenchmarks opts rest
           [ bench "blackscholes" $ whnf (run backend . blackscholes) options' ]
 
@@ -33,9 +32,6 @@ main
   
 -- Black-Scholes option pricing
 -- ----------------------------
-
-iterations :: Integral a => a
-iterations = 100
 
 riskfree, volatility :: Floating a => a
 riskfree   = 0.02
@@ -57,9 +53,8 @@ cnd' d =
 
 {-# NOINLINE blackscholes #-}
 blackscholes :: (Elt a, IsFloating a) => Acc (Vector (a, a, a)) -> Acc (Vector (a, a))
-blackscholes = A.map gl
+blackscholes = A.map go
   where
-  gl x = let x' = go x in A.iterate iterations (\_ -> go x) x'
   go x =
     let (price, strike, years) = A.unlift x
         r       = A.constant riskfree
