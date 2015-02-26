@@ -9,7 +9,6 @@ import Data.Array.Accelerate                    as A
 import System.Environment
 import Config 
 import Data.Array.Accelerate.Examples.Internal  as A 
-import Random.Array
 import Data.Label
 
 main :: IO ()
@@ -27,7 +26,7 @@ main
             options     = randomArray (uniformR ((5,1,0.25),(30,100,10))) (Z :. n)
 
         runBenchmarks opts rest
-          [ bench "megapar" $ whnf (run backend . blackscholes) options ]
+          [ bench "blackscholes" $ whnf (run backend . blackscholes) options ]
 
 
   

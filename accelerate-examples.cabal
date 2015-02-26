@@ -736,7 +736,6 @@ Executable accelerate-blackscholes
   hs-source-dirs:       examples/blackscholes
   other-modules:        Config
                         Main
-                        Random.Array
 
   if !flag(blackscholes)
     buildable:          False
