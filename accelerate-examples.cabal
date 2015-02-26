@@ -114,6 +114,10 @@ Flag ray
   Description:          A simple real-time ray tracer
   Default:              True
 
+Flag blackscholes
+  Description:          Blackscholes algorithm
+  Default:              True
+
 Flag kmeans
   Description:          An implementation of k-means clustering in a plane
   Default:              True
@@ -722,6 +726,33 @@ Executable accelerate-kmeans
 
   ghc-options:          -Wall -O2 -threaded -threaded -rtsopts
   ghc-prof-options:     -auto-all
+
+
+-- Blackscholes
+-- ------------
+
+Executable accelerate-blackscholes
+  Main-is:              Main.hs
+  hs-source-dirs:       examples/blackscholes
+  other-modules:        Config
+                        Main
+                        Random.Array
+
+  if !flag(blackscholes)
+    buildable:          False
+  else
+    build-depends:      accelerate                      == 2.0.*,
+                        accelerate-examples             == 2.0.*,
+                        base                            == 4.7.*,
+                        mwv-random, vector, bytestring, array, time
+
+  if flag(ekg)
+    ghc-options:        -with-rtsopts=-T
+
+  ghc-options:          -Wall -O2 -threaded -threaded -rtsopts
+  ghc-prof-options:     -auto-all
+
+
 
 
 source-repository head
