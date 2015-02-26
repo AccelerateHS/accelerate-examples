@@ -25,7 +25,7 @@ main
             ys          = A.use $ fromList (Z :. n :. n) [100..]
 
         runBenchmarks opts rest
-          [ bench "blackscholes" $ whnf (run backend . (dotp xs)) ys ]
+          [ bench "dotp" $ whnf (run backend . (dotp xs)) ys ]
 
 {-# NOINLINE dotp #-}
 dotp :: Acc (Array DIM2 Int) -> Acc (Array DIM2 Int) -> Acc (Array DIM1 Int)

@@ -46,7 +46,7 @@ header :: [String]
 header =
   [ "dotp "
   , ""
-  , "Usage: accelerate-blackscholes [OPTIONS]"
+  , "Usage: accelerate-dotp [OPTIONS]"
   , ""
   ]
 
