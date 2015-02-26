@@ -744,7 +744,7 @@ Executable accelerate-blackscholes
     build-depends:      accelerate                      == 2.0.*,
                         accelerate-examples             == 2.0.*,
                         base                            == 4.7.*,
-                        mwc-random, vector, bytestring, array, time
+                        mwc-random, vector, bytestring, array, time, fclabels
 
   if flag(ekg)
     ghc-options:        -with-rtsopts=-T
