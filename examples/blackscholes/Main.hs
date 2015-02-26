@@ -17,8 +17,6 @@ main
         argv                    <- getArgs
         (conf, opts, rest)      <- parseArgs options defaults header footer argv
 
---        setFlags [dump_gc, dump_cc, verbose] 
-
         let n           = get configN conf
             backend     = get optBackend opts
             
