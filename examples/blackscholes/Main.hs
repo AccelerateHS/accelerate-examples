@@ -22,11 +22,11 @@ main
         let n           = get configN conf
             backend     = get optBackend opts
             
-            options     :: Vector (Float,Float,Float)
-            options     = randomArray (uniformR ((5,1,0.25),(30,100,10))) (Z :. n)
+            options'    :: Acc (Vector (Float,Float,Float))
+            options'    = A.use $ randomArray (uniformR ((5,1,0.25),(30,100,10))) (Z :. n)
 
         runBenchmarks opts rest
-          [ bench "blackscholes" $ whnf (run backend . blackscholes) options ]
+          [ bench "blackscholes" $ whnf (run backend . blackscholes) options' ]
 
 
   
