@@ -44,9 +44,9 @@ options =
 
 header :: [String]
 header =
-  [ "megapar - A hack "
+  [ "blackscholes "
   , ""
-  , "Usage: megapar [OPTIONS]"
+  , "Usage: accelerate-blackscholes [OPTIONS]"
   , ""
   ]
 
