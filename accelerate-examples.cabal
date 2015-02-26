@@ -118,6 +118,10 @@ Flag blackscholes
   Description:          Blackscholes algorithm
   Default:              True
 
+Flag dotp
+  Description:          Dot product
+  Default:              True
+
 Flag kmeans
   Description:          An implementation of k-means clustering in a plane
   Default:              True
@@ -751,6 +755,28 @@ Executable accelerate-blackscholes
   ghc-options:          -Wall -O2 -threaded -threaded -rtsopts
   ghc-prof-options:     -auto-all
 
+
+-- Dotp
+-- ----
+
+Executable accelerate-dotp
+  Main-is:              Main.hs
+  hs-source-dirs:       examples/dotp
+  other-modules:        Config
+                        Main
+
+  if !flag(dotp)
+    buildable:          False
+  else
+    build-depends:      accelerate                      == 2.0.*,
+                        accelerate-examples             == 2.0.*,
+                        base                            == 4.7.*,
+                        fclabels
+  if flag(ekg)
+    ghc-options:        -with-rtsopts=-T
+
+  ghc-options:          -Wall -O2 -threaded -threaded -rtsopts
+  ghc-prof-options:     -auto-all
 
 
 
