@@ -21,7 +21,7 @@ defaults :: Config
 defaults = Config
   { _configWidth        = 800
   , _configHeight       = 600
-  , _configLimit        = 255
+  , _configLimit        = 768
   , _configFramerate    = 25
   }
 
