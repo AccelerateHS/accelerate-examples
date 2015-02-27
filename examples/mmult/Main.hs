@@ -24,7 +24,7 @@ main
             brr         = A.use $ fromList (Z :. n :. n) [100.0..] :: Acc (Array DIM2 Float)            
 
         runBenchmarks opts rest
-          [ bench "dotp" $ whnf (run backend . mmult') (arr, brr) ]
+          [ bench "mmult" $ whnf (run backend . mmult') (arr, brr) ]
 
 
 mmult' :: forall e.
