@@ -21,9 +21,10 @@ main
         let n           = get configN conf
             backend     = get optBackend opts
             xs          = A.use $ fromList (Z :. n) [0..]
+            ys          = A.use $ fromList (Z :. n) [1000..]            
 
         runBenchmarks opts rest
-          [ bench "dotp" $ whnf (run backend . dotp') (xs, xs) ]
+          [ bench "dotp" $ whnf (run backend . dotp') (xs, ys) ]
 
 dotp' :: (Acc (Array DIM1 Int), Acc (Array DIM1 Int)) -> Acc (Array DIM0 Int)
 dotp' (xs, ys) = dotp xs ys
