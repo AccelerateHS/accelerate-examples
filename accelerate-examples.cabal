@@ -788,7 +788,7 @@ Executable accelerate-dotp
 
 Executable accelerate-mmult
   Main-is:              Main.hs
-  hs-source-dirs:       examples/dotp
+  hs-source-dirs:       examples/mmult
   other-modules:        Config
                         Main
 
