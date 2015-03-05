@@ -2,3 +2,7 @@ dist/
 .DS_Store
 examples/canny/Process_stub.h
 *.swp
+examples/kmeans/clusters
+examples/kmeans/params
+examples/kmeans/points
+examples/kmeans/points.bin
