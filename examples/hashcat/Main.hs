@@ -50,9 +50,8 @@ main = do
                      $ A.foldSeq max (-1)
                      $ A.zipWithSeq (hashcatWord digest)
                            (A.toSeq (Z :. All :. Split) (A.use dict))
-                           (A.toSeq (Z :. Split) (iota (Sugar.size (Sugar.shape dict))))
-
-            iota n = A.generate (A.index1 (A.constant n)) A.unindex1
+                           (A.toSeq (Z :. Split) (iota (A.indexHead (A.constant (Sugar.shape dict)))))
+            iota n = A.generate (A.index1 n) A.unindex1
         --
         in case idx `A.indexArray` Z of
              -1 -> Nothing

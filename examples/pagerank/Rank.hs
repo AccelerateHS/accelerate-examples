@@ -19,6 +19,8 @@ import qualified Data.Vector.Storable                   as S
 import System.CPUTime
 
 
+import Debug.Trace
+
 arrayize vec = (A.fromVectors (Z :. S.length vec) vec)
 
 -- | Perform some iterations of the PageRank algorithm by loading the whole
@@ -110,7 +112,7 @@ pageRank backend noSeq maxIters chunkSize pageCount from to sizes titlesFile ran
         stepInSeq :: A.Vector Rank -> A.Vector Rank
         stepInSeq = 
           let !pages  = A.fromVectors (Z:.S.length from) (((), from), to)
-          in run1 backend (stepRankSeq pages (use sizes))
+          in trace (show ((stepRankSeq pages (use sizes)))) $ run1 backend (stepRankSeq pages (use sizes))
 
         edgeCount = S.length from
 

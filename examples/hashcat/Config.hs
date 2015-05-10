@@ -31,7 +31,7 @@ defaults = Config
   , _configDict                 = []
   , _configMaxWords             = Nothing
   , _configSkipWords            = 0
-  , _configNoSeq                = True
+  , _configNoSeq                = False
   , _configHelp                 = False
   }
 

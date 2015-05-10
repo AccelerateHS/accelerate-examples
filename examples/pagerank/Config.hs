@@ -22,7 +22,7 @@ defaults = Config
   { _configSteps        = 10
   , _configChunkSize    = 12000000
   , _configCount        = False
-  , _configNoSeq        = True
+  , _configNoSeq        = False
   }
 
 
