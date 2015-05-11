@@ -318,6 +318,31 @@ Executable accelerate-smvm
                         vector-algorithms               >= 0.4
 
 
+-- Matrix vector multiplication
+-- -----------------------------------
+
+Executable accelerate-mvm
+  Main-is:              Main.hs
+  hs-source-dirs:       examples/mvm
+  other-modules:        Matrix
+                        MVM
+
+  ghc-options:          -O2 -Wall -threaded -rtsopts -eventlog
+  ghc-prof-options:     -auto-all
+
+  if impl(ghc >= 7.6)
+    ghc-options:        -fsimpl-tick-factor=130
+
+  if flag(ekg)
+    ghc-options:        -with-rtsopts=-T
+
+  build-depends:        accelerate                      == 2.0.*,
+                        accelerate-examples             == 2.0.*,
+                        base                            == 4.7.*,
+                        fclabels                        >= 2.0,
+                        mwc-random                      >= 0.8
+
+
 -- A quasicrystal demo as the sum of waves in a plane
 -- --------------------------------------------------
 
