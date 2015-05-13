@@ -36,5 +36,5 @@ main = do
   bench' "mvmSeq-uselazy"   $ whnf (run1 backend (mvmSeq (use mat))) vec
   bench' "mvmSeq-nouselazy" $ whnf (run2 backend mvmSeq mat) vec
   bench' "dotp"             $ whnf (run2 backend dotp bigvec1) bigvec2
-  bench' "dotpSeq"          $ whnf (\bv2 -> run backend (dotpSeq (use bigvec1) (use bv2))) bigvec2
+  bench' "dotpSeq"          $ whnf (\_ -> dotpSeq (use bigvec1) (use bigvec2)) ()
 
