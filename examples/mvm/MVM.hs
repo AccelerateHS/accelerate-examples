@@ -20,9 +20,6 @@ dotp :: (Elt a, IsNum a) => Acc (Vector a) -> Acc (Vector a) -> Acc (Scalar a)
 dotp a b = A.fold (+) 0 (A.zipWith (*) a b)
 
 dotpSeq :: (Elt a, IsNum a) => Acc (Vector a) -> Acc (Vector a) -> Acc (Scalar a)
-dotpSeq xs ys = A.collect $ A.foldSeq (+) 0 $ A.zipWithSeq (tlift2 (*)) (toSeqElems xs) (toSeqElems ys)
+dotpSeq xs ys = A.collect $ A.foldSeq (+) 0 $ A.zipWithSeq (A.zipWith (*)) (toSeqElems xs) (toSeqElems ys)
   where
-    tlift2 :: (Elt a, Elt b, Elt c) => (Exp a -> Exp b -> Exp c) -> (Acc (Scalar a) -> Acc (Scalar b) -> Acc (Scalar c))
-    tlift2 f a b = unit (f (the a) (the b))
-
     toSeqElems = toSeq (Z:.Split)
