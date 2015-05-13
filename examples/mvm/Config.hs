@@ -30,7 +30,7 @@ options =
 
 header :: [String]
 header =
-  [ "accelerate-smvm (c) [2015] The Accelerate Team"
+  [ "accelerate-mvm (c) [2015] The Accelerate Team"
   , ""
   , "Usage: accelerate-mvm [OPTIONS]"
   , ""

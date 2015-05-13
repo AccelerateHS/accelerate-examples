@@ -28,6 +28,8 @@ main = do
   -- Benchmark
   --
   runBenchmarks opts rest
-    [ bench "mvm" $ whnf (run2 backend mvm mat) vec
-    , bench "mvmSeq" $ whnf (run2 backend mvmSeq mat) vec]
+    [ bench "mvm"              $ whnf (run2 backend mvm mat) vec
+    , bench "mvmSeq-uselazy"   $ whnf (run1 backend (mvmSeq (use mat))) vec
+    , bench "mvmSeq-nouselazy" $ whnf (run2 backend mvmSeq mat) vec
+    ]
 
