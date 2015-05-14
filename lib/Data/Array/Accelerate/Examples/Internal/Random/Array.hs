@@ -14,7 +14,7 @@ module Data.Array.Accelerate.Examples.Internal.Random.Array (
   -- * Generating random arrays
   (:~>),
   uniform, uniformR,
-  randomArray, randomArrayWithSeed, randomArrayWithSystemRandom,
+  randomArray, randomArrayWithSeed, randomArrayWithSystemRandom, randomArrayIO
 
 ) where
 
@@ -54,6 +54,12 @@ randomArray f sh
                             return (arr, undefined)
     in
     adata `seq` Array (fromElt sh) adata
+
+randomArrayIO :: (Shape sh, Elt e) => sh :~> e -> sh -> IO (Array sh e)
+randomArrayIO f sh = do
+   gen <- create
+   arr <- runRandomArray f sh gen
+   return (Array (fromElt sh) arr)
 
 
 -- | Generate an array of random values using a supplied generator function and

@@ -17,8 +17,8 @@ randomMatrix
     => DIM2 :~> a
     -> Int
     -> Int
-    -> Matrix a
-randomMatrix f rows cols = randomArray f (Z:.rows:.cols)
+    -> IO (Matrix a)
+randomMatrix f rows cols = randomArrayIO f (Z:.rows:.cols)
 
 -- A randomly generated vector of a given size
 --
@@ -27,5 +27,5 @@ randomVector
     :: (Variate a, Num a, Elt a)
     => DIM1 :~> a
     -> Int
-    -> Vector a
-randomVector f n = randomArray f (Z:.n)
+    -> IO (Vector a)
+randomVector f n = randomArrayIO f (Z:.n)

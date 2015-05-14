@@ -21,10 +21,10 @@ main = do
   let rows = get configRows conf
       cols = get configCols conf
 
-  let mat     = randomMatrix A.uniform rows cols   :: Matrix Float
-      vec     = randomVector A.uniform cols        :: Vector Float
-      bigvec1 = randomVector A.uniform (cols*rows) :: Vector Float
-      bigvec2 = randomVector A.uniform (cols*rows) :: Vector Float
+  mat     <- randomMatrix A.uniform rows cols   :: IO (Matrix Float)
+  vec     <- randomVector A.uniform cols        :: IO (Vector Float)
+  bigvec1 <- randomVector A.uniform (cols*rows) :: IO (Vector Float)
+  bigvec2 <- randomVector A.uniform (cols*rows) :: IO (Vector Float)
 
   let backend   = get optBackend opts
 
