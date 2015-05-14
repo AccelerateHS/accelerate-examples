@@ -1,9 +1,10 @@
-
+{-# LANGUAGE BangPatterns #-}
 import MVM
 import Matrix
 import Config
 
 import Prelude                                          as P
+import Data.Functor
 import Data.Label                                       ( get )
 import Data.Array.Accelerate                            as A
 import qualified Data.Array.Accelerate.CUDA                       as CUDA
@@ -26,15 +27,43 @@ main = do
   bigvec1 <- randomVector A.uniform (cols*rows) :: IO (Vector Float)
   bigvec2 <- randomVector A.uniform (cols*rows) :: IO (Vector Float)
 
-  let backend   = get optBackend opts
+  let backend = get optBackend opts
 
-  let bench' name f = runBenchmarks opts rest [bench name f] >> CUDA.performGC
+  -- Acclerate by default keeps arrays in memory till they can be used again. As
+  -- we are wanting to test streaming results, obviously data transfer is a big
+  -- part of that, so we want to make sure all arrays are removed from the cache
+  -- for every benchmark iteration.
+  --
+  let clean = do
+                CUDA.unsafeFree mat
+                CUDA.unsafeFree vec
+                CUDA.unsafeFree bigvec1
+                CUDA.unsafeFree bigvec2
+
+  let bench' name f = runBenchmarks opts rest [bench name f]
+
+  let !mvm'        = run2 backend mvm
+      !mvmSeqLazy  = run1 backend (mvmSeq (use mat))
+      !mvmSeq'     = run2 backend mvmSeq
+      !dotp'       = run2 backend dotp
+      !dotpSeqLazy = run1 backend (\a -> lift (a, dotpSeq (use bigvec1) (use bigvec2)))
+      !dotpSeq'    = run2 backend dotpSeq
+
+  let force0 arr = indexArray arr Z `seq` arr
+  let force1 arr = indexArray arr (Z:.0) `seq` arr
 
   -- Benchmark
   --
-  bench' "mvm"              $ whnf (run2 backend mvm mat) vec
-  bench' "mvmSeq-uselazy"   $ whnf (run1 backend (mvmSeq (use mat))) vec
-  bench' "mvmSeq-nouselazy" $ whnf (run2 backend mvmSeq mat) vec
-  bench' "dotp"             $ whnf (run2 backend dotp bigvec1) bigvec2
-  bench' "dotpSeq"          $ whnf (run1 backend (\_ -> dotpSeq (use bigvec1) (use bigvec2))) ()
+  bench' "mvm"               $ whnfIO (force1 <$> runClean (mvm' mat) vec clean)
+  bench' "mvmSeq-uselazy"    $ whnfIO (force1 <$> runClean mvmSeqLazy vec clean)
+  bench' "mvmSeq-nouselazy"  $ whnfIO (force1 <$> runClean (mvmSeq' mat) vec clean)
+  bench' "dotp"              $ whnfIO (force0 <$> runClean (dotp' bigvec1) bigvec2 clean)
+  bench' "dotpSeq-uselazy"   $ whnfIO (force0 . P.snd <$> runClean dotpSeqLazy () clean)
+  bench' "dotpSeq-nouselazy" $ whnfIO (force0 <$> runClean (dotpSeq' bigvec1) bigvec2 clean)
 
+-- Run a function with the given teardown action afterward.
+{-# NOINLINE runClean #-}
+runClean :: (a -> b) -> a -> IO () -> IO b
+runClean f a clean = do
+  clean
+  f <$> return a
