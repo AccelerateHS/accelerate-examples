@@ -47,7 +47,7 @@ main = do
         let abcd = readMD5 hash
             idx  = run1 backend l (A.fromList Z [abcd])
             l digest = A.collect
-                     $ A.foldSeq max (-1)
+                     $ A.foldSeqE max (-1)
                      $ A.zipWithSeq (hashcatWord digest)
                            (A.toSeq (Z :. All :. Split) (A.use dict))
                            (A.toSeq (Z :. Split) (iota (A.indexHead (A.constant (Sugar.shape dict)))))
