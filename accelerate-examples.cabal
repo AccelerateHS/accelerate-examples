@@ -343,8 +343,16 @@ Executable accelerate-mvm
   build-depends:        accelerate                      == 2.0.*,
                         accelerate-examples             == 2.0.*,
                         base                            == 4.7.*,
+                        containers                      >= 0.4.2,
+                        criterion                       >= 1.0,
+                        either                          >= 4.0,
                         fclabels                        >= 2.0,
-                        mwc-random                      >= 0.8
+                        mwc-random                      >= 0.8,
+                        mtl                             >= 2.0,
+                        random                          >= 1.0,
+                        statistics                      >= 0.13,
+                        transformers                    >= 0.3,
+                        vector                          >= 0.7
 
 
 -- A quasicrystal demo as the sum of waves in a plane

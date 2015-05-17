@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts    #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE ViewPatterns        #-}
 
 module MVM where
 
@@ -21,3 +22,9 @@ dotp a b = A.fold (+) 0 (A.zipWith (*) a b)
 
 dotpSeq :: (Elt a, IsNum a) => Acc (Vector a) -> Acc (Vector a) -> Acc (Scalar a)
 dotpSeq xs ys = A.collect $ A.foldSeqE (+) 0 $ A.zipWithSeq (A.zipWith (*)) (toSeqE xs) (toSeqE ys)
+
+maxSumSeq :: (Elt a, IsNum a) => Acc (Vector a) -> Acc (Scalar (a, a))
+maxSumSeq xs = let xs' = toSeqE xs in (\(unlift -> (m,s)) -> unit $ lift (the m, the s)) . A.collect $ lift $ (foldSeqE max 0 xs', foldSeqE (+) 0 xs')
+
+maxSum :: (Elt a, IsNum a) => Acc (Vector a) -> Acc (Scalar (a, a))
+maxSum xs = unit $ lift (the (fold max 0 xs), the (fold (+) 0 xs))
