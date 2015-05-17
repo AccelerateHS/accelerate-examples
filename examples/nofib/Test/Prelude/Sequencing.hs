@@ -55,8 +55,8 @@ idSequenceRef = id
 sumMaxSequence :: (Elt a, IsBounded a, IsNum a) => Acc (Vector a) -> Acc (Scalar a, Scalar a)
 sumMaxSequence xs = collect $
   let xs' = toSeq' xs
-  in lift ( foldSeq (+) 0 xs'
-          , foldSeq max minBound xs')
+  in lift ( foldSeqE (+) 0 xs'
+          , foldSeqE max minBound xs')
 
 sumMaxSequenceRef :: (Elt a, Ord a, Bounded a, Num a) => Vector a -> (Scalar a, Scalar a)
 sumMaxSequenceRef xs = ( fromList Z . (:[]) . P.sum     . toList $ xs
@@ -82,7 +82,7 @@ scatterSequenceRef (vec, vec_upd) =
 
 logsum :: (Elt a, IsFloating a) => Int -> Acc (Scalar a)
 logsum n = collect
-  $ foldSeq (+) 0.0
+  $ foldSeqE (+) 0.0
   $ mapSeq (map (log . fromIntegral . (+1)))
   $ toSeq' (iota n)
 
@@ -103,7 +103,7 @@ nestedSequence n m = asnd . collect
   $ fromSeq
   $ mapSeq
   (\ i -> collect
-          $ foldSeq (+) 0
+          $ foldSeqE (+) 0
           $ mapSeq (zipWith (+) i)
           $ toSeq' (iota m)
   )
@@ -117,7 +117,7 @@ nestedIrregularSequence n = asnd . collect
   $ fromSeq
   $ mapSeq
   (\ i -> collect
-        $ foldSeq (+) 0
+        $ foldSeqE (+) 0
         $ mapSeq (zipWith (+) i)
         $ toSeq' (iota' i)
   )
@@ -134,10 +134,10 @@ deepNestedSequence n = asnd . collect
         $ fromSeq
         $ mapSeq
         (\ j -> collect
-              $ foldSeq (+) 0
+              $ foldSeqE (+) 0
               $ mapSeq
               (\ k -> collect
-                    $ foldSeq (+) 0
+                    $ foldSeqE (+) 0
                     $ toSeq' (iota' k)
               )
               $ toSeq' (iota' j)
@@ -152,7 +152,7 @@ deepNestedSequenceRef n = fromList (Z :. P.length xs) xs
 
 chunking1 :: Int -> Acc (Scalar Int)
 chunking1 n = collect
-  $ foldSeq (+) 0
+  $ foldSeqE (+) 0
   $ let s = toSeq' (iota n)
     in zipWithSeq (\ x y -> zipWith (-) (sum x) (product y))
          (mapSeq iota' s)
@@ -320,7 +320,7 @@ test_sequences backend opt = testGroup "sequences"
 
     testChunking2 :: Test
     testChunking2 =
-      testProperty "chunking2" $ verbose
+      testProperty "chunking2"
         (\ input -> (run1 backend chunking2 input ~?= chunking2Ref input))
 
     testChunking2b :: Test
