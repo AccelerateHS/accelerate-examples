@@ -39,7 +39,10 @@ main = do
         let mean = V.sum ms / P.fromIntegral sz
         let lb   = V.foldl1 max ms
         let ub   = V.foldl1 min ms
+        let var  = V.sum (V.map ((**2) . (mean -)) ms) / P.fromIntegral sz
+        let sd   = sqrt var
         putStrLn ("mean: " P.++ secs mean P.++ " (" P.++ secs lb P.++ " .. " P.++ secs ub P.++ ")")
+        putStrLn ("standard deviation: " P.++ secs sd)
 
 
   -- Converted accelerate computations. Have to be careful we're not accidently
