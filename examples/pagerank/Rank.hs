@@ -9,14 +9,16 @@ import Step
 import Count
 import Page
 import System.Directory
+import Control.Exception
 import Control.Monad
 import Prelude                                          as P
 import Data.Array.Accelerate                            as A
 import Data.Array.Accelerate.IO                         as A
 import Data.Array.Accelerate.Examples.Internal          as A
+import qualified Data.Array.Accelerate.CUDA             as CUDA
 import qualified Data.Vector                            as V
 import qualified Data.Vector.Storable                   as S
-import System.CPUTime
+import Criterion.Measurement
 
 
 import Debug.Trace
@@ -41,10 +43,7 @@ rank backend noSeq steps chunkSize pagesPath titlesPath
         let pageCount   = S.length sizes
         let edgeCount   = S.length from
         let !ranks      = initialRanks backend pageCount
-        start <- getCPUTime
         pageRank backend noSeq steps chunkSize pageCount from to (arrayize sizes) titlesPath ranks
-        end   <- getCPUTime
-        putStrLn $ "Time taken: " P.++ show (P.fromIntegral (end - start) / (10^12)) P.++ " secs"
         return ()
 
 -- | Construct the initial ranks vector.
@@ -69,7 +68,16 @@ pageRank
         -> IO ()
 
 pageRank backend noSeq maxIters chunkSize pageCount from to sizes titlesFile ranks0
- = go maxIters ranks0
+ = do
+     initializeTime
+     _ <- evaluate stepInSeq
+     _ <- evaluate stepInChunks
+     CUDA.unsafeFree pages
+     CUDA.performGC
+     start <- getTime
+     go maxIters ranks0
+     end   <- getTime
+     putStrLn $ "Time taken: " P.++ show (end - start) P.++ " secs"
  where  go :: Int -> A.Vector Rank -> IO ()
         go 0 !ranks
          = let !rankMaxIx       = maxIndex ranks
@@ -110,9 +118,9 @@ pageRank backend noSeq maxIters chunkSize pageCount from to sizes titlesFile ran
           in A.map (+ A.the dangleContrib) ranks
 
         stepInSeq :: A.Vector Rank -> A.Vector Rank
-        stepInSeq = 
-          let !pages  = A.fromVectors (Z:.S.length from) (((), from), to)
-          in trace (show ((stepRankSeq pages (use sizes)))) $ run1 backend (stepRankSeq pages (use sizes))
+        stepInSeq = run1 backend (stepRankSeq pages (use sizes))
+
+        pages  = A.fromVectors (Z:.S.length from) (((), from), to)
 
         edgeCount = S.length from
 

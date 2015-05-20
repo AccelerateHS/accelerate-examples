@@ -625,9 +625,11 @@ Executable accelerate-pagerank
     buildable:          False
   else
     build-depends:      accelerate                      == 2.0.*,
+                        accelerate-cuda                 == 2.0.*,
                         accelerate-examples             == 2.0.*,
                         accelerate-io                   == 2.0.*,
                         base                            == 4.7.*,
+                        criterion                       >= 1.0,
                         bytestring                      >= 0.9.2,
                         containers                      >= 0.4.2,
                         directory                       >= 1.1,
