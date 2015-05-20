@@ -15,7 +15,6 @@ import System.IO
 import Data.Array.Accelerate                            ( Z(..), (:.)(..), All(..) , Split(..))
 import Data.Array.Accelerate.Examples.Internal
 import qualified Data.Array.Accelerate                  as A
-import qualified Data.Array.Accelerate.Array.Sugar      as Sugar
 import qualified Data.ByteString.Lazy.Char8             as L
 
 
@@ -47,11 +46,13 @@ main = do
         let abcd = readMD5 hash
             idx  = run1 backend l (A.fromList Z [abcd])
             l digest = A.collect
-                     $ A.foldSeqE max (-1)
-                     $ A.zipWithSeq (hashcatWord digest)
-                           (A.toSeq (Z :. All :. Split) (A.use dict))
-                           (A.toSeq (Z :. Split) (iota (A.indexHead (A.constant (Sugar.shape dict)))))
-            iota n = A.generate (A.index1 n) A.unindex1
+                     $ A.foldSeqFlatten find (A.unit (-1)) (A.toSeq (Z :. All :. Split) (A.use dict))
+              where
+                find found ixs vs =
+                  let
+                    dict'  = A.transpose $ A.reshape (A.lift (Z :. (A.size ixs) :. (16 :: Int))) vs
+                    found' = hashcatDict dict' digest
+                  in A.unit (A.the found `max` A.the found')
         --
         in case idx `A.indexArray` Z of
              -1 -> Nothing
