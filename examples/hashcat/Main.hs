@@ -30,7 +30,8 @@ main = do
   putStr "Loading dictionary... " >> hFlush stdout
   (tdict, dict) <- time $ readDict conf (get configDict conf) (get configNoSeq conf)
 
-  let (Z :. _ :. entries) = A.arrayShape dict
+  let (Z :. height :. width) = A.arrayShape dict
+      entries                = if get configNoSeq conf then width else height
   putStrLn $ printf "%d words in %s" entries (secs tdict)
 
   -- Attempt to recover one hash at a time by comparing it to entries in the

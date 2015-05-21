@@ -91,7 +91,8 @@ extract colMajor dict i
   | i > n       = error "extract: index too large"
   | otherwise   = L.takeWhile (/= w2c 0x80) bytes
   where
-    Z :. _ :. n = A.arrayShape dict
+    n           = if colMajor then w else h
+    Z :. h :. w = A.arrayShape dict
     bytes       = S.runPutLazy $
       forM_ [0 .. blockSizeWords-1] $ \c -> S.putWord32le (dict `A.indexArray` (if colMajor then Z:.c:.i else Z:.i:.c))
 
