@@ -27,17 +27,18 @@ import Data.Array.Accelerate                    as A
 -- matches the given unknown md5, returns the index into the dictionary of said
 -- match. If not found, this returns (-1).
 --
-hashcatDict :: Acc Dictionary
-         -> Acc (Scalar MD5)
-         -> Acc (Scalar Int)
-hashcatDict dict passwd
+hashcatDict :: Bool  -- ^ Column major order
+            -> Acc Dictionary
+            -> Acc (Scalar MD5)
+            -> Acc (Scalar Int)
+hashcatDict colMajor dict passwd
   = reshape (constant Z)
   $ permute const res (\ix -> crypt A.! ix `cmp` the passwd ? (constant (Z:.0), ignore))
                       (enumFromN (index1 n) 0)
   where
     n           = A.size crypt
     res         = use $ fromList (Z:.1) [-1]    :: Acc (Vector Int)
-    crypt       = md5 dict
+    crypt       = md5 colMajor dict
 
     cmp x y     = let (x1,x2,x3,x4) = unlift x
                       (y1,y2,y3,y4) = unlift y
@@ -72,11 +73,15 @@ hashcatWord passwd word ix
 type MD5        = (Word32, Word32, Word32, Word32)
 type Dictionary = Array DIM2 Word32
 
-md5 :: Acc Dictionary -> Acc (Vector MD5)
-md5 dict
-  = let n = A.snd . unindex2 $ A.shape dict
+md5 :: Bool -> Acc Dictionary -> Acc (Vector MD5)
+md5 columnMajor dict
+  = let n = if columnMajor
+            then A.snd . unindex2 $ A.shape dict
+            else A.fst . unindex2 $ A.shape dict
     in
-     A.generate (index1 n) (\ (unindex1 -> ix) -> md5Round (\i -> dict A.! index2 i ix))
+     A.generate (index1 n) (\ (unindex1 -> ix) -> md5Round (\i -> if columnMajor
+                                                                  then dict A.! index2 i ix
+                                                                  else dict A.! index2 ix i))
 
 md5Round :: (Exp Int -> Exp Word32) -> Exp MD5
 md5Round fetch

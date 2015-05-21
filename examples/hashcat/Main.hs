@@ -28,7 +28,7 @@ main = do
   -- for hashing.
   --
   putStr "Loading dictionary... " >> hFlush stdout
-  (tdict, dict) <- time $ readDict conf (get configDict conf)
+  (tdict, dict) <- time $ readDict conf (get configDict conf) (get configNoSeq conf)
 
   let (Z :. _ :. entries) = A.arrayShape dict
   putStrLn $ printf "%d words in %s" entries (secs tdict)
@@ -46,26 +46,26 @@ main = do
         let abcd = readMD5 hash
             idx  = run1 backend l (A.fromList Z [abcd])
             l digest = A.collect
-                     $ A.foldSeqFlatten find (A.unit (A.lift (-1 :: Int, 0 :: Int))) (A.toSeq (Z :. All :. Split) (A.use dict))
+                     $ A.foldSeqFlatten find (A.unit (A.lift (-1 :: Int, 0 :: Int))) (A.toSeq (Z :. Split :. All) (A.use dict))
               where
                 find fi ixs vs =
                   let
                     (found, i) = A.unlift (A.the fi)
-                    dict'  = A.transpose $ A.reshape (A.lift (Z :. (A.size ixs) :. (16 :: Int))) vs
-                    found' = hashcatDict dict' digest
+                    dict'  = A.reshape (A.lift (Z :. (A.size ixs) :. (16 :: Int))) vs
+                    found' = hashcatDict False dict' digest
                   in A.unit $ A.lift (A.the found' A.>* -1 A.? (i + A.the found', found), i + (A.size ixs))
         --
         in case fst (idx `A.indexArray` Z) of
              -1 -> Nothing
-             n  -> Just (extract dict n)
+             n  -> Just (extract False dict n)
 
       recover hash =
         let abcd = readMD5 hash
-            idx  = run1 backend (hashcatDict (A.use dict)) (A.fromList Z [abcd])
+            idx  = run1 backend (hashcatDict True (A.use dict)) (A.fromList Z [abcd])
         --
         in case idx `A.indexArray` Z of
              -1 -> Nothing
-             n  -> Just (extract dict n)
+             n  -> Just (extract True dict n)
 
       recoverAll :: [L.ByteString] -> IO (Int,Int)
       recoverAll =
