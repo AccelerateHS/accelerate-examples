@@ -46,15 +46,16 @@ main = do
         let abcd = readMD5 hash
             idx  = run1 backend l (A.fromList Z [abcd])
             l digest = A.collect
-                     $ A.foldSeqFlatten find (A.unit (-1)) (A.toSeq (Z :. All :. Split) (A.use dict))
+                     $ A.foldSeqFlatten find (A.unit (A.lift (-1 :: Int, 0 :: Int))) (A.toSeq (Z :. All :. Split) (A.use dict))
               where
-                find found ixs vs =
+                find fi ixs vs =
                   let
+                    (found, i) = A.unlift (A.the fi)
                     dict'  = A.transpose $ A.reshape (A.lift (Z :. (A.size ixs) :. (16 :: Int))) vs
                     found' = hashcatDict dict' digest
-                  in A.unit (A.the found `max` A.the found')
+                  in A.unit $ A.lift (A.the found' A.>* -1 A.? (i + A.the found', found), i + (A.size ixs))
         --
-        in case idx `A.indexArray` Z of
+        in case fst (idx `A.indexArray` Z) of
              -1 -> Nothing
              n  -> Just (extract dict n)
 
