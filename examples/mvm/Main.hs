@@ -28,8 +28,9 @@ main = do
   let rows = get configRows conf
       cols = get configCols conf
 
-  let backend = get optBackend opts
-      iters   = get configIters conf
+  let backend  = get optBackend opts
+      iters    = get configIters conf
+      hostArrs = get configHostArrays conf
 
   let bench name f tearups = do
         putStrLn ("Benchmarking " P.++ name P.++ ".")
@@ -67,10 +68,12 @@ main = do
   -- Poor man's random array generation
   --
   let genMat :: Scalar Float -> Array DIM2 Float
-      genMat = run1 backend (A.fill (lift (Z:.rows:.cols)) . the . lift)
+      genMat = if hostArrs then fromFunction (Z:.rows:.cols) . const . flip indexArray Z
+                           else run1 backend (A.fill (lift (Z:.rows:.cols)) . the . lift)
 
   let genVec :: Scalar Int -> Scalar Float -> Array DIM1 Float
-      genVec sz = run1 backend (A.fill (index1 (the (lift sz))) . the . lift)
+      genVec sz = if hostArrs then fromFunction (Z :. (sz `indexArray` Z)) . const . flip indexArray Z
+                              else run1 backend (A.fill (index1 (the (lift sz))) . the . lift)
 
   let matsVecs = P.replicate iters $ do
                i <- randomIO :: IO Float
