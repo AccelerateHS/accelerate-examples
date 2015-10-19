@@ -23,8 +23,7 @@ main :: IO ()
 main = do
   initializeTime
   beginMonitoring
-  argv                  <- getArgs
-  (conf, opts, files)   <- parseArgs options defaults header footer argv
+  (conf, opts, files)   <- parseArgs options defaults header footer
 
   -- Read the plain text word lists. This creates a vector of MD5 chunks ready
   -- for hashing.

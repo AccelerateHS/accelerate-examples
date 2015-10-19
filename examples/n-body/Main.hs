@@ -3,6 +3,7 @@
 --
 
 -- friends
+import Test
 import Config
 import Common.Body
 import Common.World
@@ -20,15 +21,13 @@ import Data.Array.Accelerate.Examples.Internal          as A
 -- system
 import Prelude                                          as P
 import Data.Label
-import System.Environment
 import Graphics.Gloss.Interface.Pure.Game
 
 
 main :: IO ()
 main
   = do  beginMonitoring
-        argv                    <- getArgs
-        (conf, opts, rest)      <- parseArgs options defaults header footer argv
+        (conf, opts, rest)      <- parseArgs options defaults header footer
 
         let solver      = case get configSolver conf of
                             Naive1      -> Naive1.calcAccels
@@ -53,8 +52,7 @@ main
             bodies      = run backend
                         $ A.map (setStartVelOfBody . constant $ get configStartSpeed conf)
                         $ A.zipWith setMassOfBody (A.use masses)
-                        $ A.map unitBody
-                        $ A.use positions
+                        $ A.map unitBody (A.use positions)
 
             -- The initial simulation state
             --
@@ -71,8 +69,12 @@ main
                         $ A.uncurry
                         $ advanceBodies (solver $ constant epsilon)
 
+
         -- Forward unto dawn
         --
+        runTests opts rest
+          $ makeTests step
+
         runBenchmarks opts rest
           [ bench "n-body" $ whnf (advance 0.1) world ]
 

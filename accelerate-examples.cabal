@@ -27,6 +27,8 @@ Stability:              Experimental
 Extra-source-files:     data/hashcat/README.md
                         data/matrices/README.md
 
+-- Flags that control features of the benchmark programs
+--
 Flag gui
   Description:          Enable gloss-based GUIs, where applicable. If not
                         enabled, the application always runs in benchmark mode.
@@ -38,8 +40,10 @@ Flag ekg
 
 Flag codespeed
   Description:          Enable upload of results to benchmark server
-  Default:              True
+  Default:              False
 
+-- Flags that control which Accelerate backends that are linked against
+--
 Flag cuda
   Description:          Enable the CUDA parallel backend for NVIDIA GPUs
   Default:              True
@@ -55,7 +59,6 @@ Flag llvm-gpu
 Flag cilk
   Description:          Enable the Cilk backend for multicore CPUs
   Default:              False
-
 
 -- Flags to specify which programs to build
 --
@@ -124,8 +127,12 @@ Library
                         criterion                       >= 1.0,
                         directory                       >= 1.1,
                         fclabels                        >= 2.0,
+                        HUnit                           >= 1.2,
                         mwc-random                      >= 0.8,
-                        test-framework                  >= 0.5
+                        QuickCheck                      >= 2.7,
+                        test-framework                  >= 0.5,
+                        test-framework-hunit            >= 0.3,
+                        test-framework-quickcheck2      >= 0.2
 
   Exposed-modules:      Data.Array.Accelerate.Examples.Internal
 
@@ -137,6 +144,7 @@ Library
                         Data.Array.Accelerate.Examples.Internal.ParseArgs
                         Data.Array.Accelerate.Examples.Internal.Random.Array
                         Data.Array.Accelerate.Examples.Internal.Report
+                        Data.Array.Accelerate.Examples.Internal.Similar
                         Data.Array.Accelerate.Examples.Internal.TestFramework
                         Data.Array.Accelerate.Examples.Internal.TestFramework.Config
                         Data.Array.Accelerate.Examples.Internal.Util
@@ -200,7 +208,6 @@ Executable accelerate-nofib
                         Test.Base
                         Test.FFT
                         Test.Foreign
-                        Test.Foreign.CUDA
                         Test.IO
                         Test.IO.Ptr
                         Test.IO.Vector
@@ -250,6 +257,8 @@ Executable accelerate-nofib
   if flag(cuda)
     CPP-options:        -DACCELERATE_CUDA_BACKEND
     build-depends:      accelerate-cuda                 == 1.0.*
+    other-modules:      Test.Foreign.CUDA
+
   if flag(ekg)
     ghc-options:        -with-rtsopts=-T
 
@@ -422,7 +431,8 @@ Executable accelerate-fluid
                         base                            == 4.7.*,
                         bmp                             >= 1.2,
                         fclabels                        >= 2.0,
-                        gloss                           >= 1.7
+                        gloss                           >= 1.9,
+                        gloss-rendering                 >= 1.9
 
 
 -- Simulation of gravitational attraction between solid particles
@@ -445,6 +455,7 @@ Executable accelerate-nbody
                         Solver.BarnsHut
                         Solver.Naive1
                         Solver.Naive2
+                        Test
 
   ghc-options:          -O2 -Wall -threaded -eventlog -rtsopts
   ghc-prof-options:     -auto-all
@@ -616,9 +627,9 @@ Executable accelerate-ray
                         accelerate-examples             == 1.0.*,
                         base                            == 4.7.*,
                         fclabels                        >= 1.0,
-                        gloss                           == 1.8.*,
-                        gloss-accelerate                == 1.8.*,
-                        gloss-raster-accelerate         == 1.8.*
+                        gloss                           >= 1.8,
+                        gloss-accelerate                >= 1.8,
+                        gloss-raster-accelerate         >= 1.8
 
   ghc-options:          -Wall -O2 -threaded -threaded -rtsopts
   ghc-prof-options:     -auto-all

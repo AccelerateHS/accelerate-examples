@@ -101,8 +101,7 @@ clip v maxVal =
 data XYZ a = XYZ a a a
   deriving (Eq, Show, Typeable)
 
-type instance EltRepr  (XYZ a)  = EltRepr  (a, a, a)
-type instance EltRepr' (XYZ a)  = EltRepr' (a, a, a)
+type instance EltRepr (XYZ a)  = EltRepr  (a, a, a)
 
 instance Elt a => Elt (XYZ a) where
   eltType (_ :: XYZ a)  = eltType (undefined :: (a, a, a))

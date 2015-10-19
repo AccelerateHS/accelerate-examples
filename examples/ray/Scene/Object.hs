@@ -158,8 +158,7 @@ planeCheckShine  = planeShine
 -- Sphere
 -- ------
 
-type instance EltRepr Sphere  = EltRepr (Position, Float, Color, Float)
-type instance EltRepr' Sphere = EltRepr' (Position, Float, Color, Float)
+type instance EltRepr Sphere = EltRepr (Position, Float, Color, Float)
 
 instance Elt Sphere where
   eltType (_ :: Sphere)         = eltType (undefined :: (Position, Float, Color, Float))
@@ -185,8 +184,7 @@ instance Lift Exp Sphere where
 -- Plane
 -- -----
 
-type instance EltRepr Plane  = EltRepr (Position, Direction, Color, Float)
-type instance EltRepr' Plane = EltRepr' (Position, Direction, Color, Float)
+type instance EltRepr Plane = EltRepr (Position, Direction, Color, Float)
 
 instance Elt Plane where
   eltType (_ :: Plane)          = eltType (undefined :: (Position, Direction, Color, Float))
@@ -213,17 +211,12 @@ instance Lift Exp Plane where
 -- Checkered Plane
 -- ---------------
 
-type instance EltRepr PlaneCheck  = EltRepr (Position, Direction, Float)
-type instance EltRepr' PlaneCheck = EltRepr' (Position, Direction, Float)
+type instance EltRepr PlaneCheck = EltRepr (Position, Direction, Float)
 
 instance Elt PlaneCheck where
   eltType (_ :: PlaneCheck)     = eltType (undefined :: (Position, Direction, Float))
   toElt plane                   = let (p,n,s) = toElt plane in PlaneCheck p n s
   fromElt (PlaneCheck p n s)    = fromElt (p, n, s)
-
-  eltType' (_ :: PlaneCheck)    = eltType' (undefined :: (Position, Direction, Float))
-  toElt' plane                  = let (p,n,s) = toElt' plane in PlaneCheck p n s
-  fromElt' (PlaneCheck p n s)   = fromElt' (p, n, s)
 
 instance IsTuple PlaneCheck where
   type TupleRepr PlaneCheck = TupleRepr (Position, Direction, Float)

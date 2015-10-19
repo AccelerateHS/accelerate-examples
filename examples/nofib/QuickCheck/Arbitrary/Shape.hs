@@ -29,6 +29,25 @@ instance Arbitrary DIM2 where
 
   shrink (Z :. h :. w) = [ Z :. h' :. w' | h' <- shrink h, w' <- shrink w ]
 
+instance Arbitrary DIM3 where
+  arbitrary     = sized $ \n -> do
+    w   <- choose (0, n)
+    h   <- choose (0, n)
+    d   <- choose (0, n)
+    return (Z :. h :. w :. d)
+
+  shrink (Z :. h :. w :. d) = [ Z :. h' :. w' :. d' | h' <- shrink h, w' <- shrink w, d' <- shrink d ]
+
+instance Arbitrary DIM4 where
+  arbitrary     = sized $ \n -> do
+    w   <- choose (0, n)
+    h   <- choose (0, n)
+    d   <- choose (0, n)
+    t   <- choose (0, n)
+    return (Z :. h :. w :. d :. t)
+
+  shrink (Z :. h :. w :. d :. t) = [ Z :. h' :. w' :. d' :. t' | h' <- shrink h, w' <- shrink w, d' <- shrink d, t' <- shrink t ]
+
 
 -- Generate an arbitrary shape with approximately this many elements in each
 -- dimension. If the generated shape does not contain approximately the
