@@ -17,13 +17,15 @@ import Control.Monad                                    ( unless )
 import Data.Binary                                      ( decodeFile )
 import Data.Label                                       ( get )
 import System.Directory
+import System.Environment
 
 
 main :: IO ()
 main = do
 
   beginMonitoring
-  (_, opts, rest)       <- parseArgs options defaults header footer
+  argv                  <- getArgs
+  (_, opts, rest)       <- parseArgs options defaults header footer argv
 
   inputs                <- (&&) <$> doesFileExist "points.bin"
                                 <*> doesFileExist "clusters"

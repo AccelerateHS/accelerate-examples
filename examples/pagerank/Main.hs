@@ -11,6 +11,8 @@ import Rank
 import Control.Monad
 import Data.Char
 import Data.Label                 ( get )
+import System.Environment
+import System.Exit
 
 import Data.Array.Accelerate.Examples.Internal
 
@@ -18,7 +20,8 @@ import Data.Array.Accelerate.Examples.Internal
 main :: IO ()
 main = do
   beginMonitoring
-  (conf, opts, linksPath : titlesPath : _) <- parseArgs options defaults header footer
+  argv                                     <- getArgs
+  (conf, opts, linksPath : titlesPath : _) <- parseArgs options defaults header footer argv
 
   let backend   = get optBackend opts
       steps     = get configSteps conf

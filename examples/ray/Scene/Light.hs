@@ -92,7 +92,8 @@ applyLight objects point normal light
 lightPos l   = Exp $ SuccTupIdx ZeroTupIdx `Prj` l
 lightColor l = Exp $ ZeroTupIdx `Prj` l
 
-type instance EltRepr Light = EltRepr (Position, Color)
+type instance EltRepr Light  = EltRepr (Position, Color)
+type instance EltRepr' Light = EltRepr' (Position, Color)
 
 instance Elt Light where
   eltType (_ :: Light)  = eltType (undefined :: (Position, Color))

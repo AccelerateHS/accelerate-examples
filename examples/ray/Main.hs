@@ -3,8 +3,6 @@ module Main where
 
 -- Ray
 import Config
-import Scene.Object                                             ( Objects )
-import Scene.Light                                              ( Lights )
 import Scene.State
 import Gloss.Draw
 import Gloss.Event
@@ -18,12 +16,14 @@ import qualified Graphics.Gloss.Accelerate.Raster.Field         as G
 
 -- Enemies
 import Data.Label
+import System.Environment                                       ( getArgs )
 
 
 main :: IO ()
 main = do
   beginMonitoring
-  (conf, opts, rest)    <- parseArgs options defaults header footer
+  argv                  <- getArgs
+  (conf, opts, rest)    <- parseArgs options defaults header footer argv
 
   let width     = get configWidth conf
       height    = get configHeight conf
@@ -35,7 +35,6 @@ main = do
       state     = initState 0
       ambient   = rawColor 0.3 0.3 0.3
 
-      scene :: Acc (Objects,Lights) -> Acc (Array DIM2 Color)
       scene st
         = let eye               = constant (get stateEyePos state)
               eyeDir            = castViewRays width height fov eye

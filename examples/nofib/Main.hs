@@ -2,6 +2,7 @@
 module Main where
 
 import Data.Label
+import System.Environment
 
 import Config
 import Test.FFT
@@ -26,7 +27,8 @@ main = do
 
   -- process command line args, and print a brief usage message
   --
-  (conf, opts, rest)    <- parseArgs options defaults header footer
+  argv                  <- getArgs
+  (conf, opts, rest)    <- parseArgs options defaults header footer argv
   let backend            = get optBackend opts
 
   -- Run tests, executing the simplest first. More complex operations, such as

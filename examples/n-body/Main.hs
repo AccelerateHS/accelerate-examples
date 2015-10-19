@@ -21,13 +21,15 @@ import Data.Array.Accelerate.Examples.Internal          as A
 -- system
 import Prelude                                          as P
 import Data.Label
+import System.Environment
 import Graphics.Gloss.Interface.Pure.Game
 
 
 main :: IO ()
 main
   = do  beginMonitoring
-        (conf, opts, rest)      <- parseArgs options defaults header footer
+        argv                    <- getArgs
+        (conf, opts, rest)      <- parseArgs options defaults header footer argv
 
         let solver      = case get configSolver conf of
                             Naive1      -> Naive1.calcAccels

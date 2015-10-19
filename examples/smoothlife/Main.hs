@@ -14,13 +14,15 @@ import Data.Array.Accelerate                            as A
 import Data.Array.Accelerate.Examples.Internal          as A
 import Data.Label
 import Control.Exception
+import System.Environment
 import Graphics.Gloss
 
 
 main :: IO ()
 main
   = do  beginMonitoring
-        (conf, opts, rest)      <- parseArgs options defaults header footer
+        argv                    <- getArgs
+        (conf, opts, rest)      <- parseArgs options defaults header footer argv
 
         let -- visualisation configuration
             n           = get configWindowSize conf
