@@ -1,12 +1,10 @@
+{-# LANGUAGE BangPatterns #-}
 
 module Main where
 
 import Config
 import Digest
 import MD5
-import Monitoring
-import ParseArgs
-import Util
 
 import Data.Label
 import Text.Printf
@@ -15,16 +13,19 @@ import Control.Applicative
 import Criterion.Measurement
 import System.IO
 import System.Environment
-import Data.Array.Accelerate                    ( Z(..), (:.)(..) )
-import qualified Data.Array.Accelerate          as A
-import qualified Data.ByteString.Lazy.Char8     as L
+import Data.Array.Accelerate                            ( Z(..), (:.)(..), All(..) , Split(..))
+import Data.Array.Accelerate.Examples.Internal
+import qualified Data.Array.Accelerate                  as A
+import qualified Data.Array.Accelerate.Array.Sugar      as Sugar
+import qualified Data.ByteString.Lazy.Char8             as L
 
 
 main :: IO ()
 main = do
+  initializeTime
   beginMonitoring
   argv                  <- getArgs
-  (conf, _cconf, files) <- parseArgs configHelp configBackend options defaults header footer argv
+  (conf, opts, files)   <- parseArgs options defaults header footer argv
 
   -- Read the plain text word lists. This creates a vector of MD5 chunks ready
   -- for hashing.
@@ -42,11 +43,26 @@ main = do
   -- function are applied, but is defeated by salting passwords. This is true
   -- even if the salt is known, so long as it is unique for each password.
   --
-  let backend = get configBackend conf
+  let backend = get optBackend opts
+
+      recoverSeq hash =
+        let abcd = readMD5 hash
+            idx  = run1 backend l (A.fromList Z [abcd])
+            l digest = A.collect
+                     $ A.foldSeq max (-1)
+                     $ A.zipWithSeq (hashcatWord digest)
+                           (A.toSeq (Z :. All :. Split) (A.use dict))
+                           (A.toSeq (Z :. Split) (iota (Sugar.size (Sugar.shape dict))))
+
+            iota n = A.generate (A.index1 (A.constant n)) A.unindex1
+        --
+        in case idx `A.indexArray` Z of
+             -1 -> Nothing
+             n  -> Just (extract dict n)
 
       recover hash =
         let abcd = readMD5 hash
-            idx  = run1 backend (hashcat (A.use dict)) (A.fromList Z [abcd])
+            idx  = run1 backend (hashcatDict (A.use dict)) (A.fromList Z [abcd])
         --
         in case idx `A.indexArray` Z of
              -1 -> Nothing
@@ -54,7 +70,10 @@ main = do
 
       recoverAll :: [L.ByteString] -> IO (Int,Int)
       recoverAll =
-        foldM (\(i,n) h -> maybe (return (i,n+1)) (\t -> showText h t >> return (i+1,n+1)) (recover h)) (0,0)
+        if get configNoSeq conf
+        then go recover
+        else go recoverSeq
+        where go rec = foldM (\(i,n) h -> maybe (return (i,n+1)) (\t -> showText h t >> return (i+1,n+1)) (rec h)) (0,0)
 
       showText hash text = do
         L.putStr hash >> putStr ": " >> L.putStrLn text
@@ -79,4 +98,12 @@ main = do
                       (showFFloatSIBase (Just 2) 1000 persec "Hash/sec")
 
   when (r == t) $ putStrLn "All hashes recovered (:"
+
+time :: IO a -> IO (Double, a)
+time action = do
+  start  <- getTime
+  result <- action
+  end    <- getTime
+  let !delta = end - start
+  return (delta, result)
 
