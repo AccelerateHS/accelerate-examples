@@ -55,12 +55,12 @@ before_install:
     - git reset --hard ${SHA_ACCELERATE_FFT}
     - popd
 
-    - travis_retry git clone -b release/0.19 ${URL_GLOSS_ACCELERATE} deps/gloss-accelerate
+    - travis_retry git clone -b release/1.9 ${URL_GLOSS_ACCELERATE} deps/gloss-accelerate
     - pushd deps/gloss-accelerate
     - git reset --hard ${SHA_GLOSS_ACCELERATE}
     - popd
 
-    - travis_retry git clone -b release/0.19 ${URL_GLOSS_RASTER_ACCELERATE} deps/gloss-raster-accelerate
+    - travis_retry git clone -b release/1.9 ${URL_GLOSS_RASTER_ACCELERATE} deps/gloss-raster-accelerate
     - pushd deps/gloss-raster-accelerate
     - git reset --hard ${SHA_GLOSS_RASTER_ACCELERATE}
     - popd
