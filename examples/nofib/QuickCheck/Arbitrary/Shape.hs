@@ -6,7 +6,7 @@
 module QuickCheck.Arbitrary.Shape where
 
 import Test.QuickCheck
-import Data.Array.Accelerate                            ( Shape, Z(..), (:.)(..), DIM0, DIM1, DIM2 )
+import Data.Array.Accelerate                            ( Shape, Z(..), (:.)(..), DIM0, DIM1, DIM2, DIM3, DIM4 )
 import qualified Data.Array.Accelerate.Array.Sugar      as Sugar
 
 
