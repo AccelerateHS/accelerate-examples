@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts    #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 --
 -- A Mandelbrot set generator.
@@ -48,7 +49,7 @@ mandelbrot
 mandelbrot screenX screenY depth view =
   generate (constant (Z:.screenY:.screenX))
            (\ix -> let c = initial ix
-                   in  A.snd $ A.while (\zi -> A.snd zi <* lIMIT &&* dot (A.fst zi) <* 4)
+                   in  A.snd $ A.while (\zi -> A.snd zi A.<* lIMIT &&* dot (A.fst zi) A.<* 4)
                                        (\zi -> lift1 (next c) zi)
                                        (lift (c, constant 0)))
   where
@@ -87,13 +88,15 @@ prettyRGBA cmax c = c ==* cmax ? ( 0xFF000000, escapeToColour (cmax - c) )
 -- Directly convert the iteration count on escape to a colour. The base set
 -- (x,y,z) yields a dark background with light highlights.
 --
+-- Note that OpenGL reads pixel data in AGBR format, rather than RGBA.
+--
 escapeToColour :: Exp Int32 -> Exp RGBA32
-escapeToColour m = constant 0xFFFFFFFF - (packRGBA32 $ lift (x,y,z,w))
+escapeToColour m = constant 0xFFFFFFFF - (packRGBA32 $ lift (a,b,g,r))
   where
-    x   = constant 0
-    w   = A.fromIntegral (3 * m)
-    z   = A.fromIntegral (5 * m)
-    y   = A.fromIntegral (7 * m)
+    r   = A.fromIntegral (3 * m)
+    g   = A.fromIntegral (5 * m)
+    b   = A.fromIntegral (7 * m)
+    a   = constant 0
 
 
 {--

@@ -1,7 +1,8 @@
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE FlexibleContexts         #-}
 {-# LANGUAGE ForeignFunctionInterface #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE ScopedTypeVariables      #-}
+{-# LANGUAGE TypeFamilies             #-}
+{-# LANGUAGE TypeOperators            #-}
 
 module Test.Spectral.BlackScholes (
 
@@ -9,18 +10,18 @@ module Test.Spectral.BlackScholes (
 
 ) where
 
-import Prelude                                                  as P
 import Control.Applicative
 import Data.Label
 import Data.Maybe
 import Data.Typeable
-import Test.QuickCheck
-import Test.Framework
-import Test.Framework.Providers.QuickCheck2
-import Foreign.Ptr
 import Foreign.Marshal
+import Foreign.Ptr
 import Foreign.Storable
 import System.Random
+import Test.Framework
+import Test.Framework.Providers.QuickCheck2
+import Test.QuickCheck
+import Prelude                                                  as P
 
 import Config
 import QuickCheck.Arbitrary.Array

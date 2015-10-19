@@ -8,16 +8,16 @@ module Main where
 import Kmeans
 import Config
 
-import Prelude                                          as P
 import Data.Array.Accelerate                            as A
 import Data.Array.Accelerate.Examples.Internal          as A
 
-import Control.Applicative                              ( (<$>), (<*>) )
+import Control.Applicative
 import Control.Monad                                    ( unless )
 import Data.Binary                                      ( decodeFile )
 import Data.Label                                       ( get )
 import System.Directory
 import System.Environment
+import Prelude                                          as P
 
 
 main :: IO ()

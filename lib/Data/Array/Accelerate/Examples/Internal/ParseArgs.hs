@@ -38,6 +38,7 @@ import Control.Monad
 import System.Exit
 import System.Console.GetOpt
 import Text.PrettyPrint.ANSI.Leijen
+import Prelude
 
 #ifdef ACCELERATE_ENABLE_CODESPEED
 import Data.Char
