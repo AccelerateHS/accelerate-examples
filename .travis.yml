@@ -15,13 +15,13 @@ matrix:
   include:
     - env: CABAL=1.18 GHC=7.8.4
       compiler: ": #GHC 7.8.4"
-      addons: {apt: {packages: [cabal-install-1.18,ghc-7.8.4], sources: [hvr-ghc]}}
+      addons: {apt: {packages: [cabal-install-1.18,ghc-7.8.4,freeglut3-dev], sources: [hvr-ghc]}}
     - env: CABAL=1.22 GHC=7.10.2
       compiler: ": #GHC 7.10.2"
-      addons: {apt: {packages: [cabal-install-1.22,ghc-7.10.2], sources: [hvr-ghc]}}
+      addons: {apt: {packages: [cabal-install-1.22,ghc-7.10.2,freeglut3-dev], sources: [hvr-ghc]}}
     - env: CABAL=head GHC=head
       compiler: ": #GHC head"
-      addons: {apt: {packages: [cabal-install-head,ghc-head], sources: [hvr-ghc]}}
+      addons: {apt: {packages: [cabal-install-head,ghc-head,freeglut3-dev], sources: [hvr-ghc]}}
 
   allow_failures:
     - env: CABAL=head GHC=head
