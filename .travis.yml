@@ -28,7 +28,7 @@ matrix:
 
 before_install:
  - unset CC
- - export PATH=/opt/ghc/$GHC/bin:/opt/cabal/$CABAL/bin:/usr/bin/llvm-$LLVM/bin:$PATH
+ - export PATH=/opt/ghc/$GHC/bin:/opt/cabal/$CABAL/bin:/usr/lib/llvm-$LLVM/bin:$PATH
 
 install:
  - echo "$(ghc --version) [$(ghc --print-project-git-commit-id 2> /dev/null || echo '?')]"
