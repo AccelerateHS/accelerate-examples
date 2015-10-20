@@ -13,22 +13,22 @@ before_cache:
 
 matrix:
   include:
-    - env: CABAL=1.18 GHC=7.8.4
+    - env: CABAL=1.18 GHC=7.8.4 LLVM=3.4
       compiler: ": #GHC 7.8.4"
       addons: {apt: {packages: [cabal-install-1.18,ghc-7.8.4,freeglut3-dev], sources: [hvr-ghc]}}
-    - env: CABAL=1.22 GHC=7.10.2
+    - env: CABAL=1.22 GHC=7.10.2 LLVM=3.5
       compiler: ": #GHC 7.10.2"
-      addons: {apt: {packages: [cabal-install-1.22,ghc-7.10.2,freeglut3-dev], sources: [hvr-ghc]}}
-    - env: CABAL=head GHC=head
+      addons: {apt: {packages: [cabal-install-1.22,ghc-7.10.2,llvm-3.5,freeglut3-dev], sources: [hvr-ghc,llvm-toolchain-precise-3.5,ubuntu-toolchain-r-test]}}
+    - env: CABAL=head GHC=head LLVM=3.6
       compiler: ": #GHC head"
-      addons: {apt: {packages: [cabal-install-head,ghc-head,freeglut3-dev], sources: [hvr-ghc]}}
+      addons: {apt: {packages: [cabal-install-head,ghc-head,llvm-3.6,freeglut3-dev], sources: [hvr-ghc,llvm-toolchain-precise-3.6,ubuntu-toolchain-r-test]}}
 
   allow_failures:
-    - env: CABAL=head GHC=head
+    - env: CABAL=head GHC=head LLVM=3.6
 
 before_install:
  - unset CC
- - export PATH=/opt/ghc/$GHC/bin:/opt/cabal/$CABAL/bin:$PATH
+ - export PATH=/opt/ghc/$GHC/bin:/opt/cabal/$CABAL/bin:/usr/bin/llvm-$LLVM/bin:$PATH
 
 install:
  - cabal --version
