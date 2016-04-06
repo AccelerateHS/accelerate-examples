@@ -64,7 +64,7 @@ runBenchmarks opt argv benchmarks
           exists <- doesFileExist rawFile
           if exists
              then either fail return =<< do
-                    rs <- readReports rawFile
+                    rs <- readRecords rawFile
                     case get rawDataFile crit of
                         Nothing   -> removeFile rawFile >> return rs
                         Just _    -> return rs

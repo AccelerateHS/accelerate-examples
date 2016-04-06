@@ -124,7 +124,7 @@ Library
                         ansi-wl-pprint                  >= 0.6,
                         base                            >= 4.7,
                         containers                      >= 0.5,
-                        criterion                       >= 1.0,
+                        criterion                       >= 1.1,
                         directory                       >= 1.1,
                         fclabels                        >= 2.0,
                         HUnit                           >= 1.2,
@@ -343,7 +343,7 @@ Executable accelerate-mvm
   build-depends:        accelerate                      == 2.0.*,
                         accelerate-examples             == 2.0.*,
                         base                            == 4.7.*,
-                        criterion                       >= 1.0,
+                        criterion                       >= 1.1,
                         fclabels                        >= 2.0,
                         mwc-random                      >= 0.8,
                         random                          >= 1.0,
@@ -570,7 +570,7 @@ Executable accelerate-hashcat
                         bytestring                      >= 0.9,
                         bytestring-lexing               >= 0.5,
                         cereal                          >= 0.3,
-                        criterion                       >= 1.0,
+                        criterion                       >= 1.1,
                         fclabels                        >= 2.0,
                         mwc-random                      >= 0.8
 
