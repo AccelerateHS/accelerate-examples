@@ -342,7 +342,7 @@ Executable accelerate-mvm
 
   build-depends:        accelerate                      == 2.0.*,
                         accelerate-examples             == 2.0.*,
-                        base                            == 4.7.*,
+                        base                            >= 4.7,
                         criterion                       >= 1.1,
                         fclabels                        >= 2.0,
                         mwc-random                      >= 0.8,
