@@ -4,16 +4,16 @@ env:
     - HAPPY=1.19.5
     - ALEX=3.1.4
 
-    - SHA_ACCELERATE=4d181866db677d0bb0fad0aa3224d8856c5a0911
+    - SHA_ACCELERATE=4040809732e2004903a259e57c407cc9599f5144
     - URL_ACCELERATE=https://github.com/AccelerateHS/accelerate.git
 
-    - SHA_ACCELERATE_IO=af478f260b8ea9df892f9af633eec1ba1d694317
+    - SHA_ACCELERATE_IO=64eeb44d899a259ff2f6e325dfd107f004e5c4e2
     - URL_ACCELERATE_IO=https://github.com/AccelerateHS/accelerate-io.git
 
     - SHA_ACCELERATE_FFT=319520e23804315e10d5d7bdf0405a742df9eab2
     - URL_ACCELERATE_FFT=https://github.com/AccelerateHS/accelerate-fft.git
 
-    - SHA_ACCELERATE_CUDA=6b1f21878991d417b4ff165137e264628ea58bb9
+    - SHA_ACCELERATE_CUDA=428ecb0c289b700b04d593d0810ec19e5eecdeb8
     - URL_ACCELERATE_CUDA=https://github.com/AccelerateHS/accelerate-cuda.git
 
     - SHA_GLOSS_ACCELERATE=94aac6e3b2061479ab4dd20ea23b65c7363419e4
