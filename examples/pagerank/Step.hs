@@ -49,7 +49,7 @@ stepRankSeq p sizes ranks
     in A.collect
      $ A.foldSeqFlatten addUpdates' zeroes
      $ A.mapSeq (A.map (contribution sizes ranks))
-         (A.toSeq (Z :. Split) (use p))
+         (A.toSeqInner (use p))
 
 -- | Perform one iteration step for the internal Page Rank algorithm.
 stepRank

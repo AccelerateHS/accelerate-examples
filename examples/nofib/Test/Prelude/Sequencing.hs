@@ -26,11 +26,6 @@ import Data.Array.Accelerate.Examples.Internal
 import Data.Array.Accelerate                                    as A
 import Data.Array.Accelerate.Array.Sugar                        as Sugar
 
-toSeq' :: (Shape sh, Elt a)
-       => Acc (Array (sh :. Int) a)
-       -> Seq [Array sh a]
-toSeq' = toSeq (Any :. Split)
-
 iota :: Int -> Acc (Vector Int)
 iota n = generate (index1 (constant n)) unindex1
 
@@ -57,7 +52,7 @@ idSequenceRef = id
 
 sumMaxSequence :: (Elt a, IsBounded a, IsNum a) => Acc (Vector a) -> Acc (Scalar a, Scalar a)
 sumMaxSequence xs = collect $
-  let xs' = toSeq' xs
+  let xs' = toSeqInner xs
   in lift ( foldSeqE (+) 0 xs'
           , foldSeqE max minBound xs')
 
@@ -68,7 +63,7 @@ sumMaxSequenceRef xs = ( fromList Z . (:[]) . P.sum     . toList $ xs
 scatterSequence :: (Elt a, IsNum a) => Acc (Vector a, Vector (Int, a)) -> Acc (Vector a)
 scatterSequence input = collect
   $ foldSeqFlatten f (afst input)
-  $ toSeq' (asnd input)
+  $ toSeqInner (asnd input)
   where
     f xs' _ upd =
       let (to, ys) = A.unzip upd
@@ -86,9 +81,9 @@ scatterSequenceRef (vec, vec_upd) =
 
 logsum :: (Elt a, IsFloating a) => Int -> Acc (Scalar a)
 logsum n = collect
-  $ foldSeq (+) 0.0
+  $ foldSeqE (+) 0.0
   $ mapSeq (A.map (log . A.fromIntegral . (+1)))
-  $ toSeq' (iota n)
+  $ toSeqInner (iota n)
 
 logsumRef :: (Elt a, IsFloating a) => Int -> Scalar a
 logsumRef n = fromList Z [P.sum [log (P.fromIntegral i) | i <- [1..n]]]
@@ -97,67 +92,67 @@ logsumRef n = fromList Z [P.sum [log (P.fromIntegral i) | i <- [1..n]]]
 --logsumChunk n b = sum $ collect
 --  $ foldSeq (+) (rep (Z :. b) 0.0)
 --  $ mapSeq (map (log . fromIntegral . (+1)))
---  $ toSeq' (iotaChunk n b)
+--  $ toSeqInner (iotaChunk n b)
 
 --logsumChunkRef :: (Elt a, IsFloating a) => Int -> Int -> Scalar a
 --logsumChunkRef n b = logsumRef (n * b)
 
-nestedSequence :: Int -> Int -> Acc (Vector Int)
-nestedSequence n m = asnd . collect
-  $ fromSeq
-  $ mapSeq
-  (\ i -> collect
-          $ foldSeq (+) 0
-          $ mapSeq (A.zipWith (+) i)
-          $ toSeq' (iota m)
-  )
-  $ toSeq' (iota n)
+-- nestedSequence :: Int -> Int -> Acc (Vector Int)
+-- nestedSequence n m = asnd . collect
+--   $ fromSeq
+--   $ mapSeq
+--   (\ i -> collect
+--           $ foldSeq (+) 0
+--           $ mapSeq (A.zipWith (+) i)
+--           $ toSeqInner (iota m)
+--   )
+--   $ toSeqInner (iota n)
 
-nestedSequenceRef :: Int -> Int -> Vector Int
-nestedSequenceRef n m = fromList (Z :. n) [P.sum [i + j | j <- [0..m-1]] | i <- [0..n-1]]
+-- nestedSequenceRef :: Int -> Int -> Vector Int
+-- nestedSequenceRef n m = fromList (Z :. n) [P.sum [i + j | j <- [0..m-1]] | i <- [0..n-1]]
+--
+-- nestedIrregularSequence :: Int -> Acc (Vector Int)
+-- nestedIrregularSequence n = asnd . collect
+--   $ fromSeq
+--   $ mapSeq
+--   (\ i -> collect
+--         $ foldSeq (+) 0
+--         $ mapSeq (A.zipWith (+) i)
+--         $ toSeqInner (iota' i)
+--   )
+--   $ toSeqInner (iota n)
 
-nestedIrregularSequence :: Int -> Acc (Vector Int)
-nestedIrregularSequence n = asnd . collect
-  $ fromSeq
-  $ mapSeq
-  (\ i -> collect
-        $ foldSeq (+) 0
-        $ mapSeq (A.zipWith (+) i)
-        $ toSeq' (iota' i)
-  )
-  $ toSeq' (iota n)
+-- nestedIrregularSequenceRef :: Int -> Vector Int
+-- nestedIrregularSequenceRef n = fromList (Z :. n) [P.sum [i + j | j <- [0..i-1]] | i <- [0..n-1]]
+--
+-- deepNestedSequence :: Int -> Acc (Vector Int)
+-- deepNestedSequence n = asnd . collect
+--   $ fromSeq
+--   $ mapSeq
+--   (\ i -> asnd . collect
+--         $ fromSeq
+--         $ mapSeq
+--         (\ j -> collect
+--               $ foldSeqE (+) 0
+--               $ mapSeq
+--               (\ k -> collect
+--                     $ foldSeqE (+) 0
+--                     $ toSeqInner (iota' k)
+--               )
+--               $ toSeqInner (iota' j)
+--         )
+--         $ toSeqInner (iota' i)
+--   )
+--   $ toSeqInner (iota n)
 
-nestedIrregularSequenceRef :: Int -> Vector Int
-nestedIrregularSequenceRef n = fromList (Z :. n) [P.sum [i + j | j <- [0..i-1]] | i <- [0..n-1]]
-
-deepNestedSequence :: Int -> Acc (Vector Int)
-deepNestedSequence n = asnd . collect
-  $ fromSeq
-  $ mapSeq
-  (\ i -> asnd . collect
-        $ fromSeq
-        $ mapSeq
-        (\ j -> collect
-              $ foldSeqE (+) 0
-              $ mapSeq
-              (\ k -> collect
-                    $ foldSeqE (+) 0
-                    $ toSeq' (iota' k)
-              )
-              $ toSeq' (iota' j)
-        )
-        $ toSeq' (iota' i)
-  )
-  $ toSeq' (iota n)
-
-deepNestedSequenceRef :: Int -> Vector Int
-deepNestedSequenceRef n = fromList (Z :. P.length xs) xs
-  where xs = [P.sum [x | k <- [0..j-1], x <- [0..k-1]] | i <- [0..n-1], j <- [0..i-1]]
+-- deepNestedSequenceRef :: Int -> Vector Int
+-- deepNestedSequenceRef n = fromList (Z :. P.length xs) xs
+--   where xs = [P.sum [x | k <- [0..j-1], x <- [0..k-1]] | i <- [0..n-1], j <- [0..i-1]]
 
 chunking1 :: Int -> Acc (Scalar Int)
 chunking1 n = collect
   $ foldSeqE (+) 0
-  $ let s = toSeq' (iota n)
+  $ let s = toSeqInner (iota n)
     in zipWithSeq (\ x y -> A.zipWith (-) (A.sum x) (A.product y))
          (mapSeq iota' s)
          (mapSeq (iota' . A.map (constant n -)) s)
@@ -167,15 +162,15 @@ chunking2 :: Acc (Array (Z :. Int :. Int) Int, Array (Z :. Int :. Int) Int) -> A
 chunking2 input = asnd $ collect
   $ fromSeq
   $ zipWithSeq (A.++)
-      (toSeq (Z :. Split :. All) (afst input))
-      (toSeq (Z :. Split :. All) (asnd input))
+      (toSeqOuter (afst input))
+      (toSeqOuter (asnd input))
 
 chunking2b :: (Array (Z :. Int :. Int) Int, Array (Z :. Int :. Int) Int) -> Acc (Vector Int)
 chunking2b input = asnd $ collect
   $ fromSeq
   $ zipWithSeq (A.++)
-      (toSeq (Z :. Split :. All) $ use (P.fst input))
-      (toSeq (Z :. Split :. All) $ use (P.snd input))
+      (toSeqOuter $ use (P.fst input))
+      (toSeqOuter $ use (P.snd input))
 
 chunking2Ref :: (Array (Z :. Int :. Int) Int, Array (Z :. Int :. Int) Int) -> Vector Int
 chunking2Ref (a, b) =
@@ -232,15 +227,15 @@ test_sequences backend opt = testGroup "sequences"
     [ testLogsum configFloat  (undefined :: Float)
     , testLogsum configDouble (undefined :: Double)
     ]
-  --, testGroup "logsum_chunked" $ catMaybes
+  -- , testGroup "logsum_chunked" $ catMaybes
   --  [ testLogsumChunked configFloat  (undefined :: Float)
   --  , testLogsumChunked configDouble (undefined :: Double)
   --  ]
-  , testGroup "nested"
-    [ testNestedSequence
-    , testNestedIrregularSequence
-    , testDeepNestedSequence
-    ]
+  -- , testGroup "nested"
+  --   [ testNestedSequence
+  --   , testNestedIrregularSequence
+  --   , testDeepNestedSequence
+  --   ]
   , testGroup "chunking"
     [ testChunking1
     , testChunking2
@@ -302,20 +297,20 @@ test_sequences backend opt = testGroup "sequences"
     --  | otherwise               = Just $ testProperty (show (typeOf (undefined :: a)))
     --      (\ (NonNegative n) (Positive b) -> (run backend (logsumChunk n b) :: Scalar a) ~?= logsumChunkRef n b)
 
-    testNestedSequence :: Test
-    testNestedSequence =
-      testProperty "regular"
-        (\ (NonNegative n) (NonNegative m) -> (run backend (nestedSequence n m) ~?= nestedSequenceRef n m))
-
-    testNestedIrregularSequence :: Test
-    testNestedIrregularSequence =
-      testProperty "irregular"
-        (\ (NonNegative n) -> (run backend (nestedIrregularSequence n) ~?= nestedIrregularSequenceRef n))
-
-    testDeepNestedSequence :: Test
-    testDeepNestedSequence =
-      testProperty "deep"
-        (\ (NonNegative n) -> (run backend (deepNestedSequence n) ~?= deepNestedSequenceRef n))
+    -- testNestedSequence :: Test
+    -- testNestedSequence =
+    --   testProperty "regular"
+    --     (\ (NonNegative n) (NonNegative m) -> (run backend (nestedSequence n m) ~?= nestedSequenceRef n m))
+    --
+    -- testNestedIrregularSequence :: Test
+    -- testNestedIrregularSequence =
+    --   testProperty "irregular"
+    --     (\ (NonNegative n) -> (run backend (nestedIrregularSequence n) ~?= nestedIrregularSequenceRef n))
+    --
+    -- testDeepNestedSequence :: Test
+    -- testDeepNestedSequence =
+    --   testProperty "deep"
+    --     (\ (NonNegative n) -> (run backend (deepNestedSequence n) ~?= deepNestedSequenceRef n))
 
     testChunking1 :: Test
     testChunking1 =

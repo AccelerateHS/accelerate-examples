@@ -48,8 +48,9 @@ main = do
       recoverSeq hash =
         let abcd = readMD5 hash
             idx  = run1 backend l (A.fromList Z [abcd])
+            l :: A.Acc (A.Scalar MD5.MD5) -> A.Acc (A.Scalar (Int, Int)) 
             l digest = A.collect
-                     $ A.foldSeqFlatten find (A.unit (A.lift (-1 :: Int, 0 :: Int))) (A.toSeq (Z :. Split :. All) (A.use dict))
+                     $ A.foldSeqFlatten find (A.unit (A.lift (-1 :: Int, 0 :: Int))) (A.toSeqInner (A.use dict))
               where
                 find fi ixs vs =
                   let

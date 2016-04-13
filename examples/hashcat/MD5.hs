@@ -3,7 +3,7 @@
 
 module MD5 (
 
-  Dictionary,
+  Dictionary, MD5,
   hashcatWord, hashcatDict, readMD5, showMD5, md5Round
 
 ) where
