@@ -205,6 +205,7 @@ Executable accelerate-nofib
   other-modules:        Config
                         QuickCheck.Arbitrary.Array
                         QuickCheck.Arbitrary.Shape
+                        SMVM
                         Test.Base
                         Test.FFT
                         Test.Foreign
@@ -324,7 +325,8 @@ Executable accelerate-smvm
 Executable accelerate-mvm
   Main-is:              Main.hs
   hs-source-dirs:       examples/mvm
-  other-modules:        Matrix
+  other-modules:        Config
+                        Matrix
                         MVM
 
   ghc-options:          -O2 -Wall -threaded -rtsopts -eventlog
