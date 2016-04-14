@@ -342,11 +342,12 @@ Executable accelerate-mvm
   if flag(ekg)
     ghc-options:        -with-rtsopts=-T
 
-  if flag(cuda)
-    CPP-options:        -DACCELERATE_CUDA_BACKEND
-    build-depends:      accelerate-cuda                 == 2.0.*
+  if !flag(cuda)
+    buildable:          False
 
+  CPP-options:          -DACCELERATE_CUDA_BACKEND
   build-depends:        accelerate                      == 2.0.*,
+                        accelerate-cuda                 == 2.0.*
                         accelerate-examples             == 2.0.*,
                         base                            >= 4.7,
                         criterion                       >= 1.1,
