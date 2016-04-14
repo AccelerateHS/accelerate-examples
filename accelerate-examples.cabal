@@ -344,10 +344,11 @@ Executable accelerate-mvm
 
   if !flag(cuda)
     buildable:          False
+  else
+    CPP-options:        -DACCELERATE_CUDA_BACKEND
 
-  CPP-options:          -DACCELERATE_CUDA_BACKEND
-  build-depends:        accelerate                      == 2.0.*,
-                        accelerate-cuda                 == 2.0.*
+    build-depends:      accelerate                      == 2.0.*,
+                        accelerate-cuda                 == 2.0.*,
                         accelerate-examples             == 2.0.*,
                         base                            >= 4.7,
                         criterion                       >= 1.1,
@@ -627,7 +628,7 @@ Executable accelerate-pagerank
   if flag(ekg)
     ghc-options:        -with-rtsopts=-T
 
-  if !flag(pagerank)
+  if !flag(pagerank) || !flag(cuda)
     buildable:          False
   else
     build-depends:      accelerate                      == 2.0.*,
