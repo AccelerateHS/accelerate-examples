@@ -55,8 +55,8 @@ backprop layers x y = (nabla_b, nabla_w)
                     layers
 
     -- Backward pass
-    nabla_b_final = A.zipWith (*) (costDerivative (last activations) y) (A.map sigmoid' (last zs))
-    nabla_w_final = cross nabla_b_final (last activations)
+    nabla_b_final = A.zipWith (*) (costDerivative (P.last activations) y) (A.map sigmoid' (P.last zs))
+    nabla_w_final = cross nabla_b_final (P.last activations)
 
     nabla_b :: [Acc (Vector Float)]
     nabla_w :: [Acc (Matrix Float)]
@@ -65,8 +65,8 @@ backprop layers x y = (nabla_b, nabla_w)
                                delta' = A.zipWith (*) (mvm (transpose w) delta) sp
                            in (delta', cross delta' a))
                            (nabla_b_final, nabla_w_final)
-                       $ P.zip3 (P.tail . P.init $ zs)
-                                (P.drop 2 . P.map weights $ layers)
+                       $ P.zip3 (P.init $ zs)
+                                (P.init . P.map weights $ layers)
                                 (x : activations)
 
 costDerivative :: Acc (Vector Float) -> Acc (Vector Float) -> Acc (Vector Float)
