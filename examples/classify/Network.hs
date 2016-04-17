@@ -1,7 +1,11 @@
 {-# LANGUAGE FlexibleContexts    #-}
 {-# LANGUAGE ViewPatterns        #-}
 
-module Network where
+module Network (
+
+  Layer, Matrix, biases, weights, feedforward, backprop,
+
+) where
 
 import Data.Array.Accelerate            as A
 
@@ -56,7 +60,7 @@ backprop layers x y = (nabla_b, nabla_w)
 
     -- Backward pass
     nabla_b_final = A.zipWith (*) (costDerivative (P.last activations) y) (A.map sigmoid' (P.last zs))
-    nabla_w_final = cross nabla_b_final (P.last activations)
+    nabla_w_final = cross nabla_b_final (P.last (P.init activations))
 
     nabla_b :: [Acc (Vector Float)]
     nabla_w :: [Acc (Matrix Float)]
