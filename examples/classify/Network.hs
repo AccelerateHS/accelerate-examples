@@ -35,7 +35,7 @@ weights :: Acc Layer -> Acc (Matrix Float)
 weights = asnd
 
 sigmoid :: Exp Float -> Exp Float
-sigmoid z = 1 / (1 + exp z)
+sigmoid z = 1 / (1 + exp (-z))
 
 sigmoid' :: Exp Float -> Exp Float
 sigmoid' z = sigmoid z * (1 - sigmoid z)
@@ -70,7 +70,7 @@ backprop layers x y = (nabla_b, nabla_w)
                            in (delta', cross delta' a))
                            (nabla_b_final, nabla_w_final)
                        $ P.zip3 (P.init $ zs)
-                                (P.init . P.map weights $ layers)
+                                (P.tail . P.map weights $ layers)
                                 (x : activations)
 
 costDerivative :: Acc (Vector Float) -> Acc (Vector Float) -> Acc (Vector Float)
