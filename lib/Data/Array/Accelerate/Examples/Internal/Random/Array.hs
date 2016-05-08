@@ -13,17 +13,18 @@ module Data.Array.Accelerate.Examples.Internal.Random.Array (
 
   -- * Generating random arrays
   (:~>),
-  uniform, uniformR,
+  uniform, uniformR, standard, normal,
   randomArray, randomArrayWithSeed, randomArrayWithSystemRandom, randomArrayIO
 
 ) where
 
-import System.Random.MWC                        hiding ( uniform, uniformR )
-import qualified System.Random.MWC              as R
+import System.Random.MWC                         hiding ( uniform, uniformR )
+import qualified System.Random.MWC               as R
+import qualified System.Random.MWC.Distributions as R
 
-import Data.Array.Accelerate                    as A
-import Data.Array.Accelerate.Array.Data         as A
-import Data.Array.Accelerate.Array.Sugar        as Sugar
+import Data.Array.Accelerate                     as A
+import Data.Array.Accelerate.Array.Data          as A
+import Data.Array.Accelerate.Array.Sugar         as Sugar
 
 
 -- | A PNRG from indices to variates
@@ -41,6 +42,16 @@ uniform _ = R.uniform
 uniformR :: (Shape sh, Elt e, Variate e) => (e, e) -> sh :~> e
 uniformR bounds _ = R.uniformR bounds
 
+-- | Normally distributed random variates with a mean of 0 and a standard
+-- deviation of 1.
+--
+standard :: Shape sh => sh :~> Double
+standard _ = R.standard
+
+-- | Normally distributed random variates.
+--
+normal :: Shape sh => Double -> Double -> sh :~> Double
+normal mean stddev _ = R.normal mean stddev
 
 -- | Generate an array of random values using the supplied generator function.
 --   The generator for variates is initialised with a fixed seed.
@@ -108,4 +119,3 @@ runRandomArray f sh gen
 
       iter sh write (>>) (return ())
       return arr
-

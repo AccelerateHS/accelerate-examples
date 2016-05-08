@@ -717,6 +717,8 @@ Executable accelerate-classify
   Main-is:              Main.hs
   hs-source-dirs:       examples/classify
   other-modules:        Config
+                        Evaluate
+                        Image
                         Loader
                         Main
                         Network
@@ -731,6 +733,7 @@ Executable accelerate-classify
                         base                            >= 4.7,
                         binary                          >= 0.7,
                         bytestring                      >= 0.10,
+                        criterion                       >= 1.1,
                         directory                       >= 1.1,
                         fclabels                        >= 1.0,
                         random

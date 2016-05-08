@@ -1,4 +1,6 @@
-module Loader where
+module Loader (
+  readImages, readLabels,
+) where
 
 import Control.Monad
 import Data.Array.Accelerate          ( Array, DIM3, Z(..), (:.)(..), Vector )
@@ -55,7 +57,7 @@ readImages f = do
 deserialiseLabels :: Get ByteString
 deserialiseLabels = do
   magicNumber <- getWord32be
-  when (magicNumber /= 2051) $ fail "Not a valid MNIST label file"
+  when (magicNumber /= 2049) $ fail "Not a valid MNIST label file"
   imageCount <- fromIntegral <$> getWord32be
   labels <- getByteString imageCount
   return $! labels

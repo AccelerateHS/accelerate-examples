@@ -1,16 +1,22 @@
 {-# LANGUAGE FlexibleContexts    #-}
+{-# LANGUAGE TypeOperators       #-}
 {-# LANGUAGE ViewPatterns        #-}
 
 module Network (
 
-  Layer, Matrix, biases, weights, feedforward, backprop,
+  Layer, Matrix, biases, weights, feedforward, backprop, backprop3,
+
+  randomLayers,
 
 ) where
 
 import Data.Array.Accelerate            as A
+import Data.Array.Accelerate.Examples.Internal
 
 import Prelude                          as P
+import Control.Monad
 import Data.List                        ( mapAccumL )
+import GHC.Float
 
 -- Stochastic gradient descent learning for a neural network.
 -- ----------------------------------------------------------
@@ -78,8 +84,31 @@ costDerivative outputActivation y = A.zipWith (-) outputActivation y
 
 mvm :: (Elt a, IsNum a) => Acc (Matrix a) -> Acc (Vector a) -> Acc (Vector a)
 mvm mat vec
-  = let h = A.fst (unindex2 (shape mat))
+  = let Z:.h:._ = unlift (shape mat) :: Z:.Exp Int:.Exp Int
     in A.fold (+) 0 $ A.zipWith (*) mat (A.replicate (A.lift (Z:.h:.All)) vec)
 
 cross :: Acc (Vector Float) -> Acc (Vector Float) -> Acc (Matrix Float)
 cross v h = A.zipWith (*) (A.replicate (lift (Z:.All:.size h)) v) (A.replicate (lift (Z:.size v:.All)) h)
+
+randomBiases :: Int -> IO (Vector Float)
+randomBiases = randomArrayIO standardFloat . (Z:.) -- TODO: Configurable random generators
+
+randomWeights :: DIM2 -> IO (Array DIM2 Float)
+randomWeights = randomArrayIO standardFloat
+
+randomLayers :: [Int] -> IO [Layer]
+randomLayers sizes = zipWithM f (P.init sizes) (P.tail sizes)
+  where
+    f x y = (,) <$> randomBiases y <*> randomWeights (Z:.y:.x)
+
+standardFloat :: Shape sh => sh :~> Float
+standardFloat sh gen = double2Float <$> standard sh gen
+
+backprop3 :: Acc (Layer, Layer)
+          -> Acc (Vector Float)
+          -> Acc (Vector Float)
+          -> Acc ((Vector Float, Vector Float)
+                 ,(Matrix Float, Matrix Float))
+backprop3 (unlift -> (l1,l2)) x y =
+  let ([db1,db2], [dw1,dw2]) = backprop [l1,l2] x y
+  in lift ((db1,db2), (dw1,dw2))
