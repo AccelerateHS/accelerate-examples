@@ -7,6 +7,10 @@ import Config
 import Digest
 import MD5
 
+import Data.Array.Accelerate                            ( Z(..), (:.)(..) )
+import Data.Array.Accelerate.Examples.Internal          as A
+import qualified Data.Array.Accelerate                  as A
+
 import Data.Label
 import Text.Printf
 import Control.Monad
@@ -17,7 +21,8 @@ import Data.Array.Accelerate                            ( Z(..), (:.)(..), All(.
 import Data.Array.Accelerate.Examples.Internal
 import qualified Data.Array.Accelerate                  as A
 import qualified Data.ByteString.Lazy.Char8             as L
-import Prelude
+
+import Prelude                                          as P
 
 
 main :: IO ()
@@ -48,7 +53,7 @@ main = do
       recoverSeq hash =
         let abcd = readMD5 hash
             idx  = run1 backend l (A.fromList Z [abcd])
-            l :: A.Acc (A.Scalar MD5.MD5) -> A.Acc (A.Scalar (Int, Int)) 
+            l :: A.Acc (A.Scalar MD5.MD5) -> A.Acc (A.Scalar (Int, Int))
             l digest = A.collect
                      $ A.foldSeqFlatten find (A.unit (A.lift (-1 :: Int, 0 :: Int))) (A.toSeqInner (A.use dict))
               where
@@ -63,6 +68,13 @@ main = do
              -1 -> Nothing
              n  -> Just (extract False dict n)
 
+      recoverAll :: [L.ByteString] -> IO (Int,Int)
+      recoverAll =
+        if get configNoSeq conf
+        then go recover
+        else go recoverSeq
+        where go rec = foldM (\(i,n) h -> maybe (return (i,n+1)) (\t -> showText h t >> return (i+1,n+1)) (rec h)) (0,0)
+
       recover hash =
         let abcd = readMD5 hash
             idx  = run1 backend (hashcatDict True (A.use dict)) (A.fromList Z [abcd])
@@ -70,13 +82,6 @@ main = do
         in case idx `A.indexArray` Z of
              -1 -> Nothing
              n  -> Just (extract True dict n)
-
-      recoverAll :: [L.ByteString] -> IO (Int,Int)
-      recoverAll =
-        if get configNoSeq conf
-        then go recover
-        else go recoverSeq
-        where go rec = foldM (\(i,n) h -> maybe (return (i,n+1)) (\t -> showText h t >> return (i+1,n+1)) (rec h)) (0,0)
 
       showText hash text = do
         L.putStr hash >> putStr ": " >> L.putStrLn text
@@ -109,4 +114,3 @@ time action = do
   end    <- getTime
   let !delta = end - start
   return (delta, result)
-

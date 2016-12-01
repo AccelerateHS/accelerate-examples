@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP                 #-}
+{-# LANGUAGE ConstraintKinds     #-}
 {-# LANGUAGE FlexibleContexts    #-}
 {-# LANGUAGE FlexibleInstances   #-}
 {-# LANGUAGE RankNTypes          #-}
@@ -5,7 +7,7 @@
 {-# LANGUAGE TypeFamilies        #-}
 {-# LANGUAGE TypeOperators       #-}
 
-module Test.Prelude.Sequencing (
+module Test.Prelude.Sequences (
 
   test_sequences
 
@@ -20,7 +22,6 @@ import Test.Framework.Providers.QuickCheck2
 import Test.QuickCheck                                          hiding ( generate, collect )
 
 import Config
-import Test.Base
 import QuickCheck.Arbitrary.Array                               ()
 import Data.Array.Accelerate.Examples.Internal
 import Data.Array.Accelerate                                    as A
@@ -32,35 +33,32 @@ iota n = generate (index1 (constant n)) unindex1
 iota' :: Acc (Scalar Int) -> Acc (Vector Int)
 iota' n = generate (index1 (the n)) unindex1
 
---iotaChunk :: Int -> Int -> Acc (Array (Z :. Int :. Int) Int)
---iotaChunk n b = reshape (constant (Z :. b :. n)) $ generate (index1 (constant (n * b))) unindex1
+-- iotaChunk :: Int -> Int -> Acc (Array (Z :. Int :. Int) Int)
+-- iotaChunk n b = reshape (constant (Z :. b :. n)) $ generate (index1 (constant (n * b))) unindex1
 
 idSequence
     :: forall sh a. (Shape sh, Slice sh, Elt a)
     => Acc (Array (sh :. Int) a)
     -> Acc (Array (sh :. Int) a)
-idSequence = error "idSequence is currently disabled"
-{--
 idSequence xs
-  = reshape (A.shape xs) . asnd . collect
-  . fromSeq
-  $ toSeq Divide xs
---}
+  = collect . tabulate
+  $ toSeqOuter xs
 
 idSequenceRef :: (Shape sh, Elt a) => (Array (sh :. Int) a) -> (Array (sh :. Int) a)
 idSequenceRef = id
 
-sumMaxSequence :: (Elt a, IsBounded a, IsNum a) => Acc (Vector a) -> Acc (Scalar a, Scalar a)
+sumMaxSequence :: (A.Num a, A.Ord a, A.Bounded a) => Acc (Vector a) -> Acc (Scalar a, Scalar a)
 sumMaxSequence xs = collect $
   let xs' = toSeqInner xs
   in lift ( foldSeqE (+) 0 xs'
-          , foldSeqE max minBound xs')
+          , foldSeqE A.max minBound xs')
 
-sumMaxSequenceRef :: (Elt a, Ord a, Bounded a, Num a) => Vector a -> (Scalar a, Scalar a)
-sumMaxSequenceRef xs = ( fromList Z . (:[]) . P.sum     . toList $ xs
-                   , fromList Z . (:[]) . P.foldl (P.max) minBound . toList $ xs)
+sumMaxSequenceRef :: (Elt a, P.Ord a, P.Bounded a, P.Num a) => Vector a -> (Scalar a, Scalar a)
+sumMaxSequenceRef xs = ( fromList Z . (:[]) . P.sum                    . toList $ xs
+                       , fromList Z . (:[]) . P.foldl (P.max) minBound . toList $ xs
+                       )
 
-scatterSequence :: (Elt a, IsNum a) => Acc (Vector a, Vector (Int, a)) -> Acc (Vector a)
+scatterSequence :: A.Num a => Acc (Vector a, Vector (Int, a)) -> Acc (Vector a)
 scatterSequence input = collect
   $ foldSeqFlatten f (afst input)
   $ toSeqInner (asnd input)
@@ -69,7 +67,7 @@ scatterSequence input = collect
       let (to, ys) = A.unzip upd
       in permute (+) xs' (index1 . (`mod` A.size (afst input)) . (to A.!)) ys
 
-scatterSequenceRef :: (Elt a, IsNum a) => (Vector a, Vector (Int, a)) -> Vector a
+scatterSequenceRef :: (Elt a, P.Num a) => (Vector a, Vector (Int, a)) -> Vector a
 scatterSequenceRef (vec, vec_upd) =
   let xs                = toList vec
       updates           = toList vec_upd
@@ -79,22 +77,22 @@ scatterSequenceRef (vec, vec_upd) =
   in
   fromList (Z :. n) ys
 
-logsum :: (Elt a, IsFloating a) => Int -> Acc (Scalar a)
+logsum :: (A.Floating a, A.FromIntegral Int a) => Int -> Acc (Scalar a)
 logsum n = collect
   $ foldSeqE (+) 0.0
   $ mapSeq (A.map (log . A.fromIntegral . (+1)))
   $ toSeqInner (iota n)
 
-logsumRef :: (Elt a, IsFloating a) => Int -> Scalar a
+logsumRef :: (Elt a, P.Floating a) => Int -> Scalar a
 logsumRef n = fromList Z [P.sum [log (P.fromIntegral i) | i <- [1..n]]]
 
---logsumChunk :: (Elt a, IsFloating a) => Int -> Int -> Acc (Scalar a)
+--logsumChunk :: A.Floating a => Int -> Int -> Acc (Scalar a)
 --logsumChunk n b = sum $ collect
 --  $ foldSeq (+) (rep (Z :. b) 0.0)
 --  $ mapSeq (map (log . fromIntegral . (+1)))
 --  $ toSeqInner (iotaChunk n b)
 
---logsumChunkRef :: (Elt a, IsFloating a) => Int -> Int -> Scalar a
+--logsumChunkRef :: A.Floating a => Int -> Int -> Scalar a
 --logsumChunkRef n b = logsumRef (n * b)
 
 -- nestedSequence :: Int -> Int -> Acc (Vector Int)
@@ -187,10 +185,26 @@ chunking1Ref :: Int -> Scalar Int
 chunking1Ref n = fromList Z [x]
   where x = P.sum [ P.sum [0..i-1] - P.product [0..n-i-1] | i <- [0..n-1] ]
 
+
 test_sequences :: Backend -> Config -> Test
-test_sequences backend opt = testGroup "sequences"
+test_sequences backend opt
+  = testGroup "sequences"
+  $ if backend `elem` supportedBackends
+      then test_sequences' backend opt
+      else []
+  where
+    supportedBackends =
+      [ Interpreter
+#ifdef ACCELERATE_CUDA_BACKEND
+      , CUDA
+#endif
+      ]
+
+test_sequences' :: Backend -> Config -> [Test]
+test_sequences' backend opt =
   [ testGroup "id" $ catMaybes
-    [ testIdSequence configInt8   (undefined :: Int8)
+    [
+      testIdSequence configInt8   (undefined :: Int8)
     , testIdSequence configInt16  (undefined :: Int16)
     , testIdSequence configInt32  (undefined :: Int32)
     , testIdSequence configInt64  (undefined :: Int64)
@@ -243,52 +257,57 @@ test_sequences backend opt = testGroup "sequences"
     ]
   ]
   where
-    testIdSequence :: forall a. (Elt a, Similar a, IsNum a, Arbitrary a)
-            => (Config :-> Bool)
-            -> a
-            -> Maybe Test
+    testIdSequence
+        :: forall a. (Similar a, A.Num a, Arbitrary a)
+        => (Config :-> Bool)
+        -> a
+        -> Maybe Test
     testIdSequence ok _
       | P.not (get ok opt)      = Nothing
       | otherwise               = Just $ testGroup (show (typeOf (undefined :: a)))
-          [ testDim dim1
-          , testDim dim2
+          [ testDim (undefined :: DIM1)
+          , testDim (undefined :: DIM2)
+          , testDim (undefined :: DIM3)
           ]
       where
-        testDim :: forall sh. (sh ~ FullShape sh, Slice sh, Shape sh, Eq sh, Arbitrary sh, Arbitrary (Array (sh :. Int) a)) => (sh :. Int) -> Test
-        testDim sh = testProperty ("DIM" P.++ show (dim sh))
+        testDim :: forall sh. (sh ~ FullShape sh, Slice sh, Shape sh, P.Eq sh, Arbitrary sh, Arbitrary (Array (sh :. Int) a)) => (sh :. Int) -> Test
+        testDim sh = testProperty ("DIM" P.++ show (rank sh))
           ((\ xs -> run1 backend idSequence xs ~?= idSequenceRef xs) :: Array (sh :. Int) a -> Property)
 
 
-    testSumMaxSequence :: forall a. (Elt a, Similar a, IsNum a, IsBounded a, Bounded a, Ord a, Arbitrary a)
-            => (Config :-> Bool)
-            -> a
-            -> Maybe Test
+    testSumMaxSequence
+        :: forall a. (P.Num a, P.Bounded a, P.Ord a, A.Num a, A.Bounded a, A.Ord a, Similar a, Arbitrary a)
+        => (Config :-> Bool)
+        -> a
+        -> Maybe Test
     testSumMaxSequence ok _
       | P.not (get ok opt)      = Nothing
       | otherwise               = Just $ testProperty (show (typeOf (undefined :: a)))
           ((\xs -> run1 backend sumMaxSequence xs ~?= sumMaxSequenceRef xs) :: Vector a -> Property)
 
 
-    testScatterSequence :: forall a. (Elt a, Similar a, IsNum a, Arbitrary a)
-            => (Config :-> Bool)
-            -> a
-            -> Maybe Test
+    testScatterSequence
+        :: forall a. (P.Num a, A.Num a, Similar a, Arbitrary a)
+        => (Config :-> Bool)
+        -> a
+        -> Maybe Test
     testScatterSequence ok _
       | P.not (get ok opt)      = Nothing
       | otherwise               = Just $ testProperty (show (typeOf (undefined :: a)))
           ((\input -> run1 backend scatterSequence input ~?= scatterSequenceRef input) :: (Vector a, Vector (Int, a)) -> Property)
 
 
-    testLogsum :: forall a. (Elt a, Similar a, IsFloating a, Arbitrary a)
-               => (Config :-> Bool)
-               -> a
-               -> Maybe Test
+    testLogsum
+        :: forall a. (P.Floating a, A.Floating a, A.FromIntegral Int a, Similar a, Arbitrary a)
+        => (Config :-> Bool)
+        -> a
+        -> Maybe Test
     testLogsum ok _
       | P.not (get ok opt)      = Nothing
       | otherwise               = Just $ testProperty (show (typeOf (undefined :: a)))
           (\ (NonNegative n) -> (run backend (logsum n) :: Scalar a) ~?= logsumRef n)
 
-    --testLogsumChunked :: forall a. (Elt a, Similar a, IsFloating a, Arbitrary a)
+    --testLogsumChunked :: forall a. (A.Floating a, Similar a, Arbitrary a)
     --           => (Config :-> Bool)
     --           -> a
     --           -> Maybe Test

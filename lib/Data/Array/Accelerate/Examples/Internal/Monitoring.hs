@@ -1,5 +1,4 @@
-{-# LANGUAGE CPP               #-}
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE CPP #-}
 -- |
 -- Module:      : Data.Array.Accelerate.Examples.Internal.Monitoring
 -- Copyright    : [2014] Trevor L. McDonell
@@ -17,10 +16,7 @@ module Data.Array.Accelerate.Examples.Internal.Monitoring (
 
 ) where
 
-#ifdef ACCELERATE_ENABLE_EKG
-import Control.Monad
-import System.Remote.Monitoring
-#endif
+import qualified Data.Array.Accelerate.Debug                        as Debug
 
 
 -- | Launch a monitoring server that will collect statistics on the running
@@ -28,11 +24,12 @@ import System.Remote.Monitoring
 -- program will need to be run with the RTS option -T.
 --
 beginMonitoring :: IO ()
+beginMonitoring =
 #ifdef ACCELERATE_ENABLE_EKG
-beginMonitoring = do
-  putStrLn "EKG monitor started at: http://localhost:8000\n"
-  void $ forkServer "localhost" 8000
+  if Debug.monitoringIsEnabled
+    then Debug.beginMonitoring
+    else putStrLn "Monitoring is not enabled. Recompile package 'accelerate' with flag '-fekg'"
 #else
-beginMonitoring = return ()
+  return ()
 #endif
 

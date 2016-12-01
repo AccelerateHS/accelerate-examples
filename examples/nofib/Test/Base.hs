@@ -9,10 +9,10 @@ import Data.Array.Accelerate.Array.Sugar
 
 -- Miscellaneous
 --
-indexHead :: Shape sh => (sh:.Int) -> Int
+indexHead :: sh:.Int -> Int
 indexHead (_ :. sz) = sz
 
-indexTail :: Shape sh => (sh:.Int) -> sh
+indexTail :: sh:.Int -> sh
 indexTail (sh :. _) = sh
 
 isEmptyArray :: Shape sh => Array sh e -> Bool
@@ -42,7 +42,7 @@ splitEvery n xs =
   let (h,t) = splitAt n xs
   in  h : splitEvery n t
 
-splitPlaces :: Integral i => [i] -> [a] -> [[a]]
+splitPlaces :: P.Integral i => [i] -> [a] -> [[a]]
 splitPlaces []     _  = []
 splitPlaces (i:is) vs =
   let (h,t) = splitAt (P.fromIntegral i) vs

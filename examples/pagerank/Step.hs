@@ -1,13 +1,12 @@
-module Step
-        (stepRankSeq, stepRank, Update, PageGraph)
-where
+
+module Step (
+
+  stepRank, Update, PageGraph
+
+) where
 
 import Page
-import Progress
-import Control.Monad
-import Data.IORef
 import Data.Array.Accelerate                    as A
-import Data.Array.Accelerate.AST                ( Idx(..) )
 
 type PageGraph = Vector Link
 
@@ -49,7 +48,7 @@ stepRankSeq p sizes ranks
     in A.collect
      $ A.foldSeqFlatten addUpdates' zeroes
      $ A.mapSeq (A.map (contribution sizes ranks))
-         (A.toSeqInner (use p))
+         (A.toSeq (Z :. Split) (use p))
 
 -- | Perform one iteration step for the internal Page Rank algorithm.
 stepRank
@@ -61,13 +60,7 @@ stepRank
 
 stepRank links sizes ranks parRanks
  = let
-        pageCount  = A.size sizes
-
-        -- For every link supplied, calculate it's contribution to the page it points to.
-        contribution :: Acc (Vector Float)
-        contribution = A.generate (A.shape links)
-                                  (\ix -> let (from, _) = unlift $ links ! ix :: (Exp PageId, Exp PageId)
-                                          in ranks ! index1 (A.fromIntegral from) / A.fromIntegral (sizes ! index1 (A.fromIntegral from)))
+        -- pageCount  = A.size sizes
 
         -- Add to the partial ranks the contribution of the supplied links.
         ranks' = A.permute (+) parRanks (\ix -> let (_, to) = unlift $ links ! ix :: (Exp PageId, Exp PageId)
