@@ -33,6 +33,13 @@ iota n = generate (index1 (constant n)) unindex1
 iota' :: Acc (Scalar Int) -> Acc (Vector Int)
 iota' n = generate (index1 (the n)) unindex1
 
+-- We need to introduce a normal form for arrays where any arrays of size zero
+-- are coerced into an array with the empty shape. e.g. An array of shape
+-- (Z:.2:.0) becomes and array of shape (Z:.0:.0)
+--
+normalise :: forall sh e. Shape sh => Array sh e -> Array sh e
+normalise (Array sh adata) = Array (if Sugar.size (toElt sh :: sh) == 0 then fromElt (Sugar.empty :: sh) else sh) adata
+
 -- iotaChunk :: Int -> Int -> Acc (Array (Z :. Int :. Int) Int)
 -- iotaChunk n b = reshape (constant (Z :. b :. n)) $ generate (index1 (constant (n * b))) unindex1
 
@@ -272,7 +279,7 @@ test_sequences' backend opt =
       where
         testDim :: forall sh. (sh ~ FullShape sh, Slice sh, Shape sh, P.Eq sh, Arbitrary sh, Arbitrary (Array (sh :. Int) a)) => (sh :. Int) -> Test
         testDim sh = testProperty ("DIM" P.++ show (rank sh))
-          ((\ xs -> run1 backend idSequence xs ~?= idSequenceRef xs) :: Array (sh :. Int) a -> Property)
+          ((\ xs -> normalise (run1 backend idSequence xs) ~?= normalise (idSequenceRef xs)) :: Array (sh :. Int) a -> Property)
 
 
     testSumMaxSequence
