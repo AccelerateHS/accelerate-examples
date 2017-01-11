@@ -2,6 +2,7 @@
 {-# LANGUAGE ConstraintKinds     #-}
 {-# LANGUAGE FlexibleContexts    #-}
 {-# LANGUAGE FlexibleInstances   #-}
+{-# LANGUAGE ParallelListComp    #-}
 {-# LANGUAGE RankNTypes          #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies        #-}
@@ -93,15 +94,6 @@ logsum n = collect
 logsumRef :: (Elt a, P.Floating a) => Int -> Scalar a
 logsumRef n = fromList Z [P.sum [log (P.fromIntegral i) | i <- [1..n]]]
 
---logsumChunk :: A.Floating a => Int -> Int -> Acc (Scalar a)
---logsumChunk n b = sum $ collect
---  $ foldSeq (+) (rep (Z :. b) 0.0)
---  $ mapSeq (map (log . fromIntegral . (+1)))
---  $ toSeqInner (iotaChunk n b)
-
---logsumChunkRef :: A.Floating a => Int -> Int -> Scalar a
---logsumChunkRef n b = logsumRef (n * b)
-
 -- nestedSequence :: Int -> Int -> Acc (Vector Int)
 -- nestedSequence n m = asnd . collect
 --   $ fromSeq
@@ -154,31 +146,62 @@ logsumRef n = fromList Z [P.sum [log (P.fromIntegral i) | i <- [1..n]]]
 -- deepNestedSequenceRef n = fromList (Z :. P.length xs) xs
 --   where xs = [P.sum [x | k <- [0..j-1], x <- [0..k-1]] | i <- [0..n-1], j <- [0..i-1]]
 
-chunking1 :: Int -> Acc (Scalar Int)
-chunking1 n = collect
+irregular :: Int -> Acc (Scalar Int)
+irregular n = collect
   $ foldSeqE (+) 0
   $ let s = toSeqInner (iota n)
     in zipWithSeq (\ x y -> A.zipWith (-) (A.sum x) (A.product y))
          (mapSeq iota' s)
          (mapSeq (iota' . A.map (constant n -)) s)
 
+enumeration :: Int -> Int -> Acc (Vector DIM1, Vector Int)
+enumeration n x = collect . fromSeq
+                $ produce (lift n) (\i -> A.map (* the i) (iota x))
 
-chunking2 :: Acc (Array (Z :. Int :. Int) Int, Array (Z :. Int :. Int) Int) -> Acc (Vector Int)
-chunking2 input = asnd $ collect
+enumerationIrregular :: Int -> Acc (Vector DIM1, Vector Int)
+enumerationIrregular n = collect . fromSeq
+                       $ produce (lift n) (\i -> iota' i)
+
+regularFold :: Shape sh => Acc (Array (sh:.Int:.Int) Int) -> Acc (Array (sh:.Int) Int)
+regularFold = collect . tabulate . mapSeq (fold (+) 0) . toSeqInner
+
+irregularFold :: Int -> Acc (Array DIM1 Int)
+irregularFold n = collect . tabulate . mapSeq (fold (+) 0) $ produce (lift n) iota'
+
+append :: Acc (Array (Z :. Int :. Int) Int, Array (Z :. Int :. Int) Int) -> Acc (Vector Int)
+append input = asnd $ collect
   $ fromSeq
   $ zipWithSeq (A.++)
       (toSeqOuter (afst input))
       (toSeqOuter (asnd input))
 
-chunking2b :: (Array (Z :. Int :. Int) Int, Array (Z :. Int :. Int) Int) -> Acc (Vector Int)
-chunking2b input = asnd $ collect
+appendIrregular :: Int -> Int -> Acc (Vector Int)
+appendIrregular x y = asnd $ collect
   $ fromSeq
   $ zipWithSeq (A.++)
-      (toSeqOuter $ use (P.fst input))
-      (toSeqOuter $ use (P.snd input))
+      (produce (lift x) iota')
+      (produce (lift y) iota')
 
-chunking2Ref :: (Array (Z :. Int :. Int) Int, Array (Z :. Int :. Int) Int) -> Vector Int
-chunking2Ref (a, b) =
+enumerationRef :: Int -> Int -> (Vector DIM1, Vector Int)
+enumerationRef n x =
+  let
+    shs = P.replicate n (Z:.x)
+    xs = [ P.map (*i) [0..x-1] | i <- [0..n-1]]
+    res = concat xs
+  in ( fromList (Z :. P.length shs) shs
+     , fromList (Z :. P.length res) res)
+
+enumerationIrregularRef :: Int -> (Vector DIM1, Vector Int)
+enumerationIrregularRef n =
+  let
+    shs = [ Z:.i | i <- [0..n-1]]
+    xs = [ [0..i-1] | i <- [0..n-1]]
+    res = concat xs
+  in ( fromList (Z :. P.length shs) shs
+     , fromList (Z :. P.length res) res)
+
+appendRef :: (Array (Z :. Int :. Int) Int, Array (Z :. Int :. Int) Int) -> Vector Int
+appendRef (a, b) =
   let
     (Z:. n :. m) = Sugar.shape a
     (Z:. r :. c) = Sugar.shape b
@@ -188,10 +211,28 @@ chunking2Ref (a, b) =
     res = concat zs
   in fromList (Z :. P.length res) res
 
-chunking1Ref :: Int -> Scalar Int
-chunking1Ref n = fromList Z [x]
+appendIrregularRef :: Int -> Int -> Vector Int
+appendIrregularRef x y =
+  let
+    xs = [ [0..i-1] | i <- [0..x-1]]
+    ys = [ [0..i-1] | i <- [0..y-1]]
+    zs = P.zipWith (P.++) xs ys
+    res = concat zs
+  in fromList (Z :. P.length res) res
+
+irregularRef :: Int -> Scalar Int
+irregularRef n = fromList Z [x]
   where x = P.sum [ P.sum [0..i-1] - P.product [0..n-i-1] | i <- [0..n-1] ]
 
+regularFoldRef :: Shape sh => Array (sh :. Int :. Int) Int -> Array (sh :. Int) Int
+regularFoldRef a =
+  let
+    (sh:.n:.m) = Sugar.shape a
+    xs = [[ P.sum [a Sugar.! (Sugar.fromIndex sh j :. k :. i) | k <- [0..n-1]] | j <- [0..Sugar.size sh - 1] ] | i <- [0..m-1]]
+  in fromList (sh:.m) (concat xs)
+
+irregularFoldRef :: Int -> Array DIM1 Int
+irregularFoldRef n = fromList (Z:.n) $ P.map P.sum $ P.map (P.enumFromTo 0 . (P.subtract 1)) [0..n-1]
 
 test_sequences :: Backend -> Config -> Test
 test_sequences backend opt
@@ -232,6 +273,19 @@ test_sequences' backend opt =
     , testSumMaxSequence configWord32 (undefined :: Word32)
     , testSumMaxSequence configWord64 (undefined :: Word64)
     ]
+  , testGroup "logsum" $ catMaybes
+    [ testLogsum configFloat  (undefined :: Float)
+    , testLogsum configDouble (undefined :: Double)
+    ]
+  , testGroup "lifted"
+    [ testEnumeration
+    , testEnumerationIrregular
+    , testAppend
+    , testAppendIrregular
+    , testRegularFold
+    , testIrregularFold
+    , testIrregular
+    ]
   , testGroup "scatter" $ catMaybes
     [ testScatterSequence configInt8   (undefined :: Int8)
     , testScatterSequence configInt16  (undefined :: Int16)
@@ -244,10 +298,6 @@ test_sequences' backend opt =
     , testScatterSequence configFloat  (undefined :: Float)
     , testScatterSequence configDouble (undefined :: Double)
     ]
-  , testGroup "logsum" $ catMaybes
-    [ testLogsum configFloat  (undefined :: Float)
-    , testLogsum configDouble (undefined :: Double)
-    ]
   -- , testGroup "logsum_chunked" $ catMaybes
   --  [ testLogsumChunked configFloat  (undefined :: Float)
   --  , testLogsumChunked configDouble (undefined :: Double)
@@ -257,11 +307,6 @@ test_sequences' backend opt =
   --   , testNestedIrregularSequence
   --   , testDeepNestedSequence
   --   ]
-  , testGroup "chunking"
-    [ testChunking1
-    , testChunking2
-    , testChunking2b
-    ]
   ]
   where
     testIdSequence
@@ -274,7 +319,7 @@ test_sequences' backend opt =
       | otherwise               = Just $ testGroup (show (typeOf (undefined :: a)))
           [ testDim (undefined :: DIM1)
           , testDim (undefined :: DIM2)
-          , testDim (undefined :: DIM3)
+          -- , testDim (undefined :: DIM3)
           ]
       where
         testDim :: forall sh. (sh ~ FullShape sh, Slice sh, Shape sh, P.Eq sh, Arbitrary sh, Arbitrary (Array (sh :. Int) a)) => (sh :. Int) -> Test
@@ -301,7 +346,8 @@ test_sequences' backend opt =
     testScatterSequence ok _
       | P.not (get ok opt)      = Nothing
       | otherwise               = Just $ testProperty (show (typeOf (undefined :: a)))
-          ((\input -> run1 backend scatterSequence input ~?= scatterSequenceRef input) :: (Vector a, Vector (Int, a)) -> Property)
+          ((\input ->  arraySize (arrayShape (P.fst input)) P.> 0
+                   ==> run1 backend scatterSequence input ~?= scatterSequenceRef input) :: (Vector a, Vector (Int, a)) -> Property)
 
 
     testLogsum
@@ -313,15 +359,6 @@ test_sequences' backend opt =
       | P.not (get ok opt)      = Nothing
       | otherwise               = Just $ testProperty (show (typeOf (undefined :: a)))
           (\ (NonNegative n) -> (run backend (logsum n) :: Scalar a) ~?= logsumRef n)
-
-    --testLogsumChunked :: forall a. (A.Floating a, Similar a, Arbitrary a)
-    --           => (Config :-> Bool)
-    --           -> a
-    --           -> Maybe Test
-    --testLogsumChunked ok _
-    --  | P.not (get ok opt)      = Nothing
-    --  | otherwise               = Just $ testProperty (show (typeOf (undefined :: a)))
-    --      (\ (NonNegative n) (Positive b) -> (run backend (logsumChunk n b) :: Scalar a) ~?= logsumChunkRef n b)
 
     -- testNestedSequence :: Test
     -- testNestedSequence =
@@ -338,17 +375,43 @@ test_sequences' backend opt =
     --   testProperty "deep"
     --     (\ (NonNegative n) -> (run backend (deepNestedSequence n) ~?= deepNestedSequenceRef n))
 
-    testChunking1 :: Test
-    testChunking1 =
-      testProperty "chunking1"
-        (\ (NonNegative n) -> (run backend (chunking1 n) ~?= chunking1Ref n))
+    testEnumeration :: Test
+    testEnumeration =
+      testProperty "enumeration"
+      (\ (NonNegative n) (NonNegative x) -> (run backend (enumeration n x) ~?= enumerationRef n x))
 
-    testChunking2 :: Test
-    testChunking2 =
-      testProperty "chunking2"
-        (\ input -> (run1 backend chunking2 input ~?= chunking2Ref input))
+    testEnumerationIrregular :: Test
+    testEnumerationIrregular =
+      testProperty "enumeration-irregular"
+      (\ (NonNegative n) -> (run backend (enumerationIrregular n) ~?= enumerationIrregularRef n))
 
-    testChunking2b :: Test
-    testChunking2b =
-      testProperty "chunking2b"
-        (\ input -> (run backend (chunking2b input) ~?= chunking2Ref input))
+    testIrregular :: Test
+    testIrregular =
+      testProperty "irregular"
+        (\ (NonNegative n) -> (run backend (irregular n) ~?= irregularRef n))
+
+    testAppend :: Test
+    testAppend =
+      testProperty "append"
+        (\ input -> (run1 backend append input ~?= appendRef input))
+
+    testAppendIrregular :: Test
+    testAppendIrregular =
+      testProperty "append-irregular"
+        (\ (NonNegative x) (NonNegative y) -> (run backend (appendIrregular x y) ~?= appendIrregularRef x y))
+
+    testRegularFold :: Test
+    testRegularFold = testGroup "fold-regular"
+        [ testDim (undefined :: DIM0)
+        -- , testDim (undefined :: DIM1)
+        ]
+      where
+        testDim :: forall sh. (Shape sh, Arbitrary (Array (sh:.Int:.Int) Int), P.Eq sh) => sh -> Test
+        testDim sh =
+          testProperty ("DIM" P.++ show (rank sh))
+            ((\input -> normalise (run1 backend regularFold input) ~?= normalise (regularFoldRef input)) :: Array (sh :. Int :. Int) Int -> Property)
+
+    testIrregularFold :: Test
+    testIrregularFold =
+      testProperty "fold-irregular"
+        (\ (NonNegative n) -> (run backend (irregularFold n) ~?= irregularFoldRef n))
