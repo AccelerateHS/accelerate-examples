@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns  #-}
 {-# LANGUAGE CPP           #-}
 {-# LANGUAGE TypeOperators #-}
 -- |
@@ -70,8 +71,24 @@ run1 CUDA        f = CUDA.run1 f
 run1 Cilk        f = Cilk.run . f . use
 #endif
 
+{-# INLINE run2 #-}
 run2 :: (Arrays a, Arrays b, Arrays c) => Backend -> (Acc a -> Acc b -> Acc c) -> a -> b -> c
-run2 backend f x y = run1 backend (A.uncurry f) (x,y)
+run2 backend f x y = go (x,y)
+  where
+    !go = run1 backend (A.uncurry f)
+
+{-# INLINE run3 #-}
+run3 :: (Arrays a, Arrays b, Arrays c, Arrays d) => Backend -> (Acc a -> Acc b -> Acc c -> Acc d) -> a -> b -> c -> d
+run3 backend f x y z = go (x,y,z)
+  where
+    !go = run1 backend (\t -> let (a,b,c) = unlift t in f a b c)
+
+
+{-# INLINE run4 #-}
+run4 :: (Arrays a, Arrays b, Arrays c, Arrays d, Arrays e) => Backend -> (Acc a -> Acc b -> Acc c -> Acc d -> Acc e) -> a -> b -> c -> d -> e
+run4 backend f x y z w = go (x,y,z,w)
+  where
+    !go = run1 backend (\t -> let (a,b,c,d) = unlift t in f a b c d)
 
 
 -- | The set of backends available to execute the program.
@@ -121,9 +138,10 @@ instance Show Backend where
 -- available.
 --
 defaultBackend :: Backend
-defaultBackend
-  | maxBound == Interpreter = Interpreter
-  | otherwise               = succ Interpreter
+defaultBackend =
+  case maxBound of
+    Interpreter -> Interpreter
+    _           -> succ Interpreter
 
 
 -- The set of available backnds. This will be used for both the command line
@@ -148,7 +166,7 @@ availableBackends optBackend =
 #ifdef ACCELERATE_CUDA_BACKEND
   , Option  [] [show CUDA]
             (NoArg (set optBackend CUDA))
-            "implementation for NVIDIA GPUs (parallel)"
+            "CUDA based implementation for NVIDIA GPUs (parallel)"
 #endif
 #ifdef ACCELERATE_LLVM_MULTIDEV_BACKEND
   , Option  [] [show Multi]
@@ -178,18 +196,24 @@ availableBackends optBackend =
 --     non-thread-safe backend (perhaps it requires exclusive access to the
 --     accelerator board) should specify `Just 1`.
 --
+-- Both the LLVM-CPU and LLVM-PTX backends are safe to run concurrently given
+-- the same execution context. Although this results in over-subscription,
+-- particularly for the CPU backend, it still improves performance because the
+-- majority of the time is spent in the reference implementation / checking
+-- results, so running multiple tests concurrently is still useful.
+--
 concurrentBackends :: Backend -> Maybe Int
 concurrentBackends Interpreter  = Nothing
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
-concurrentBackends CPU          = Just 1
+concurrentBackends CPU          = Nothing
 #endif
 #ifdef ACCELERATE_LLVM_PTX_BACKEND
-concurrentBackends PTX          = Nothing       -- ???
+concurrentBackends PTX          = Nothing
 #endif
 #ifdef ACCELERATE_CUDA_BACKEND
-concurrentBackends CUDA         = Nothing       -- not quite true! D:
+concurrentBackends CUDA         = Just 1      -- not thread safe
 #endif
 #ifdef ACCELERATE_CILK_BACKEND
-concurrentBackends Cilk         = Just 1
+concurrentBackends Cilk         = Just 1      -- not thread safe
 #endif
 

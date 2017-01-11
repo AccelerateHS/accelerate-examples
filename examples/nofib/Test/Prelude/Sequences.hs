@@ -38,7 +38,7 @@ iota' n = generate (index1 (the n)) unindex1
 -- (Z:.2:.0) becomes and array of shape (Z:.0:.0)
 --
 normalise :: forall sh e. Shape sh => Array sh e -> Array sh e
-normalise (Array sh adata) = Array (if Sugar.size (toElt sh :: sh) == 0 then fromElt (Sugar.empty :: sh) else sh) adata
+normalise (Array sh adata) = Array (if Sugar.size (toElt sh :: sh) P.== 0 then fromElt (Sugar.empty :: sh) else sh) adata
 
 -- iotaChunk :: Int -> Int -> Acc (Array (Z :. Int :. Int) Int)
 -- iotaChunk n b = reshape (constant (Z :. b :. n)) $ generate (index1 (constant (n * b))) unindex1
@@ -80,7 +80,7 @@ scatterSequenceRef (vec, vec_upd) =
       updates           = toList vec_upd
       n                 = P.length xs
       ys                = P.foldl f xs updates
-      f xs' (i, x)      = [ if j == i `P.mod` n then x P.+ y else y | (j, y) <- P.zip [0..] xs']
+      f xs' (i, x)      = [ if j P.== i `P.mod` n then x P.+ y else y | (j, y) <- P.zip [0..] xs']
   in
   fromList (Z :. n) ys
 
