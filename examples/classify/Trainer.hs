@@ -1,44 +1,54 @@
-{-# LANGUAGE BangPatterns  #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE ViewPatterns  #-}
+{-# LANGUAGE BangPatterns        #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeOperators       #-}
+{-# LANGUAGE ViewPatterns        #-}
 module Trainer where
 
 import Control.Exception                                ( evaluate )
 import Control.Monad
 import Criterion.Measurement                            ( getTime, secs, initializeTime )
-import Data.Array.Accelerate                            hiding ( tail, init, length, (++), fst )
+import Data.Array.Accelerate                            hiding ( tail, init, length, (++), fst, max )
 import Data.Array.Accelerate.Examples.Internal
-import Prelude                                          hiding ( map, fromIntegral, last, zipWith, zipWith3, last, uncurry, replicate )
+import Prelude                                          hiding ( map, fromIntegral, last, zipWith, zipWith3, last, uncurry, replicate, Eq(..) )
 import System.Mem
 
 import Image
 import Network
 
 vectorResult :: Acc (Scalar Word8) -> Acc (Vector Float)
--- vectorResult r = generate (index1 10) (\ix -> unindex1 ix ==* fromIntegral (the r) ? (1.0, 0.0))
-vectorResult r = flatten . imap (\ix y -> unindex1 ix ==* fromIntegral y ? (1.0,0.0)) $ replicate (index1 (10 :: Exp Int)) r
+vectorResult r = generate (index1 10) (\ix -> unindex1 ix == fromIntegral (the r) ? (1.0, 0.0))
+
+flattenGradients :: Acc (Layer, Layer)
+                 -> Seq [( (Vector Float, Vector Float)
+                         , (Matrix Float, Matrix Float) )]
+                 -> Seq ( (Layer, Layer)
+                        , (Matrix Float, Matrix Float)
+                        , (Array DIM3 Float, Array DIM3 Float) )
+flattenGradients n dn =
+  let
+    (nabla_bs, nabla_ws) = unzipSeq dn
+    (db1, db2)           = unzipSeq nabla_bs
+    (dw1, dw2)           = unzipSeq nabla_ws
+  in lift ( n, (tabulate db1, tabulate db2), (tabulate dw1, tabulate dw2) )
 
 batch3 :: Exp Float
+       -> Acc ( (Layer, Layer),
+                (Matrix Float, Matrix Float),
+                (Array DIM3 Float, Array DIM3 Float) )
        -> Acc (Layer, Layer)
-       -> Acc (Nested ((Vector Float, Vector Float)
-                      ,(Matrix Float, Matrix Float)))
-       -> Acc (Layer, Layer)
-batch3 eta (unlift -> (l1,l2)) dn =
+batch3 eta (unlift -> (n,db,dw) :: ( Acc (Layer, Layer), Acc (Matrix Float, Matrix Float), Acc (Array DIM3 Float, Array DIM3 Float) )) =
   let
-    (nabla_bs, nabla_ws) = denest dn
-    (db1, db2)      = denest nabla_bs
-    (dw1, dw2)      = denest nabla_ws
-    batchSize       = nestedSize db1
-
+    (l1,l2) = unlift n
+    (db1,db2) = unlift db
+    (dw1,dw2) = unlift dw
+    batchSize = indexHead (indexTrans (shape db1))
     gd x nx = x - (eta / fromIntegral batchSize) * nx
 
-    combine :: (Shape sh, Slice sh) => Acc (Array sh Float) -> Acc (Nested (Array sh Float)) -> Acc (Array sh Float)
+    combine :: (Shape sh, Slice sh) => Acc (Array sh Float) -> Acc (Array (sh:.Int) Float) -> Acc (Array sh Float)
     combine a = zipWith gd a
               . transpose
               . fold (+) 0
               . transpose
-              . reshape' (shape a)
-              . nestedValues
 
     b1 = combine (biases l1) db1
     b2 = combine (biases l2) db2
@@ -78,7 +88,9 @@ train3' :: Float
 train3' eta input output initialNetwork =
   let images         = allImages input
       labels         = mapSeq (vectorResult . reshape index0) $ subarrays (index1 1) output
-  in collect $ foldBatch (\n (unlift -> (x,y)) -> backprop3 n x y) (batch3 (lift eta)) initialNetwork
+  in collect $ foldBatch (\n (unzipSeq -> (x,y)) -> flattenGradients n (zipWithSeq (backprop3 n) x y))
+                         (batch3 (lift eta))
+                         initialNetwork
              $ zipSeq images labels
 
 reshape' :: (Shape sh, Slice sh, Elt e) => Exp sh -> Acc (Vector e) -> Acc (Array (sh:.Int) e)

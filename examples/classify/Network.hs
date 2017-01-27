@@ -82,7 +82,7 @@ backprop layers x y = (nabla_b, nabla_w)
 costDerivative :: Acc (Vector Float) -> Acc (Vector Float) -> Acc (Vector Float)
 costDerivative outputActivation y = A.zipWith (-) outputActivation y
 
-mvm :: (Elt a, IsNum a) => Acc (Matrix a) -> Acc (Vector a) -> Acc (Vector a)
+mvm :: (Elt a, A.Num a) => Acc (Matrix a) -> Acc (Vector a) -> Acc (Vector a)
 mvm mat vec
   = let Z:.h:._ = unlift (shape mat) :: Z:.Exp Int:.Exp Int
     in A.fold (+) 0 $ A.zipWith (*) mat (A.replicate (A.lift (Z:.h:.All)) vec)
