@@ -20,7 +20,8 @@ import Data.Maybe
 import Data.Typeable
 import Test.Framework
 import Test.Framework.Providers.QuickCheck2
-import Test.QuickCheck                                          hiding ( generate, collect )
+import Test.QuickCheck                                          hiding ( generate, collect, elements )
+import qualified Test.QuickCheck                                as T
 
 import Config
 import QuickCheck.Arbitrary.Array                               ()
@@ -234,22 +235,25 @@ regularFoldRef a =
 irregularFoldRef :: Int -> Array DIM1 Int
 irregularFoldRef n = fromList (Z:.n) $ P.map P.sum $ P.map (P.enumFromTo 0 . (P.subtract 1)) [0..n-1]
 
-test_sequences :: Backend -> Config -> Test
-test_sequences backend opt
-  = testGroup "sequences"
-  $ if backend `elem` supportedBackends
-      then test_sequences' backend opt
-      else []
+subarrays1Ref :: Elt e => Int -> Vector e -> Array DIM2 e
+subarrays1Ref n xs = fromList (Z:.m:.n) . concat
+                   $ [ [xs Sugar.! (Z:.(y*n + x)) | x <- [0..n-1]]
+                       | y <- [0..m - 1]]
   where
-    supportedBackends =
-      [ Interpreter
-#ifdef ACCELERATE_CUDA_BACKEND
-      , CUDA
-#endif
-      ]
+    m = Sugar.size (Sugar.shape xs) `div` n
 
-test_sequences' :: Backend -> Config -> [Test]
-test_sequences' backend opt =
+subarrays2Ref :: Elt e => DIM2 -> Array DIM2 e -> Array DIM3 e
+subarrays2Ref (Z:.m:.n) xs = fromList (Z:.s:.m:.n) . concat
+                   $ [  [xs Sugar.! (Z:.(y' + m*y):.(x' + n*x)) | (y',x') <- (,) <$> [0..m-1] <*>  [0..n-1]]
+                      | (x,y) <- (,) <$> [0..n'-1] <*> [0..m'-1] ]
+  where
+    Z:.h:.w = arrayShape xs
+    s = Sugar.size (Sugar.shape xs) `div` (m * n)
+    m' = h `div` m
+    n' = w `div` n
+
+test_sequences :: Backend -> Config -> Test
+test_sequences backend opt = testGroup "sequences"
   [ testGroup "id" $ catMaybes
     [
       testIdSequence configInt8   (undefined :: Int8)
@@ -297,6 +301,10 @@ test_sequences' backend opt =
     , testScatterSequence configWord64 (undefined :: Word64)
     , testScatterSequence configFloat  (undefined :: Float)
     , testScatterSequence configDouble (undefined :: Double)
+    ]
+  , testGroup "subarrays"
+    [ testSubarrays1D
+    , testSubarrays2D
     ]
   -- , testGroup "logsum_chunked" $ catMaybes
   --  [ testLogsumChunked configFloat  (undefined :: Float)
@@ -415,3 +423,25 @@ test_sequences' backend opt =
     testIrregularFold =
       testProperty "fold-irregular"
         (\ (NonNegative n) -> (run backend (irregularFold n) ~?= irregularFoldRef n))
+
+    testSubarrays1D :: Test
+    testSubarrays1D =
+      testProperty "DIM1"
+        (\ (arr :: Vector Int) -> arraySize (arrayShape arr) P.> 0 ==>
+           forAll (subshapesOf (arrayShape arr)) $ \(Z:.n) ->
+           normalise (run backend (collect . tabulate $ subarrays (index1 (lift n)) arr))
+                ~?= normalise (subarrays1Ref n arr))
+
+    testSubarrays2D :: Test
+    testSubarrays2D =
+      testProperty "DIM2"
+        (\ (arr :: Array DIM2 Int) -> arraySize (arrayShape arr) P.> 0 ==>
+           forAll (subshapesOf (arrayShape arr)) $ \sh ->
+           normalise (run backend (collect . tabulate $ subarrays (lift sh) arr))
+                ~?= normalise (subarrays2Ref sh arr))
+
+
+subshapesOf :: Shape sh => sh -> Gen sh
+subshapesOf sh = listToShape <$> mapM f (shapeToList sh)
+  where
+    f n = T.elements [i | i <- [1..n] , n `mod` i P.== 0]
