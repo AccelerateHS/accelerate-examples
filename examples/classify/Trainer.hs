@@ -66,7 +66,6 @@ train3 backend eta input output = do
   -- Run one epoch of the trainer in order to force frontend conversion
   --
   [l1,l2] <- randomLayers [h*w,1,10]
-  putStrLn (show (train3' eta input output (lift (l1, l2))))
   trainer (l1,l2) `seq` return ()
   performGC
   putStrLn "Front-end conversion completed"
