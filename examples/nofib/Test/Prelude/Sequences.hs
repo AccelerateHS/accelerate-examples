@@ -24,7 +24,7 @@ import Test.QuickCheck                                          hiding ( generat
 import qualified Test.QuickCheck                                as T
 
 import Config
-import QuickCheck.Arbitrary.Array                               ()
+import QuickCheck.Arbitrary.Array                               ( arbitrarySegments, shrinkSegments )
 import Data.Array.Accelerate.Examples.Internal
 import Data.Array.Accelerate                                    as A
 import Data.Array.Accelerate.Array.Sugar                        as Sugar
@@ -159,9 +159,13 @@ enumeration :: Int -> Int -> Acc (Vector DIM1, Vector Int)
 enumeration n x = collect . fromSeq
                 $ produce (lift n) (\i -> A.map (* the i) (iota x))
 
-enumerationIrregular :: Int -> Acc (Vector DIM1, Vector Int)
-enumerationIrregular n = collect . fromSeq
-                       $ produce (lift n) (\i -> iota' i)
+enumerationIncreasing :: Int -> Acc (Vector DIM1, Vector Int)
+enumerationIncreasing n = collect . fromSeq
+                        $ produce (lift n) (\i -> iota' i)
+
+enumerationIrregular :: Acc (Vector Int) -> Acc (Vector DIM1, Vector Int)
+enumerationIrregular ns = collect . fromSeq
+                        $ mapSeq iota' $ toSeqInner ns
 
 regularFold :: Shape sh => Acc (Array (sh:.Int:.Int) Int) -> Acc (Array (sh:.Int) Int)
 regularFold = collect . tabulate . mapSeq (fold (+) 0) . toSeqInner
@@ -192,11 +196,20 @@ enumerationRef n x =
   in ( fromList (Z :. P.length shs) shs
      , fromList (Z :. P.length res) res)
 
-enumerationIrregularRef :: Int -> (Vector DIM1, Vector Int)
-enumerationIrregularRef n =
+enumerationIncreasingRef :: Int -> (Vector DIM1, Vector Int)
+enumerationIncreasingRef n =
   let
     shs = [ Z:.i | i <- [0..n-1]]
     xs = [ [0..i-1] | i <- [0..n-1]]
+    res = concat xs
+  in ( fromList (Z :. P.length shs) shs
+     , fromList (Z :. P.length res) res)
+
+enumerationIrregularRef :: Vector Int -> (Vector DIM1, Vector Int)
+enumerationIrregularRef ns =
+  let
+    shs = [ Z:.i | i <- toList ns]
+    xs = [ [0..i-1] | i <- toList ns]
     res = concat xs
   in ( fromList (Z :. P.length shs) shs
      , fromList (Z :. P.length res) res)
@@ -283,6 +296,7 @@ test_sequences backend opt = testGroup "sequences"
     ]
   , testGroup "lifted"
     [ testEnumeration
+    , testEnumerationIncreasing
     , testEnumerationIrregular
     , testAppend
     , testAppendIrregular
@@ -388,10 +402,15 @@ test_sequences backend opt = testGroup "sequences"
       testProperty "enumeration"
       (\ (NonNegative n) (NonNegative x) -> (run backend (enumeration n x) ~?= enumerationRef n x))
 
+    testEnumerationIncreasing :: Test
+    testEnumerationIncreasing =
+      testProperty "enumeration-increasing"
+      (\ (NonNegative n) -> (run backend (enumerationIncreasing n) ~?= enumerationIncreasingRef n))
+
     testEnumerationIrregular :: Test
     testEnumerationIrregular =
-      testProperty "enumeration-irregular"
-      (\ (NonNegative n) -> (run backend (enumerationIrregular n) ~?= enumerationIrregularRef n))
+      testProperty "enumeration-irregular" $ forAllShrink arbitrarySegments shrinkSegments
+      (\ segs -> (run1 backend enumerationIrregular segs ~?= enumerationIrregularRef segs))
 
     testIrregular :: Test
     testIrregular =
