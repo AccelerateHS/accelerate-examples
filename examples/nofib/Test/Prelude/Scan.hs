@@ -21,6 +21,7 @@ import Test.Framework.Providers.QuickCheck2
 import Config
 import Test.Base
 import QuickCheck.Arbitrary.Array
+import QuickCheck.Arbitrary.Shape                               ()
 import Data.Array.Accelerate                                    as A hiding ( Ord(..) )
 import Data.Array.Accelerate.Examples.Internal                  as A
 import Data.Array.Accelerate.Array.Sugar                        as Sugar
@@ -45,7 +46,7 @@ test_scan backend opt = testGroup "scan" $ catMaybes
   , testElt configDouble (undefined :: Double)
   ]
   where
-    testElt :: forall e. (P.Num e, P.Ord e, A.Num e, A.Ord e, Similar e, Arbitrary e) => (Config :-> Bool) -> e -> Maybe Test
+    testElt :: forall e. (P.Num e, P.Ord e, A.Num e, A.Ord e, P.Enum e, Similar e, Arbitrary e) => (Config :-> Bool) -> e -> Maybe Test
     testElt ok _
       | P.not (get ok opt)  = Nothing
       | otherwise           = Just $ testGroup (show (typeOf (undefined :: e)))
@@ -54,13 +55,31 @@ test_scan backend opt = testGroup "scan" $ catMaybes
           ]
       where
         testDim :: forall sh. (Shape sh, Slice sh, P.Eq sh, Arbitrary sh, Arbitrary (Array (sh:.Int) e)) => sh:.Int -> Test
-        testDim sh = testGroup ("DIM" P.++ show (rank sh))
-          [ testProperty "scanl"        (test_scanl  :: Array (sh:.Int) e -> Property)
-          , testProperty "scanl'"       (test_scanl' :: Array (sh:.Int) e -> Property)
-          , testProperty "scanl1"       (test_scanl1 :: Array (sh:.Int) e -> Property)
-          , testProperty "scanr"        (test_scanr  :: Array (sh:.Int) e -> Property)
-          , testProperty "scanr'"       (test_scanr' :: Array (sh:.Int) e -> Property)
-          , testProperty "scanr1"       (test_scanr1 :: Array (sh:.Int) e -> Property)
+        testDim _sh = testGroup ("DIM" P.++ show (rank _sh))
+          [ testGroup "scanl"
+            [ testProperty "sum"        (test_scanl  :: Array (sh:.Int) e -> Property)
+            , testProperty "interval"   (intv_scanl  :: sh -> NonNegative Int -> Property)
+            ]
+          , testGroup "scanl'"
+            [ testProperty "sum"        (test_scanl' :: Array (sh:.Int) e -> Property)
+            , testProperty "interval"   (intv_scanl' :: sh -> NonNegative Int -> Property)
+            ]
+          , testGroup "scanl1"
+            [ testProperty "sum"        (test_scanl1 :: Array (sh:.Int) e -> Property)
+            , testProperty "interval"   (intv_scanl1 :: sh -> Positive Int -> Property)
+            ]
+          , testGroup "scanr"
+            [ testProperty "sum"        (test_scanr  :: Array (sh:.Int) e -> Property)
+            , testProperty "interval"   (intv_scanr  :: sh -> NonNegative Int -> Property)
+            ]
+          , testGroup "scanr'"
+            [ testProperty "sum"        (test_scanr' :: Array (sh:.Int) e -> Property)
+            , testProperty "interval"   (intv_scanr' :: sh -> NonNegative Int -> Property)
+            ]
+          , testGroup "scanr1"
+            [ testProperty "sum"        (test_scanr1 :: Array (sh:.Int) e -> Property)
+            , testProperty "interval"   (intv_scanr1 :: sh -> Positive Int -> Property)
+            ]
           --
           , testProperty "scanl1Seg"    (test_scanl1seg (undefined::Array (sh:.Int) e))
           , testProperty "scanr1Seg"    (test_scanr1seg (undefined::Array (sh:.Int) e))
@@ -69,68 +88,126 @@ test_scan backend opt = testGroup "scan" $ catMaybes
           , testProperty "scanl'Seg"    (test_scanl'seg (undefined::Array (sh:.Int) e))
           , testProperty "scanr'Seg"    (test_scanr'seg (undefined::Array (sh:.Int) e))
           ]
+          where
+            -- left scan
+            --
+            test_scanl  xs = (run1 backend (A.scanl (+) 0)) xs           ~?= scanlRef (+) 0 xs
+            test_scanl' xs = (run1 backend (A.lift . A.scanl' (+) 0)) xs ~?= scanl'Ref (+) 0 xs
+            test_scanl1 xs =
+              arraySize (arrayShape xs) > 0 ==>
+                (run1 backend (A.scanl1 A.min)) xs ~?= scanl1Ref P.min xs
 
-    -- left scan
-    --
-    test_scanl  xs = (run1 backend (A.scanl (+) 0)) xs           ~?= scanlRef (+) 0 xs
-    test_scanl' xs = (run1 backend (A.lift . A.scanl' (+) 0)) xs ~?= scanl'Ref (+) 0 xs
-    test_scanl1 xs =
-      arraySize (arrayShape xs) > 0 ==>
-        (run1 backend (A.scanl1 A.min)) xs ~?= scanl1Ref P.min xs
+            intv_scanl sh (NonNegative sz) =
+              let xs = intervalArray sh sz
+              in (run1 backend (A.scanl iappend' (constant one))) xs ~?= scanlRef iappend one xs
 
-    -- right scan
-    --
-    test_scanr  xs = run1 backend (A.scanr (+) 0) xs           ~?= scanrRef (+) 0 xs
-    test_scanr' xs = run1 backend (A.lift . A.scanr' (+) 0) xs ~?= scanr'Ref (+) 0 xs
-    test_scanr1 xs =
-      arraySize (arrayShape xs) > 0 ==>
-      (run1 backend (A.scanr1 A.max)) xs ~?= scanr1Ref P.max xs
+            intv_scanl' sh (NonNegative sz) =
+              let xs = intervalArray sh sz
+              in (run1 backend (A.lift . A.scanl' iappend' (constant one))) xs ~?= scanl'Ref iappend one xs
 
-    -- segmented left/right scan
-    --
-    test_scanl1seg elt =
-      forAllShrink arbitrarySegments1            shrinkSegments1      $ \(seg :: Vector Int32) ->
-      forAllShrink (arbitrarySegmentedArray seg) shrinkSegmentedArray $ \xs  ->
-        arraySize (arrayShape xs) > 0 ==>
-          (run2 backend (A.scanl1Seg (+))) xs seg
-          ~?=
-          scanl1SegRef (+) (xs `asTypeOf` elt) seg
+            intv_scanl1 sh (Positive sz) =
+              arraySize sh > 0 ==>
+                let xs = intervalArray sh sz
+                in (run1 backend (A.scanl1 iappend')) xs ~?= scanl1Ref iappend xs
 
-    test_scanr1seg elt =
-      forAllShrink arbitrarySegments1            shrinkSegments1      $ \(seg :: Vector Int32) ->
-      forAllShrink (arbitrarySegmentedArray seg) shrinkSegmentedArray $ \xs  ->
-        arraySize (arrayShape xs) > 0 ==>
-          (run2 backend (A.scanr1Seg (+))) xs seg
-          ~?=
-          scanr1SegRef (+) (xs `asTypeOf` elt) seg
+            -- right scan
+            --
+            test_scanr  xs = run1 backend (A.scanr (+) 0) xs           ~?= scanrRef (+) 0 xs
+            test_scanr' xs = run1 backend (A.lift . A.scanr' (+) 0) xs ~?= scanr'Ref (+) 0 xs
+            test_scanr1 xs =
+              arraySize (arrayShape xs) > 0 ==>
+              (run1 backend (A.scanr1 A.max)) xs ~?= scanr1Ref P.max xs
 
-    test_scanlseg elt =
-      forAllShrink arbitrarySegments             shrinkSegments       $ \(seg :: Vector Int32) ->
-      forAllShrink (arbitrarySegmentedArray seg) shrinkSegmentedArray $ \xs  ->
-        (run2 backend (A.scanlSeg (+) 0)) xs seg
-        ~?=
-        scanlSegRef (+) 0 (xs `asTypeOf` elt) seg
+            intv_scanr sh (NonNegative sz) =
+              let xs = intervalArray sh sz
+              in (run1 backend (A.scanr iappend' (constant one))) xs ~?= scanrRef iappend one xs
 
-    test_scanrseg elt =
-      forAllShrink arbitrarySegments             shrinkSegments       $ \(seg :: Vector Int32) ->
-      forAllShrink (arbitrarySegmentedArray seg) shrinkSegmentedArray $ \xs  ->
-        (run2 backend (A.scanrSeg (+) 0)) xs seg
-        ~?=
-        scanrSegRef (+) 0 (xs `asTypeOf` elt) seg
+            intv_scanr' sh (NonNegative sz) =
+              let xs = intervalArray sh sz
+              in (run1 backend (A.lift . A.scanr' iappend' (constant one))) xs ~?= scanr'Ref iappend one xs
 
-    test_scanl'seg elt =
-      forAllShrink arbitrarySegments             shrinkSegments       $ \(seg :: Vector Int32) ->
-      forAllShrink (arbitrarySegmentedArray seg) shrinkSegmentedArray $ \xs  ->
-        (run2 backend (lift $$ A.scanl'Seg (+) 0)) xs seg
-        ~?=
-        scanl'SegRef (+) 0 (xs `asTypeOf` elt) seg
+            intv_scanr1 sh (Positive sz) =
+              arraySize sh > 0 ==>
+                let xs = intervalArray sh sz
+                in (run1 backend (A.scanr1 iappend')) xs ~?= scanr1Ref iappend xs
 
-    test_scanr'seg elt =
-      forAllShrink arbitrarySegments             shrinkSegments       $ \(seg :: Vector Int32) ->
-      forAllShrink (arbitrarySegmentedArray seg) shrinkSegmentedArray $ \xs  ->
-        (run2 backend (lift $$ A.scanr'Seg (+) 0)) xs seg
-        ~?=
-        scanr'SegRef (+) 0 (xs `asTypeOf` elt) seg
+            -- segmented left/right scan
+            --
+            test_scanl1seg elt =
+              forAllShrink arbitrarySegments1            shrinkSegments1      $ \(seg :: Vector Int32) ->
+              forAllShrink (arbitrarySegmentedArray seg) shrinkSegmentedArray $ \xs  ->
+                arraySize (arrayShape xs) > 0 ==>
+                  (run2 backend (A.scanl1Seg (+))) xs seg
+                  ~?=
+                  scanl1SegRef (+) (xs `asTypeOf` elt) seg
+
+            test_scanr1seg elt =
+              forAllShrink arbitrarySegments1            shrinkSegments1      $ \(seg :: Vector Int32) ->
+              forAllShrink (arbitrarySegmentedArray seg) shrinkSegmentedArray $ \xs  ->
+                arraySize (arrayShape xs) > 0 ==>
+                  (run2 backend (A.scanr1Seg (+))) xs seg
+                  ~?=
+                  scanr1SegRef (+) (xs `asTypeOf` elt) seg
+
+            test_scanlseg elt =
+              forAllShrink arbitrarySegments             shrinkSegments       $ \(seg :: Vector Int32) ->
+              forAllShrink (arbitrarySegmentedArray seg) shrinkSegmentedArray $ \xs  ->
+                (run2 backend (A.scanlSeg (+) 0)) xs seg
+                ~?=
+                scanlSegRef (+) 0 (xs `asTypeOf` elt) seg
+
+            test_scanrseg elt =
+              forAllShrink arbitrarySegments             shrinkSegments       $ \(seg :: Vector Int32) ->
+              forAllShrink (arbitrarySegmentedArray seg) shrinkSegmentedArray $ \xs  ->
+                (run2 backend (A.scanrSeg (+) 0)) xs seg
+                ~?=
+                scanrSegRef (+) 0 (xs `asTypeOf` elt) seg
+
+            test_scanl'seg elt =
+              forAllShrink arbitrarySegments             shrinkSegments       $ \(seg :: Vector Int32) ->
+              forAllShrink (arbitrarySegmentedArray seg) shrinkSegmentedArray $ \xs  ->
+                (run2 backend (lift $$ A.scanl'Seg (+) 0)) xs seg
+                ~?=
+                scanl'SegRef (+) 0 (xs `asTypeOf` elt) seg
+
+            test_scanr'seg elt =
+              forAllShrink arbitrarySegments             shrinkSegments       $ \(seg :: Vector Int32) ->
+              forAllShrink (arbitrarySegmentedArray seg) shrinkSegmentedArray $ \xs  ->
+                (run2 backend (lift $$ A.scanr'Seg (+) 0)) xs seg
+                ~?=
+                scanr'SegRef (+) 0 (xs `asTypeOf` elt) seg
+
+            -- interval of summations monoid
+            --
+            one,top :: (e,e)
+            one = (-1,-1)
+            top = (-2,-2)
+
+            iappend :: (e,e) -> (e,e) -> (e,e)
+            iappend x y
+              | x P.== one                 = y
+              | y P.== one                 = x
+              | x P.== top P.|| y P.== top = top
+            iappend (x1,x2) (y1,y2)
+              | x2 + 1 P.== y1             = (x1,y2)
+              | otherwise                  = top
+
+            iappend' :: Exp (e,e) -> Exp (e,e) -> Exp (e,e)
+            iappend' x y
+              = x A.== constant one ?                          ( y
+              , y A.== constant one ?                          ( x
+              , x A.== constant top A.|| y A.== constant top ? ( constant top
+              , let
+                    (x1,x2) = unlift x :: (Exp e, Exp e)
+                    (y1,y2) = unlift y :: (Exp e, Exp e)
+                in
+                x2 + 1 A.== y1 ? ( lift (x1,y2) , constant top )
+              )))
+
+            intervalArray :: sh -> Int -> Array (sh:.Int) (e,e)
+            intervalArray sh n = fromList (sh:.n)
+                               . concat
+                               $ P.replicate (Sugar.size sh) [ (i,i) | i <- [0.. (P.fromIntegral n-1)] ]
 
 
 -- Reference implementation
