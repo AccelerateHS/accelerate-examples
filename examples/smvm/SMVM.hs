@@ -27,20 +27,9 @@ smvm smat vec
 smvmSeq :: forall a. A.Num a => Acc (SparseMatrix a) -> Acc (Vector a) -> Acc (Vector a)
 smvmSeq smat vec
   = let (segd, svec)    = unlift smat :: (Acc (Segments Int32), Acc (SparseVector a))
-        offs            = A.scanl (+) 0 segd
 
         smat' :: Seq [SparseVector a]
-        smat' = produce (A.length segd) getRow
-
-        getRow :: Acc (Scalar Int) -> Acc (SparseVector a)
-        getRow i = generate (index1 (A.fromIntegral (segd A.!! the i)))
-                            (\ix -> get (the i) (unindex1 ix))
-
-        get :: Exp Int -> Exp Int -> Exp (Int32, a)
-        get row ix =
-          let
-            ix' = A.fromIntegral (offs A.!! row) + ix
-          in svec A.!! ix'
+        smat' = fromShapes (A.map (index1 . A.fromIntegral) segd) svec
 
         sdotp :: Acc (SparseVector a) -> Acc (Vector a) -> Acc (Scalar a)
         sdotp xs ys = let (inds, vals) = A.unzip xs
