@@ -789,7 +789,7 @@ Executable accelerate-classify
           base                            >= 4.7
         , accelerate                      == 2.0.*
         , accelerate-examples             == 2.0.*
-        , accelerate-io                   == 2.0.*
+        , accelerate-io                   == 1.0.*
         , binary                          >= 0.7
         , bytestring                      >= 0.10
         , criterion                       >= 1.1
@@ -809,3 +809,4 @@ source-repository head
   location:             https://github.com/AccelerateHS/accelerate-examples
 
 -- vim: nospell
+
