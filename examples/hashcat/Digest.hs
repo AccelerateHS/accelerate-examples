@@ -55,18 +55,18 @@ md5block msg = do
 -- in the final array, since it is stored column-major and hence there is no
 -- easy way to truncate it.
 --
-readDict :: Config -> FilePath -> IO Dictionary
-readDict c fp = do
+readDict :: Config -> FilePath -> Bool -> IO Dictionary
+readDict c fp colMajor = do
   entries <- length       . chunk <$> L.readFile fp
   blocks  <- map md5block . chunk <$> L.readFile fp
 
-  let sh        = Z :. blockSizeWords :. entries
+  let sh        = if colMajor then Z :. blockSizeWords :. entries else Z :. entries :. blockSizeWords
       (adata,_) = runArrayData $ do
         arr <- newArrayData (size sh)
 
         let go !_ []     = return ()
             go !n (b:bs) = do
-              foldM_ (\i w -> do unsafeWriteArrayData arr (toIndex sh (Z:.i:.n)) (fromElt w)
+              foldM_ (\i w -> do unsafeWriteArrayData arr (toIndex sh (if colMajor then Z:.i:.n else Z:.n:.i)) (fromElt w)
                                  return (i+1)) 0 (bytes b)
               go (n+1) bs
 
@@ -86,12 +86,13 @@ readDict c fp = do
 
 -- Extract a word from the dictionary at a given index
 --
-extract :: Dictionary -> Int -> L.ByteString
-extract dict i
+extract :: Bool -> Dictionary -> Int -> L.ByteString
+extract colMajor dict i
   | i > n       = error "extract: index too large"
   | otherwise   = L.takeWhile (/= w2c 0x80) bytes
   where
-    Z :. _ :. n = A.arrayShape dict
+    n           = if colMajor then w else h
+    Z :. h :. w = A.arrayShape dict
     bytes       = S.runPutLazy $
-      forM_ [0 .. blockSizeWords-1] $ \c -> S.putWord32le (dict `A.indexArray` (Z:.c:.i))
+      forM_ [0 .. blockSizeWords-1] $ \c -> S.putWord32le (dict `A.indexArray` (if colMajor then Z:.c:.i else Z:.i:.c))
 

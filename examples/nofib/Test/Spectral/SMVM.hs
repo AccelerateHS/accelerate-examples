@@ -16,7 +16,6 @@ import Prelude                                                  as P
 import Data.Array.Accelerate                                    as A
 import Data.Array.Accelerate.Examples.Internal                  as A
 import Data.Label
-import Data.Maybe
 import Data.Typeable
 import Test.QuickCheck
 
@@ -26,7 +25,7 @@ import QuickCheck.Arbitrary.Array
 
 
 test_smvm :: Backend -> Config -> Test
-test_smvm backend opt = testGroup "smvm" $ catMaybes
+test_smvm backend opt = testGroup "smvm" . concat $
 --  [ testElt configInt8   (undefined :: Int8)
 --  , testElt configInt16  (undefined :: Int16)
 --  , testElt configInt32  (undefined :: Int32)
@@ -42,17 +41,27 @@ test_smvm backend opt = testGroup "smvm" $ catMaybes
     testElt :: forall a. (P.Num a, A.Num a, Similar a, Arbitrary a)
             => (Config :-> Bool)
             -> a
-            -> Maybe Test
+            -> [Test]
     testElt ok _
-      | P.not (get ok opt)      = Nothing
-      | otherwise               = Just
-      $ testProperty (show (typeOf (undefined :: a))) (run_smvm (undefined :: a))
+      | P.not (get ok opt)      = []
+      | otherwise               =
+      [ testProperty ("Arrays " P.++ show (typeOf (undefined :: a))) (run_smvm (undefined :: a))
+      , testProperty ("Sequences " P.++ show (typeOf (undefined :: a))) (run_smvmSeq (undefined :: a))
+      ]
 
     run_smvm :: forall a. (P.Num a, A.Num a, Similar a, Arbitrary a) => a -> Property
     run_smvm _ =
       forAll arbitraryCSRMatrix           $ \(segd, svec :: Vector (Int32,a), cols) ->
       forAll (arbitraryArray (Z :. cols)) $ \vec ->
         run2 backend smvm (segd, svec) vec
+        ~?=
+        smvmRef segd svec vec
+
+    run_smvmSeq :: forall a. (P.Num a, A.Num a, Similar a, Arbitrary a) => a -> Property
+    run_smvmSeq _ =
+      forAll arbitraryCSRMatrix           $ \(segd, svec :: Vector (Int32,a), cols) ->
+      forAll (arbitraryArray (Z :. cols)) $ \vec ->
+        run2 backend smvmSeq (segd, svec) vec
         ~?=
         smvmRef segd svec vec
 

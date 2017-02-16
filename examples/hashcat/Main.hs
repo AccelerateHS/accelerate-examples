@@ -7,18 +7,19 @@ import Config
 import Digest
 import MD5
 
+import Data.Array.Accelerate                            ( Z(..), (:.)(..) )
+import Data.Array.Accelerate.Examples.Internal          as A
+import qualified Data.Array.Accelerate                  as A
+
 import Data.Label
 import Text.Printf
 import Control.Monad
 import Control.Applicative
 import Criterion.Measurement
 import System.IO
-import Data.Array.Accelerate                            ( Z(..), (:.)(..), All(..) , Split(..))
-import Data.Array.Accelerate.Examples.Internal
-import qualified Data.Array.Accelerate                  as A
-import qualified Data.Array.Accelerate.Array.Sugar      as Sugar
 import qualified Data.ByteString.Lazy.Char8             as L
-import Prelude
+
+import Prelude                                          as P
 
 
 main :: IO ()
@@ -31,9 +32,10 @@ main = do
   -- for hashing.
   --
   putStr "Loading dictionary... " >> hFlush stdout
-  (tdict, dict) <- time $ readDict conf (get configDict conf)
+  (tdict, dict) <- time $ readDict conf (get configDict conf) (not (get configSeq conf))
 
-  let (Z :. _ :. entries) = A.arrayShape dict
+  let (Z :. height :. width) = A.arrayShape dict
+      entries                = if get configSeq conf then width else height
   putStrLn $ printf "%d words in %s" entries (secs tdict)
 
   -- Attempt to recover one hash at a time by comparing it to entries in the
@@ -48,32 +50,35 @@ main = do
       recoverSeq hash =
         let abcd = readMD5 hash
             idx  = run1 backend l (A.fromList Z [abcd])
+            l :: A.Acc (A.Scalar MD5.MD5) -> A.Acc (A.Scalar (Int, Int))
             l digest = A.collect
-                     $ A.foldSeq max (-1)
-                     $ A.zipWithSeq (hashcatWord digest)
-                           (A.toSeq (Z :. All :. Split) (A.use dict))
-                           (A.toSeq (Z :. Split) (iota (Sugar.size (Sugar.shape dict))))
-
-            iota n = A.generate (A.index1 (A.constant n)) A.unindex1
+                     $ A.foldSeqFlatten find (A.unit (A.lift (-1 :: Int, 0 :: Int))) (A.toSeqInner (A.use dict))
+              where
+                find fi ixs vs =
+                  let
+                    (found, i) = A.unlift (A.the fi)
+                    dict'  = A.reshape (A.lift (Z :. (A.size ixs) :. (16 :: Int))) vs
+                    found' = hashcatDict False dict' digest
+                  in A.unit $ A.lift (A.the found' A.> -1 A.? (i + A.the found', found), i + (A.size ixs))
         --
-        in case idx `A.indexArray` Z of
+        in case fst (idx `A.indexArray` Z) of
              -1 -> Nothing
-             n  -> Just (extract dict n)
-
-      recover hash =
-        let abcd = readMD5 hash
-            idx  = run1 backend (hashcatDict (A.use dict)) (A.fromList Z [abcd])
-        --
-        in case idx `A.indexArray` Z of
-             -1 -> Nothing
-             n  -> Just (extract dict n)
+             n  -> Just (extract False dict n)
 
       recoverAll :: [L.ByteString] -> IO (Int,Int)
       recoverAll =
-        if get configNoSeq conf
-        then go recover
-        else go recoverSeq
+        if get configSeq conf
+        then go recoverSeq
+        else go recover
         where go rec = foldM (\(i,n) h -> maybe (return (i,n+1)) (\t -> showText h t >> return (i+1,n+1)) (rec h)) (0,0)
+
+      recover hash =
+        let abcd = readMD5 hash
+            idx  = run1 backend (hashcatDict True (A.use dict)) (A.fromList Z [abcd])
+        --
+        in case idx `A.indexArray` Z of
+             -1 -> Nothing
+             n  -> Just (extract True dict n)
 
       showText hash text = do
         L.putStr hash >> putStr ": " >> L.putStrLn text
@@ -106,4 +111,3 @@ time action = do
   end    <- getTime
   let !delta = end - start
   return (delta, result)
-

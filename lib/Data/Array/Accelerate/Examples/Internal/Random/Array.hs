@@ -13,17 +13,18 @@ module Data.Array.Accelerate.Examples.Internal.Random.Array (
 
   -- * Generating random arrays
   (:~>),
-  uniform, uniformR,
-  randomArray, randomArrayWithSeed, randomArrayWithSystemRandom,
+  uniform, uniformR, standard, normal,
+  randomArray, randomArrayWithSeed, randomArrayWithSystemRandom, randomArrayIO
 
 ) where
 
-import System.Random.MWC                        hiding ( uniform, uniformR )
-import qualified System.Random.MWC              as R
+import System.Random.MWC                         hiding ( uniform, uniformR )
+import qualified System.Random.MWC               as R
+import qualified System.Random.MWC.Distributions as R
 
-import Data.Array.Accelerate                    as A
-import Data.Array.Accelerate.Array.Data         as A
-import Data.Array.Accelerate.Array.Sugar        as Sugar
+import Data.Array.Accelerate                     as A
+import Data.Array.Accelerate.Array.Data          as A
+import Data.Array.Accelerate.Array.Sugar         as Sugar
 
 
 -- | A PNRG from indices to variates
@@ -33,14 +34,24 @@ type sh :~> e = sh -> GenIO -> IO e
 
 -- | Uniformly distributed random variates.
 --
-uniform :: (Shape sh, Elt e, Variate e) => sh :~> e
+uniform :: Variate e => sh :~> e
 uniform _ = R.uniform
 
 -- | Uniformly distributed random variates in a given range.
 --
-uniformR :: (Shape sh, Elt e, Variate e) => (e, e) -> sh :~> e
+uniformR :: Variate e => (e, e) -> sh :~> e
 uniformR bounds _ = R.uniformR bounds
 
+-- | Normally distributed random variates with a mean of 0 and a standard
+-- deviation of 1.
+--
+standard :: Shape sh => sh :~> Double
+standard _ = R.standard
+
+-- | Normally distributed random variates.
+--
+normal :: Shape sh => Double -> Double -> sh :~> Double
+normal mean stddev _ = R.normal mean stddev
 
 -- | Generate an array of random values using the supplied generator function.
 --   The generator for variates is initialised with a fixed seed.
@@ -54,6 +65,12 @@ randomArray f sh
                             return (arr, undefined)
     in
     adata `seq` Array (fromElt sh) adata
+
+randomArrayIO :: (Shape sh, Elt e) => sh :~> e -> sh -> IO (Array sh e)
+randomArrayIO f sh = do
+   gen <- create
+   arr <- runRandomArray f sh gen
+   return (Array (fromElt sh) arr)
 
 
 -- | Generate an array of random values using a supplied generator function and
@@ -102,4 +119,3 @@ runRandomArray f sh gen
 
       iter sh write (>>) (return ())
       return arr
-

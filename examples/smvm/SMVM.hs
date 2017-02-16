@@ -24,3 +24,16 @@ smvm smat vec
     in
     foldSeg (+) 0 products segd
 
+smvmSeq :: forall a. A.Num a => Acc (SparseMatrix a) -> Acc (Vector a) -> Acc (Vector a)
+smvmSeq smat vec
+  = let (segd, svec)    = unlift smat :: (Acc (Segments Int32), Acc (SparseVector a))
+
+        smat' :: Seq [SparseVector a]
+        smat' = fromShapes (A.map (index1 . A.fromIntegral) segd) svec
+
+        sdotp :: Acc (SparseVector a) -> Acc (Vector a) -> Acc (Scalar a)
+        sdotp xs ys = let (inds, vals) = A.unzip xs
+                      in fold (+) 0
+                       $ A.zipWith (*) vals (gather (A.map A.fromIntegral inds) ys)
+
+    in collect . elements $ mapSeq (flip sdotp vec) smat'

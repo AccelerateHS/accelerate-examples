@@ -78,4 +78,3 @@ runBenchmarks opt argv benchmarks
         -- Analyse the reports, upload to the benchmark server, etc.
         --
         processReports opt reports
-

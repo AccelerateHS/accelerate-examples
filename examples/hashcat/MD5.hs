@@ -3,7 +3,7 @@
 
 module MD5 (
 
-  Dictionary,
+  Dictionary, MD5,
   hashcatWord, hashcatDict, readMD5, showMD5, md5Round
 
 ) where
@@ -18,31 +18,33 @@ import Data.ByteString.Lex.Integral             ( readHexadecimal )
 import qualified Data.Serialize                 as S
 import qualified Data.ByteString                as B
 import qualified Data.ByteString.Lazy           as L
-import Prelude                                  as P
+import Prelude                                  as P hiding ( Eq(..), (&&) )
 
-import Data.Array.Accelerate                    as A
+import Data.Array.Accelerate                    hiding ( Ord(..) )
 import Data.Array.Accelerate.Data.Bits          as A
+import qualified Data.Array.Accelerate          as A
 
 
 -- Generate an MD5 hash for every word in the dictionary, and if an entry
 -- matches the given unknown md5, returns the index into the dictionary of said
 -- match. If not found, this returns (-1).
 --
-hashcatDict :: Acc Dictionary
-         -> Acc (Scalar MD5)
-         -> Acc (Scalar Int)
-hashcatDict dict passwd
+hashcatDict :: Bool  -- ^ Column major order
+            -> Acc Dictionary
+            -> Acc (Scalar MD5)
+            -> Acc (Scalar Int)
+hashcatDict colMajor dict passwd
   = reshape (constant Z)
   $ permute const res (\ix -> crypt A.! ix `cmp` the passwd ? (constant (Z:.0), ignore))
                       (enumFromN (index1 n) 0)
   where
     n           = A.size crypt
     res         = use $ fromList (Z:.1) [-1]    :: Acc (Vector Int)
-    crypt       = md5 dict
+    crypt       = md5 colMajor dict
 
     cmp x y     = let (x1,x2,x3,x4) = unlift x
                       (y1,y2,y3,y4) = unlift y
-                  in x1 ==* y1 &&* x2 ==* y2 &&* x3 ==* y3 &&* x4 ==* y4
+                  in x1 == y1 && x2 == y2 && x3 == y3 && x4 == y4
 
 -- Generate an MD5 hash for a single word, and if an entry matches the
 -- given unknown md5, returns the given index. If not matched, this
@@ -58,7 +60,7 @@ hashcatWord passwd word ix
     crypt       = md5Round (\i -> word A.! index1 i)
     cmp x y     = let (x1,x2,x3,x4) = unlift x
                       (y1,y2,y3,y4) = unlift y
-                  in x1 ==* y1 &&* x2 ==* y2 &&* x3 ==* y3 &&* x4 ==* y4
+                  in x1 == y1 && x2 == y2 && x3 == y3 && x4 == y4
 
 
 -- An MD5 round processes 512 bits of the input, as 16 x 32-bit values. We
@@ -73,16 +75,20 @@ hashcatWord passwd word ix
 type MD5        = (Word32, Word32, Word32, Word32)
 type Dictionary = Array DIM2 Word32
 
-md5 :: Acc Dictionary -> Acc (Vector MD5)
-md5 dict
-  = let n = A.snd . unindex2 $ A.shape dict
+md5 :: Bool -> Acc Dictionary -> Acc (Vector MD5)
+md5 columnMajor dict
+  = let n = if columnMajor
+            then A.snd . unindex2 $ A.shape dict
+            else A.fst . unindex2 $ A.shape dict
     in
-     A.generate (index1 n) (\ (unindex1 -> ix) -> md5Round (\i -> dict A.! index2 i ix))
+     A.generate (index1 n) (\ (unindex1 -> ix) -> md5Round (\i -> if columnMajor
+                                                                  then dict A.! index2 i ix
+                                                                  else dict A.! index2 ix i))
 
 md5Round :: (Exp Int -> Exp Word32) -> Exp MD5
 md5Round fetch
   = lift
-  $ foldl step (a0,b0,c0,d0) [0..64]
+  $ P.foldl step (a0,b0,c0,d0) [0..64]
   where
     step (a,b,c,d) i
       | i < 16    = shfl ((b .&. c) .|. ((complement b) .&. d))
