@@ -37,3 +37,13 @@ smvmSeq smat vec
                        $ A.zipWith (*) vals (gather (A.map A.fromIntegral inds) ys)
 
     in collect . elements $ mapSeq (flip sdotp vec) smat'
+
+smvmSeq' :: A.Num a => Seq [SparseVector a] -> Acc (Vector a) -> Acc (Vector a)
+smvmSeq' smat vec
+  = let dot xs ys = A.fold (+) 0 ( A.zipWith (*) xs ys )
+        sdot srow = let (ix,xs) = A.unzip srow
+                    in  dot xs (gather (A.map A.fromIntegral ix) vec)
+    in collect
+     $ elements
+     $ mapSeq sdot smat
+

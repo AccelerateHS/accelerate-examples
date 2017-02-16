@@ -30,12 +30,19 @@ main = withSystemRandom $ \gen -> do
 
   -- Convert to Accelerate arrays
   --
-  let vec       = fromFunction (Z :. V.length vec')  (\(Z:.i) -> vec'  V.! i)
+  let backend   = get optBackend opts
+
+      vec       = fromFunction (Z :. V.length vec')  (\(Z:.i) -> vec'  V.! i)
       segd      = fromFunction (Z :. V.length segd') (\(Z:.i) -> segd' V.! i)
       svec      = fromFunction (Z :. V.length svec') (\(Z:.i) -> svec' V.! i)
       smat      = lift (use segd, svec)
 
-      backend   = get optBackend opts
+      smat'     = streamIn $ go 0 0
+        where
+          go seg offset
+            | seg P.>= V.length segd' = []
+            | otherwise               = fromFunction (Z:.n) (\(Z:.i) -> svec' V.! (offset+i)) : go (seg+1) (offset+n)
+                where n = P.fromIntegral (segd' V.! seg)
 
   putStrLn $ "Reading matrix: " P.++ fileIn
   putStrLn $ "  with shape: " P.++ shows (V.length segd') " x " P.++ shows cols " and "
@@ -46,7 +53,10 @@ main = withSystemRandom $ \gen -> do
   runBenchmarks opts (P.tail rest)
     [ bgroup "smvm"
       [ bench "foldSeg"   $ whnf (run1 backend (smvm smat))    vec
-      , bench "sequences" $ whnf (run1 backend (smvmSeq smat)) vec
+      , bgroup "sequences"
+        [ bench "fromShapes" $ whnf (run1 backend (smvmSeq  smat)) vec
+        , bench "streamIn"   $ whnf (run1 backend (smvmSeq' smat')) vec
+        ]
       ]
     ]
 
