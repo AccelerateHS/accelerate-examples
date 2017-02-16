@@ -79,6 +79,9 @@ extra-deps:
 - 'nvvm-0.7.5.1'
 - 'unique-0'
 
+# Required for accelerate packages in 1.x series which have no 2.x branch.
+allow-newer: true
+
 # Override default flag values for local packages and extra-deps
 flags:
   llvm-general:
