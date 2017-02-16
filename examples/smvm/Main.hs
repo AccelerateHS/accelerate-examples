@@ -44,5 +44,9 @@ main = withSystemRandom $ \gen -> do
   -- Benchmark
   --
   runBenchmarks opts (P.tail rest)
-    [ bench "smvm" $ whnf (run1 backend (smvm smat)) vec ]
+    [ bgroup "smvm"
+      [ bench "foldSeg"   $ whnf (run1 backend (smvm smat))    vec
+      , bench "sequences" $ whnf (run1 backend (smvmSeq smat)) vec
+      ]
+    ]
 
