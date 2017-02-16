@@ -125,6 +125,7 @@ flags:
     pagerank:   true
     ray:        true
     kmeans:     true
+    classify:   true
 
 # Extra package databases containing global packages
 extra-package-dbs: []
