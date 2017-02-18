@@ -35,7 +35,7 @@ main = do
   (tdict, dict) <- time $ readDict conf (get configDict conf) (not (get configSeq conf))
 
   let (Z :. height :. width) = A.arrayShape dict
-      entries                = if get configSeq conf then width else height
+      entries                = if get configSeq conf then height else width
   putStrLn $ printf "%d words in %s" entries (secs tdict)
 
   -- Attempt to recover one hash at a time by comparing it to entries in the
@@ -52,7 +52,7 @@ main = do
             idx  = run1 backend l (A.fromList Z [abcd])
             l :: A.Acc (A.Scalar MD5.MD5) -> A.Acc (A.Scalar (Int, Int))
             l digest = A.collect
-                     $ A.foldSeqFlatten find (A.unit (A.lift (-1 :: Int, 0 :: Int))) (A.toSeqInner (A.use dict))
+                     $ A.foldSeqFlatten find (A.unit (A.lift (-1 :: Int, 0 :: Int))) (A.toSeqOuter (A.use dict))
               where
                 find fi ixs vs =
                   let
