@@ -4,7 +4,7 @@
 module MD5 (
 
   Dictionary, MD5,
-  hashcatWord, hashcatDict, readMD5, showMD5, md5Round
+  hashcatWord, hashcatDict, hashcatSeq, readMD5, showMD5, md5Round
 
 ) where
 
@@ -24,6 +24,16 @@ import Data.Array.Accelerate                    hiding ( Ord(..) )
 import Data.Array.Accelerate.Data.Bits          as A
 import qualified Data.Array.Accelerate          as A
 
+hashcatSeq :: Dictionary -> Acc (Scalar MD5.MD5) -> Acc (Scalar Int)
+hashcatSeq dict digest = unit . A.fst . the . collect
+  $ foldSeqFlatten find (unit (lift (-1 :: Int, 0 :: Int))) (subarrays (index2 1 16) dict)
+  where
+    find fi ixs vs =
+      let
+        (found, i) = unlift (A.the fi)
+        dict'  = reshape (A.lift (Z :. (size ixs) :. (16 :: Int))) vs
+        found' = hashcatDict False dict' digest
+      in unit $ lift (the found' A.> -1 ? (i + the found', found), i + (size ixs))
 
 -- Generate an MD5 hash for every word in the dictionary, and if an entry
 -- matches the given unknown md5, returns the index into the dictionary of said

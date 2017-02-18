@@ -46,39 +46,22 @@ main = do
   -- even if the salt is known, so long as it is unique for each password.
   --
   let backend = get optBackend opts
-
-      recoverSeq hash =
-        let abcd = readMD5 hash
-            idx  = run1 backend l (A.fromList Z [abcd])
-            l :: A.Acc (A.Scalar MD5.MD5) -> A.Acc (A.Scalar (Int, Int))
-            l digest = A.collect
-                     $ A.foldSeqFlatten find (A.unit (A.lift (-1 :: Int, 0 :: Int))) (A.toSeqOuter (A.use dict))
-              where
-                find fi ixs vs =
-                  let
-                    (found, i) = A.unlift (A.the fi)
-                    dict'  = A.reshape (A.lift (Z :. (A.size ixs) :. (16 :: Int))) vs
-                    found' = hashcatDict False dict' digest
-                  in A.unit $ A.lift (A.the found' A.> -1 A.? (i + A.the found', found), i + (A.size ixs))
-        --
-        in case fst (idx `A.indexArray` Z) of
-             -1 -> Nothing
-             n  -> Just (extract False dict n)
+      !hashDict = run1 backend (hashcatDict True (A.use dict))
+      !hashSeq  = run1 backend (hashcatSeq dict)
 
       recoverAll :: [L.ByteString] -> IO (Int,Int)
       recoverAll =
-        if get configSeq conf
-        then go recoverSeq
-        else go recover
+        go recover
         where go rec = foldM (\(i,n) h -> maybe (return (i,n+1)) (\t -> showText h t >> return (i+1,n+1)) (rec h)) (0,0)
 
       recover hash =
         let abcd = readMD5 hash
-            idx  = run1 backend (hashcatDict True (A.use dict)) (A.fromList Z [abcd])
+            go   = if get configSeq conf then hashSeq else hashDict
+            idx  = go (A.fromList Z [abcd])
         --
         in case idx `A.indexArray` Z of
              -1 -> Nothing
-             n  -> Just (extract True dict n)
+             n  -> Just (extract (not (get configSeq conf)) dict n)
 
       showText hash text = do
         L.putStr hash >> putStr ": " >> L.putStrLn text
