@@ -683,7 +683,7 @@ Executable accelerate-pagerank
   if flag(ekg)
     ghc-options:        -with-rtsopts=-T
 
-  if !flag(pagerank) || !flag(cuda)
+  if !flag(pagerank)
     buildable:          False
   else
     build-depends:
