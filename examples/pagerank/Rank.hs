@@ -83,8 +83,9 @@ pageRank backend noSeq maxIters chunkSize pageCount from to sizes0 _titlesFile r
                -- Sum up the ranks for all the pages,
                -- this should be very close to 1, minus some some round-off error.
            in do   -- Show the page with the maximum rank.
-                  putStrLn $ "  high ix    : "  P.++ show rankMaxIx
+                  putStrLn $ "  high ix    : "  P.++ show (indexArray rankMaxIx Z)
                   putStrLn $ "  high rank  : "  P.++ show rankMax
+                  putStr "\n"
                   return ()
 
         go !i !ranks
@@ -100,7 +101,7 @@ pageRank backend noSeq maxIters chunkSize pageCount from to sizes0 _titlesFile r
                 -- Sum up the ranks for all the pages,
                 -- this should be very close to 1, minus some some round-off error.
                 let rankSum = run1 backend A.sum ranks2
-                putStrLn $ "  rank sum   : "  P.++ show rankSum
+                putStrLn $ "  rank sum   : "  P.++ show (indexArray rankSum Z)
 
                 go (i - 1) ranks2
 

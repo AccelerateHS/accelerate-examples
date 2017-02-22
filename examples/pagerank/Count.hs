@@ -13,6 +13,7 @@ countPages !filePath
         (lineCount, maxPageId) <- eat 0 0 (BL.lines bs)
         printPosition True "  lines read : " 10000 lineCount
         putStrLn $ "  max page id: " ++ padR 10 (show maxPageId)
+        putStr "\n"
         return (lineCount, maxPageId)
 
  where  eat !lineCount !maxPageId []
