@@ -1,7 +1,10 @@
 
 module Step (
 
-  stepRank, Update, PageGraph
+  Update, PageGraph,
+
+  stepRank,
+  stepRankSeq,
 
 ) where
 
@@ -48,7 +51,8 @@ stepRankSeq p sizes ranks
     in A.collect
      $ A.foldSeqFlatten addUpdates' zeroes
      $ A.mapSeq (A.map (contribution sizes ranks))
-         (A.toSeq (Z :. Split) (use p))
+     $ A.toSeqInner (use p)
+         -- (A.toSeq (constant (Z :. Split)) (use p))   -- TLM: ??
 
 -- | Perform one iteration step for the internal Page Rank algorithm.
 stepRank
@@ -59,10 +63,17 @@ stepRank
         -> Acc (Vector Rank)   -- ^ New ranks vector.
 
 stepRank links sizes ranks parRanks
- = let
+  = let
         -- pageCount  = A.size sizes
 
+        -- For every link, calculate its contribution to the page it points to
+        contrib = A.map (A.snd . contribution sizes ranks) links
+
         -- Add to the partial ranks the contribution of the supplied links.
-        ranks' = A.permute (+) parRanks (\ix -> let (_, to) = unlift $ links ! ix :: (Exp PageId, Exp PageId)
-                                              in index1 (A.fromIntegral to)) contribution
-        in ranks'
+        ranks'  = A.permute (+) parRanks p contrib
+
+        p ix    = let (_, to) = unlift (links ! ix)          :: (Exp PageId, Exp PageId)
+                  in index1 (A.fromIntegral to :: Exp Int)
+
+    in ranks'
+

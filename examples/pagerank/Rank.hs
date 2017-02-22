@@ -11,11 +11,12 @@ import Load
 import Page
 import Step
 
-import System.Directory
-import Control.Exception
+-- import System.Directory
+-- import Control.Exception
 import Control.Monad
-import System.CPUTime
+-- import System.CPUTime
 import Prelude                                          as P
+import qualified Data.Vector.Storable                   as S
 
 import Data.Array.Accelerate                            as A
 import Data.Array.Accelerate.Array.Sugar                as A ( EltRepr )
@@ -72,7 +73,7 @@ pageRank
         -> A.Vector Rank        -- ^ Initial ranks.
         -> IO ()
 
-pageRank backend _noSeq maxIters chunkSize pageCount from to sizes0 _titlesFile ranks0 =
+pageRank backend noSeq maxIters chunkSize pageCount from to sizes0 _titlesFile ranks0 =
   go maxIters ranks0
   where
         go :: Int -> A.Vector Rank -> IO ()
@@ -91,8 +92,9 @@ pageRank backend _noSeq maxIters chunkSize pageCount from to sizes0 _titlesFile 
                 putStrLn $ "* Step " P.++ show i
 
                 -- Run a step of the algorithm.
-                -- let ranks1 = if noSeq then stepInChunks ranks zeros 0 else stepInSeq ranks
-                let ranks1 = stepInChunks ranks zeros 0
+                let ranks1 = if noSeq then stepInChunks ranks zeros 0
+                                      else stepInSeq ranks
+                -- let ranks1 = stepInChunks ranks zeros 0
                 let ranks2 = addDangles (ranks1, sizes0)
 
                 -- Sum up the ranks for all the pages,
@@ -117,8 +119,8 @@ pageRank backend _noSeq maxIters chunkSize pageCount from to sizes0 _titlesFile 
 
         stepInSeq :: A.Vector Rank -> A.Vector Rank
         stepInSeq =
-          let !pages  = A.fromVectors (Z:.S.length from) (((), from), to)
-          in run1 backend (stepRankSeq pages (use sizes))
+          let !pages = A.fromVectors (Z :. S.length from) (((), from), to)
+          in  run1 backend (stepRankSeq pages (use sizes0))
 
         edgeCount = S.length from
 
