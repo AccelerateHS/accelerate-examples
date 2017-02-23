@@ -25,9 +25,9 @@ into the program.
 The program will also accept multiple unknowns to recover, either via multiple
 `-s` arguments or read from file, one per line.
 
-Of course, it is more fun if we don't know what what results to expect
-beforehand, in which case a dictionary of standard words won't get us too far.
-Luckily, the Internet is a
+Of course, it is more fun if we don't know what results to expect beforehand, in
+which case a dictionary of standard words won't get us too far. Luckily, the
+Internet is a
 [playground](https://wiki.skullsecurity.org/index.php?title=Passwords)...
 
     $ accelerate-hashcat -d rockyou.txt md5.txt
