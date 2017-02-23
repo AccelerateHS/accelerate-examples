@@ -98,10 +98,15 @@ pageRank backend noSeq maxIters chunkSize pageCount from to sizes0 _titlesFile r
 
                 -- Sum up the ranks for all the pages,
                 -- this should be very close to 1, minus some some round-off error.
-                let rankSum = run1 backend A.sum ranks2
-                putStrLn $ "  rank sum   : "  P.++ show (indexArray rankSum Z)
+                -- let rankSum = run1 backend A.sum ranks2
+                putStrLn $ "  rank sum   : "  P.++ show (indexArray (rankSum ranks2) Z)
 
                 go (i - 1) ranks2
+
+        -- Sum up the ranks for all the pages,
+        -- this should be very close to 1, minus some some round-off error.
+        rankSum :: Vector Rank -> Scalar Rank
+        rankSum = run1 backend A.sum
 
         -- Add to the rank the score due to dangling vectors.
         addDangles :: (Vector Rank, Vector Int) -> Vector Rank
