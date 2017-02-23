@@ -634,6 +634,15 @@ Executable accelerate-hashcat
         , fclabels                        >= 2.0
         , mwc-random                      >= 0.8
 
+  if flag(llvm-cpu)
+    CPP-options:        -DACCELERATE_LLVM_NATIVE_BACKEND
+
+  if flag(llvm-ptx)
+    CPP-options:        -DACCELERATE_LLVM_PTX_BACKEND
+
+  if flag(cuda)
+    CPP-options:        -DACCELERATE_CUDA_BACKEND
+
 
 -- FFT examples
 -- ------------

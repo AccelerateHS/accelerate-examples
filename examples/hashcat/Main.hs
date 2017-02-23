@@ -1,4 +1,5 @@
 {-# LANGUAGE BangPatterns     #-}
+{-# LANGUAGE CPP              #-}
 {-# LANGUAGE FlexibleContexts #-}
 
 module Main where
@@ -28,15 +29,38 @@ main = do
   beginMonitoring
   (conf, opts, files)   <- parseArgs options defaults header footer
 
+  let backend     = get optBackend opts
+      sequences   = get configSeq conf
+
+      columnMajor = not rowMajor
+      rowMajor    = sequences
+                 || case backend of
+                      Interpreter -> True
+#ifdef ACCELERATE_LLVM_NATIVE_BACKEND
+                      CPU         -> True
+#endif
+#ifdef ACCELERATE_LLVM_PTX_BACKEND
+                      PTX         -> False
+#endif
+#ifdef ACCELERATE_CUDA_BACKEND
+                      CUDA        -> False
+#endif
+
+  printf "Layout: %s\n" (if columnMajor then "Column" else "Row")
+  printf "Sequences: %s\n" (show sequences)
+
   -- Read the plain text word lists. This creates a vector of MD5 chunks ready
   -- for hashing.
   --
   putStr "Loading dictionary... " >> hFlush stdout
-  (tdict, dict) <- time $ readDict conf (get configDict conf) (not (get configSeq conf))
+  (tdict, dict) <- time $ readDict conf columnMajor (get configDict conf)
 
   let (Z :. height :. width) = A.arrayShape dict
-      entries                = if get configSeq conf then height else width
-  putStrLn $ printf "%d words in %s" entries (secs tdict)
+      entries                = if columnMajor
+                                 then width
+                                 else height
+
+  printf "%d words in %s\n" entries (secs tdict)
 
   -- Attempt to recover one hash at a time by comparing it to entries in the
   -- database. This rehashes the entire word list every time, rather than
@@ -45,23 +69,21 @@ main = do
   -- function are applied, but is defeated by salting passwords. This is true
   -- even if the salt is known, so long as it is unique for each password.
   --
-  let backend = get optBackend opts
-      !hashDict = run1 backend (hashcatDict True (A.use dict))
-      !hashSeq  = run1 backend (hashcatSeq dict)
+  let !rev | sequences = run1 backend (hashcatSeq dict)
+           | otherwise = run1 backend (hashcatDict columnMajor (A.use dict))
 
       recoverAll :: [L.ByteString] -> IO (Int,Int)
-      recoverAll =
-        go recover
-        where go rec = foldM (\(i,n) h -> maybe (return (i,n+1)) (\t -> showText h t >> return (i+1,n+1)) (rec h)) (0,0)
+      recoverAll = go recover
+        where
+          go rec = foldM (\(i,n) h -> maybe (return (i,n+1)) (\t -> showText h t >> return (i+1,n+1)) (rec h)) (0,0)
 
       recover hash =
         let abcd = readMD5 hash
-            go   = if get configSeq conf then hashSeq else hashDict
-            idx  = go (A.fromList Z [abcd])
+            idx  = rev (A.fromList Z [abcd])
         --
         in case idx `A.indexArray` Z of
              -1 -> Nothing
-             n  -> Just (extract (not (get configSeq conf)) dict n)
+             n  -> Just (extract columnMajor dict n)
 
       showText hash text = do
         L.putStr hash >> putStr ": " >> L.putStrLn text
@@ -94,3 +116,4 @@ time action = do
   end    <- getTime
   let !delta = end - start
   return (delta, result)
+

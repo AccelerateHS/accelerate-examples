@@ -24,37 +24,38 @@ import Data.Array.Accelerate                    hiding ( Ord(..) )
 import Data.Array.Accelerate.Data.Bits          as A
 import qualified Data.Array.Accelerate          as A
 
+
 hashcatSeq :: Dictionary -> Acc (Scalar MD5.MD5) -> Acc (Scalar Int)
-hashcatSeq dict digest = unit . A.fst . the . collect
+hashcatSeq dict digest
+  = unit . A.fst . the . collect
   $ foldSeqFlatten find (unit (lift (-1 :: Int, 0 :: Int))) (subarrays (index2 1 16) dict)
   where
     find fi ixs vs =
       let
-        (found, i) = unlift (A.the fi)
-        dict'  = reshape (A.lift (Z :. (size ixs) :. (16 :: Int))) vs
-        found' = hashcatDict False dict' digest
-      in unit $ lift (the found' A.> -1 ? (i + the found', found), i + (size ixs))
+          (found, i) = unlift (A.the fi)
+          dict'      = reshape (A.lift (Z :. size ixs :. constant 16)) vs
+          found'     = hashcatDict False dict' digest
+      in
+      unit $ lift (the found' A.> -1 ? (i + the found', found), i + (size ixs))
+
 
 -- Generate an MD5 hash for every word in the dictionary, and if an entry
 -- matches the given unknown md5, returns the index into the dictionary of said
 -- match. If not found, this returns (-1).
 --
-hashcatDict :: Bool  -- ^ Column major order
+hashcatDict :: Bool                 -- ^ column major order?
             -> Acc Dictionary
             -> Acc (Scalar MD5)
             -> Acc (Scalar Int)
 hashcatDict colMajor dict passwd
   = reshape (constant Z)
-  $ permute const res (\ix -> crypt A.! ix `cmp` the passwd ? (constant (Z:.0), ignore))
+  $ permute const res (\ix -> crypt A.! ix A.== the passwd ? (constant (Z:.0), ignore))
                       (enumFromN (index1 n) 0)
   where
-    n           = A.size crypt
-    res         = use $ fromList (Z:.1) [-1]    :: Acc (Vector Int)
-    crypt       = md5 colMajor dict
+    n       = A.size crypt
+    res     = use $ fromList (Z:.1) [-1]    :: Acc (Vector Int)
+    crypt   = md5 colMajor dict
 
-    cmp x y     = let (x1,x2,x3,x4) = unlift x
-                      (y1,y2,y3,y4) = unlift y
-                  in x1 == y1 && x2 == y2 && x3 == y3 && x4 == y4
 
 -- Generate an MD5 hash for a single word, and if an entry matches the
 -- given unknown md5, returns the given index. If not matched, this
@@ -65,12 +66,8 @@ hashcatWord :: Acc (Scalar MD5)
             -> Acc (Scalar Int)
             -> Acc (Scalar Int)
 hashcatWord passwd word ix
-  = unit (crypt `cmp` the passwd ? (the ix, -1))
-  where
-    crypt       = md5Round (\i -> word A.! index1 i)
-    cmp x y     = let (x1,x2,x3,x4) = unlift x
-                      (y1,y2,y3,y4) = unlift y
-                  in x1 == y1 && x2 == y2 && x3 == y3 && x4 == y4
+  = let crypt = md5Round (\i -> word A.! index1 i)
+    in  unit (crypt A.== the passwd ? (the ix, -1))
 
 
 -- An MD5 round processes 512 bits of the input, as 16 x 32-bit values. We
@@ -88,12 +85,13 @@ type Dictionary = Array DIM2 Word32
 md5 :: Bool -> Acc Dictionary -> Acc (Vector MD5)
 md5 columnMajor dict
   = let n = if columnMajor
-            then A.snd . unindex2 $ A.shape dict
-            else A.fst . unindex2 $ A.shape dict
+              then A.snd . unindex2 $ A.shape dict
+              else A.fst . unindex2 $ A.shape dict
     in
-     A.generate (index1 n) (\ (unindex1 -> ix) -> md5Round (\i -> if columnMajor
-                                                                  then dict A.! index2 i ix
-                                                                  else dict A.! index2 ix i))
+    A.generate (index1 n)
+               (\(unindex1 -> ix) -> md5Round (\i -> if columnMajor
+                                                       then dict A.! index2 i ix
+                                                       else dict A.! index2 ix i))
 
 md5Round :: (Exp Int -> Exp Word32) -> Exp MD5
 md5Round fetch
@@ -189,3 +187,4 @@ readMD5 =
         return . P.fst $ fromMaybe (error "readHex32be: parse failure") (readHexadecimal s)
   in
   either error id . S.runGetLazy get
+

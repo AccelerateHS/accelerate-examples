@@ -55,12 +55,13 @@ md5block msg = do
 -- in the final array, since it is stored column-major and hence there is no
 -- easy way to truncate it.
 --
-readDict :: Config -> FilePath -> Bool -> IO Dictionary
-readDict c fp colMajor = do
+readDict :: Config -> Bool -> FilePath -> IO Dictionary
+readDict conf colMajor fp = do
   entries <- length       . chunk <$> L.readFile fp
   blocks  <- map md5block . chunk <$> L.readFile fp
 
-  let sh        = if colMajor then Z :. blockSizeWords :. entries else Z :. entries :. blockSizeWords
+  let sh        = if colMajor then Z :. blockSizeWords :. entries
+                              else Z :. entries :. blockSizeWords
       (adata,_) = runArrayData $ do
         arr <- newArrayData (size sh)
 
@@ -76,8 +77,8 @@ readDict c fp colMajor = do
   adata `seq` return $ Array (fromElt sh) adata
 
   where
-    chunk = maybe id take (get configMaxWords c)
-          . drop (get configSkipWords c)
+    chunk = maybe id take (get configMaxWords conf)
+          . drop (get configSkipWords conf)
           . filter (\w -> fromIntegral (L.length w) < blockSizeBytes - 8)
           . L.lines
 

@@ -17,8 +17,6 @@ data Config
   , _configMaxWords             :: Maybe Int
   , _configSkipWords            :: Int
   , _configSeq                  :: Bool
-
-  , _configHelp                 :: Bool
   }
   deriving Show
 
@@ -32,7 +30,6 @@ defaults = Config
   , _configMaxWords             = Nothing
   , _configSkipWords            = 0
   , _configSeq                  = False
-  , _configHelp                 = False
   }
 
 
@@ -56,13 +53,9 @@ options =
                 (ReqArg (set configMaxWords . Just . read) "INT")
                 "Use at most this many words from the list"
 
-  , Option      [] ["seq"]
+  , Option      [] ["sequences"]
                 (NoArg (set configSeq True))
-                "use sequencing"
-
-  , Option      ['h', '?'] ["help"]
-                (NoArg (set configHelp True))
-                "show this help message"
+                "Use Sequences"
   ]
 
 
@@ -78,3 +71,4 @@ header =
 
 footer :: [String]
 footer = [ "" ]
+
