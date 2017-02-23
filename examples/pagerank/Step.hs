@@ -20,20 +20,21 @@ contribution
         :: Acc (Vector Int)    -- ^ Number of outgoing links for each page.
         -> Acc (Vector Rank)   -- ^ Old ranks vector.
         -> Exp Link   -- ^ A link.
-        -> Exp Update -- ^ New rank.
+        -> Exp Rank  -- ^ New rank.
 contribution sizes ranks link
-  = let (from, to) = unlift link :: (Exp PageId, Exp PageId)
-    in lift (to, ranks ! index1 (A.fromIntegral from) / A.fromIntegral (sizes ! index1 (A.fromIntegral from))) :: Exp Update
+  = let (from, _) = unlift link :: (Exp PageId, Exp PageId)
+    in ranks ! index1 (A.fromIntegral from) / A.fromIntegral (sizes ! index1 (A.fromIntegral from))
 
 -- | Updates a vector of ranks by a given vector of updates.
 addUpdates
-        :: Acc (Vector Rank)   -- ^ Old partial ranks.
-        -> Acc (Vector Update) -- ^ Updates.
+        :: Acc (Vector Link)
+        -> Acc (Vector Rank)   -- ^ Old partial ranks.
+        -> Acc (Vector Rank)   -- ^ Updates.
         -> Acc (Vector Rank)   -- ^ New partial ranks.
-addUpdates parRanks updates
+addUpdates links parRanks updates
  = let
-        (to, contr) = A.unzip updates
-   in A.permute (+) parRanks (index1 . A.fromIntegral . (to !)) contr
+     to = A.map A.snd links
+   in A.permute (+) parRanks (index1 . A.fromIntegral . (to !)) updates
 
 stepRankSeq :: PageGraph
             -> Acc (Vector Int)  -- Sizes.
@@ -45,12 +46,11 @@ stepRankSeq p sizes ranks
       zeroes = A.fill (shape ranks) 0.0
 
       -- Ignore shape vector.
-      addUpdates' :: Acc (Vector Rank) -> Acc (Vector Z) -> Acc (Vector Update) -> Acc (Vector Rank)
-      addUpdates' = const . addUpdates
+      addUpdates' :: Acc (Vector Rank) -> Acc (Vector Z) -> Acc (Vector Link) -> Acc (Vector Rank)
+      addUpdates' ranks' _ links = addUpdates links ranks' (A.map (contribution sizes ranks) links)
 
     in A.collect
      $ A.foldSeqFlatten addUpdates' zeroes
-     $ A.mapSeq (A.map (contribution sizes ranks))
      $ A.toSeqInner (use p)
          -- (A.toSeq (constant (Z :. Split)) (use p))   -- TLM: ??
 
@@ -67,7 +67,7 @@ stepRank links sizes ranks parRanks
         -- pageCount  = A.size sizes
 
         -- For every link, calculate its contribution to the page it points to
-        contrib = A.map (A.snd . contribution sizes ranks) links
+        contrib = A.map (contribution sizes ranks) links
 
         -- Add to the partial ranks the contribution of the supplied links.
         ranks'  = A.permute (+) parRanks p contrib
