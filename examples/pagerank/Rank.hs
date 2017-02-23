@@ -10,11 +10,9 @@ import Count
 import Load
 import Page
 import Step
+import Time
 
--- import System.Directory
--- import Control.Exception
 import Control.Monad
--- import System.CPUTime
 import Prelude                                          as P
 import qualified Data.Vector.Storable                   as S
 
@@ -43,13 +41,14 @@ rank
     -> FilePath             -- ^ Path to titles file.
     -> IO ()
 rank backend noSeq steps chunkSize pagesPath titlesPath
- = do   (_, maxPageId) <- countPages pagesPath
+ = do   (_, maxPageId)        <- countPages pagesPath
         putStrLn "* Loading pages."
-        (!from, !to, !sizes) <- loadPages pagesPath (P.fromIntegral maxPageId)
-        let pageCount   = S.length sizes
+        (!from, !to, !sizes)  <- loadPages pagesPath (P.fromIntegral maxPageId)
         -- let edgeCount   = S.length from
+        let !pageCount  = S.length sizes
         let !ranks      = initialRanks backend pageCount
-        pageRank backend noSeq steps chunkSize pageCount from to (arrayize sizes) titlesPath ranks
+        timed $ pageRank backend noSeq steps chunkSize pageCount from to (arrayize sizes) titlesPath ranks
+        putStr "\n"
         return ()
 
 -- | Construct the initial ranks vector.
@@ -85,7 +84,6 @@ pageRank backend noSeq maxIters chunkSize pageCount from to sizes0 _titlesFile r
            in do   -- Show the page with the maximum rank.
                   putStrLn $ "  high ix    : "  P.++ show (indexArray rankMaxIx Z)
                   putStrLn $ "  high rank  : "  P.++ show rankMax
-                  putStr "\n"
                   return ()
 
         go !i !ranks

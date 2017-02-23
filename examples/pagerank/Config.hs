@@ -31,7 +31,7 @@ options =
   [ Option []   ["steps"]       (ReqArg (set configSteps . read) "INT")     "number of steps to perform"
   , Option []   ["chunk-size"]  (ReqArg (set configChunkSize . read) "INT") "size of chunks to be processed"
   , Option []   ["count"]       (NoArg  (set configCount True))             "count number of pages in the links file"
-  , Option []   ["noseq"]       (NoArg  (set configNoSeq True))                "do not use Accelerate sequencing"
+  , Option []   ["noseq"]       (NoArg  (set configNoSeq True))             "do not use Accelerate sequencing"
   ]
 
 

@@ -685,6 +685,7 @@ Executable accelerate-pagerank
         Progress
         Rank
         Step
+        Time
 
   ghc-prof-options:     -auto-all
   ghc-options:          -Wall -threaded -eventlog -rtsopts -with-rtsopts=-n2M -with-rtsopts=-A64M
@@ -706,6 +707,7 @@ Executable accelerate-pagerank
         , fclabels                        >= 1.0
         , vector                          >= 0.9
         , vector-algorithms               >= 0.5.4
+        , time                            >= 1.4
 
 
 -- Ray tracer
