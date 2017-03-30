@@ -3,18 +3,22 @@ import SMVM
 import Matrix
 import Config
 
-import Prelude                                          as P
-import Data.Label                                       ( get )
-import System.Random.MWC
-import System.Exit
+import Data.Array.Accelerate                                        as A
+import Data.Array.Accelerate.Examples.Internal                      as A
+import Data.Array.Accelerate.IO                                     as A
+
+import Data.Label                                                   ( get )
+import Data.Matrix.MatrixMarket                                     ( readMatrix )
 import System.Environment
-import Data.Array.Accelerate                            as A
-import Data.Array.Accelerate.Examples.Internal          as A
-import qualified Data.Vector.Unboxed                    as V
+import System.Exit
+import System.Random.MWC
+import Text.Printf
+import Prelude                                                      as P
+import qualified Data.Vector.Storable                               as S
 
 
 main :: IO ()
-main = withSystemRandom $ \gen -> do
+main = do
   beginMonitoring
 
   (_, opts, rest)       <- parseArgs options defaults header footer
@@ -25,28 +29,30 @@ main = withSystemRandom $ \gen -> do
 
   -- Read in the matrix file, and generate a random vector to multiply against
   --
-  (segd', svec', cols) <- readCSRMatrix gen fileIn
-  vec'                 <- uniformVector gen cols
+  matrix  <- readMatrix fileIn
+  csr     <- withSystemRandom $ \gen -> matrixToCSR gen matrix
+  xs      <- withSystemRandom $ \gen -> uniformVector gen (rows csr) :: IO (S.Vector Double)
 
   -- Convert to Accelerate arrays
   --
   let backend   = get optBackend opts
-
-      vec       = fromFunction (Z :. V.length vec')  (\(Z:.i) -> vec'  V.! i)
-      segd      = fromFunction (Z :. V.length segd') (\(Z:.i) -> segd' V.! i)
-      svec      = fromFunction (Z :. V.length svec') (\(Z:.i) -> svec' V.! i)
-      smat      = lift (use segd, svec)
+      vec       = fromVectors (Z :. S.length xs) xs
+      segd      = fromVectors (Z :. S.length (csr_segd_length csr)) (csr_segd_length csr)
+      svec      = fromVectors (Z :. nnz csr) (((), csr_indices csr), csr_values csr)
+      smat      = use (segd, svec)  :: Acc (SparseMatrix Double)
 
       smat'     = streamIn $ go 0 0
         where
           go seg offset
-            | seg P.>= V.length segd' = []
-            | otherwise               = fromFunction (Z:.n) (\(Z:.i) -> svec' V.! (offset+i)) : go (seg+1) (offset+n)
-                where n = P.fromIntegral (segd' V.! seg)
+            | seg P.>= A.arraySize (A.arrayShape segd)
+            = []
+            | otherwise
+            = fromFunction (Z:.n) (\(Z:.i) -> svec `A.indexArray` (Z:.offset+i)) : go (seg+1) (offset+n)
+                where n = P.fromIntegral (segd `A.indexArray` (Z:.seg))
 
-  putStrLn $ "Reading matrix: " P.++ fileIn
-  putStrLn $ "  with shape: " P.++ shows (V.length segd') " x " P.++ shows cols " and "
-                              P.++ shows (V.length svec') " entries\n"
+  printf "input matrix: %s\n" fileIn
+  printf "        size: %d x %d\n" (rows csr) (columns csr)
+  printf "   non-zeros: %d\n\n" (nnz csr)
 
   -- Benchmark
   --

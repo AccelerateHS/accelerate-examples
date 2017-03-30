@@ -177,22 +177,22 @@ Library
   if flag(cuda)
     CPP-options:        -DACCELERATE_CUDA_BACKEND
     build-depends:
-        accelerate-cuda                 == 2.0.*
+        accelerate-cuda                   == 2.0.*
 
   if flag(llvm-cpu)
     CPP-options:        -DACCELERATE_LLVM_NATIVE_BACKEND
     build-depends:
-        accelerate-llvm-native          == 2.0.*
+        accelerate-llvm-native            == 2.0.*
 
   if flag(llvm-ptx)
     CPP-options:        -DACCELERATE_LLVM_PTX_BACKEND
     build-depends:
-        accelerate-llvm-ptx             == 2.0.*
+        accelerate-llvm-ptx               == 2.0.*
 
   if flag(cilk)
     CPP-options:        -DACCELERATE_CILK_BACKEND
     build-depends:
-        accelerate-icc-opencl           == 1.0.*
+        accelerate-icc-opencl             == 1.0.*
 
   if flag(ekg)
     CPP-options:        -DACCELERATE_ENABLE_EKG
@@ -259,6 +259,7 @@ Executable accelerate-nofib
         Test.Issues.Issue286
         Test.Issues.Issue287
         Test.Issues.Issue288
+        Test.Issues.Issue362
         Test.Prelude
         Test.Prelude.Backpermute
         Test.Prelude.Filter
@@ -286,7 +287,7 @@ Executable accelerate-nofib
   if flag(cuda)
     CPP-options:        -DACCELERATE_CUDA_BACKEND
     build-depends:
-        accelerate-cuda                 == 0.16.*
+        accelerate-cuda                   == 0.17.*
 
     other-modules:
         Test.Foreign.CUDA
@@ -322,7 +323,7 @@ Executable accelerate-nofib
 Executable accelerate-smvm
   hs-source-dirs:       examples/smvm
   Main-is:              Main.hs
-  other-modules:        Config Matrix MatrixMarket SMVM
+  other-modules:        Config Matrix SMVM
 
   ghc-prof-options:     -auto-all
   ghc-options:          -Wall -threaded -eventlog -rtsopts -with-rtsopts=-n2M -with-rtsopts=-A64M
@@ -340,12 +341,14 @@ Executable accelerate-smvm
           base                            >= 4.7
         , accelerate                      == 2.0.*
         , accelerate-examples             == 2.0.*
+        , accelerate-io                   == 1.0.*
         , attoparsec                      >= 0.10
         , bytestring                      >= 0.9
         , bytestring-lexing               >= 0.5
         , fclabels                        >= 2.0
-        , primitive                       >= 0.5
+        , matrix-market-attoparsec        >= 0.1
         , mwc-random                      >= 0.8
+        , scientific                      >= 0.3
         , vector                          >= 0.7
         , vector-algorithms               >= 0.4
 
