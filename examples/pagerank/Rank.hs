@@ -36,18 +36,17 @@ rank
     :: Backend
     -> Bool                 -- ^ Do not use Accelerate sequencing
     -> Int                  -- ^ Number of iterations to run.
-    -> Int                  -- ^ Size of chunk.
     -> FilePath             -- ^ Path to links file.
     -> FilePath             -- ^ Path to titles file.
     -> IO ()
-rank backend noSeq steps chunkSize pagesPath titlesPath
+rank backend noSeq steps pagesPath titlesPath
  = do   (_, maxPageId)        <- countPages pagesPath
         putStrLn "* Loading pages."
         (!from, !to, !sizes)  <- loadPages pagesPath (P.fromIntegral maxPageId)
         -- let edgeCount   = S.length from
         let !pageCount  = S.length sizes
         let !ranks      = initialRanks backend pageCount
-        timed $ pageRank backend noSeq steps chunkSize pageCount from to (arrayize sizes) titlesPath ranks
+        timed $ pageRank backend noSeq steps pageCount from to (arrayize sizes) titlesPath ranks
         putStr "\n"
         return ()
 
@@ -63,7 +62,6 @@ pageRank
         :: Backend
         -> Bool                 -- ^ Do not use Accelerate sequencing.
         -> Int                  -- ^ Number of iterations to run.
-        -> Int                  -- ^ Chunk size
         -> Int                  -- ^ Number of pages
         -> S.Vector PageId      -- ^ Pages graph from.
         -> S.Vector PageId      -- ^ Pages graph to (same length as from).
@@ -72,7 +70,7 @@ pageRank
         -> A.Vector Rank        -- ^ Initial ranks.
         -> IO ()
 
-pageRank backend noSeq maxIters chunkSize pageCount from to sizes0 _titlesFile ranks0 =
+pageRank backend noSeq maxIters pageCount from to sizes0 _titlesFile ranks0 =
   go maxIters ranks0
   where
         go :: Int -> A.Vector Rank -> IO ()
@@ -91,7 +89,7 @@ pageRank backend noSeq maxIters chunkSize pageCount from to sizes0 _titlesFile r
                 putStrLn $ "* Step " P.++ show i
 
                 -- Run a step of the algorithm.
-                let ranks1 = if noSeq then stepInChunks ranks zeros 0
+                let ranks1 = if noSeq then step ranks
                                       else stepInSeq ranks
                 -- let ranks1 = stepInChunks ranks zeros 0
                 let ranks2 = addDangles (ranks1, sizes0)
@@ -131,19 +129,11 @@ pageRank backend noSeq maxIters chunkSize pageCount from to sizes0 _titlesFile r
         zeros :: Vector Rank
         zeros = run backend $ A.fill (A.lift $ Z :. pageCount) 0
 
-        stepInChunks !ranks !parRanks !start
-          | start P.>= edgeCount
-          = parRanks
-          | otherwise
-          = let end     = P.min (start + chunkSize) edgeCount
-                from'   = S.slice start (end - start) from
-                to'     = S.slice start (end - start) to
-                !pages  = A.fromVectors (Z:.(end - start)) (((), from'), to')
-                !parRanks1 = step (pages, sizes0, ranks, parRanks)
-            in stepInChunks ranks parRanks1 (start + chunkSize)
+        pageGraph :: PageGraph
+        pageGraph = (fromVectors (Z:.edgeCount) (((),from),to))
 
-        step :: (PageGraph, Vector Int, Vector Rank, Vector Rank) -> Vector Rank
-        step = run1 backend $ (\t -> let (p,s,r,pr) = unlift t in stepRank p s r pr)
+        step :: Vector Rank -> Vector Rank
+        step = run1 backend $ \ranks -> stepRank (use pageGraph) (use sizes0) ranks (use zeros)
 
         -- Computer the index of the maximum rank.
         maxIndex :: A.Vector Rank -> A.Scalar Int

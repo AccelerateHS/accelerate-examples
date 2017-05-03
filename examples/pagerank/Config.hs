@@ -9,7 +9,6 @@ import System.Console.GetOpt
 data Config = Config
   {
     _configSteps        :: Int
-  , _configChunkSize    :: Int
   , _configCount        :: Bool
   , _configNoSeq        :: Bool
   }
@@ -20,7 +19,6 @@ $(mkLabels [''Config])
 defaults :: Config
 defaults = Config
   { _configSteps        = 10
-  , _configChunkSize    = 12000000
   , _configCount        = False
   , _configNoSeq        = False
   }
@@ -29,7 +27,6 @@ defaults = Config
 options :: [OptDescr (Config -> Config)]
 options =
   [ Option []   ["steps"]       (ReqArg (set configSteps . read) "INT")     "number of steps to perform"
-  , Option []   ["chunk-size"]  (ReqArg (set configChunkSize . read) "INT") "size of chunks to be processed"
   , Option []   ["count"]       (NoArg  (set configCount True))             "count number of pages in the links file"
   , Option []   ["noseq"]       (NoArg  (set configNoSeq True))             "do not use Accelerate sequencing"
   ]
