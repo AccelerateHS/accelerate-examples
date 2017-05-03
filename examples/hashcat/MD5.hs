@@ -25,11 +25,12 @@ import Data.Array.Accelerate.Data.Bits          as A
 import qualified Data.Array.Accelerate          as A
 
 
-hashcatSeq :: Dictionary -> Acc (Scalar MD5.MD5) -> Acc (Scalar Int)
-hashcatSeq dict digest
+hashcatSeq :: Bool -> Dictionary -> Acc (Scalar MD5.MD5) -> Acc (Scalar Int)
+hashcatSeq colMajor dict digest
   = unit . A.fst . the . collect
-  $ foldSeqFlatten find (unit (lift (-1 :: Int, 0 :: Int))) (subarrays (index2 1 16) dict)
+  $ foldSeqFlatten find (unit (lift (-1 :: Int, 0 :: Int))) (subarrays wordShape dict)
   where
+    wordShape = if colMajor then index2 16 1 else index2 1 16
     find fi ixs vs =
       let
           (found, i) = unlift (A.the fi)

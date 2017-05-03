@@ -33,8 +33,7 @@ main = do
       sequences   = get configSeq conf
 
       columnMajor = not rowMajor
-      rowMajor    = sequences
-                 || case backend of
+      rowMajor    = case backend of
                       Interpreter -> True
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
                       CPU         -> True
@@ -69,7 +68,7 @@ main = do
   -- function are applied, but is defeated by salting passwords. This is true
   -- even if the salt is known, so long as it is unique for each password.
   --
-  let !rev | sequences = run1 backend (hashcatSeq dict)
+  let !rev | sequences = run1 backend (hashcatSeq columnMajor dict)
            | otherwise = run1 backend (hashcatDict columnMajor (A.use dict))
 
       recoverAll :: [L.ByteString] -> IO (Int,Int)
