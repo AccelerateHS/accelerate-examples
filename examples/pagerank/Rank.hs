@@ -39,14 +39,14 @@ rank
     -> FilePath             -- ^ Path to links file.
     -> FilePath             -- ^ Path to titles file.
     -> IO ()
-rank backend noSeq steps pagesPath titlesPath
+rank backend useSeq steps pagesPath titlesPath
  = do   (_, maxPageId)        <- countPages pagesPath
         putStrLn "* Loading pages."
         (!from, !to, !sizes)  <- loadPages pagesPath (P.fromIntegral maxPageId)
         -- let edgeCount   = S.length from
         let !pageCount  = S.length sizes
         let !ranks      = initialRanks backend pageCount
-        timed $ pageRank backend noSeq steps pageCount from to (arrayize sizes) titlesPath ranks
+        timed $ pageRank backend useSeq steps pageCount from to (arrayize sizes) titlesPath ranks
         putStr "\n"
         return ()
 
@@ -70,7 +70,7 @@ pageRank
         -> A.Vector Rank        -- ^ Initial ranks.
         -> IO ()
 
-pageRank backend noSeq maxIters pageCount from to sizes0 _titlesFile ranks0 =
+pageRank backend useSeq maxIters pageCount from to sizes0 _titlesFile ranks0 =
   go maxIters ranks0
   where
         go :: Int -> A.Vector Rank -> IO ()
@@ -89,8 +89,8 @@ pageRank backend noSeq maxIters pageCount from to sizes0 _titlesFile ranks0 =
                 putStrLn $ "* Step " P.++ show i
 
                 -- Run a step of the algorithm.
-                let ranks1 = if noSeq then step ranks
-                                      else stepInSeq ranks
+                let ranks1 = if useSeq then stepInSeq ranks
+                                       else step ranks
                 -- let ranks1 = stepInChunks ranks zeros 0
                 let ranks2 = addDangles (ranks1, sizes0)
 

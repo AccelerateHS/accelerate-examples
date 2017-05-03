@@ -21,9 +21,9 @@ main = do
 
   let backend   = get optBackend opts
       steps     = get configSteps conf
-      noSeq     = get configNoSeq conf
+      useSeq    = get configSeq conf
 
   if get configCount conf
      then void (countPages linksPath)
-     else rank backend noSeq steps linksPath titlesPath
+     else rank backend useSeq steps linksPath titlesPath
 

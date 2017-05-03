@@ -10,7 +10,7 @@ data Config = Config
   {
     _configSteps        :: Int
   , _configCount        :: Bool
-  , _configNoSeq        :: Bool
+  , _configSeq          :: Bool
   }
   deriving Show
 
@@ -20,7 +20,7 @@ defaults :: Config
 defaults = Config
   { _configSteps        = 10
   , _configCount        = False
-  , _configNoSeq        = False
+  , _configSeq          = False
   }
 
 
@@ -28,7 +28,7 @@ options :: [OptDescr (Config -> Config)]
 options =
   [ Option []   ["steps"]       (ReqArg (set configSteps . read) "INT")     "number of steps to perform"
   , Option []   ["count"]       (NoArg  (set configCount True))             "count number of pages in the links file"
-  , Option []   ["noseq"]       (NoArg  (set configNoSeq True))             "do not use Accelerate sequencing"
+  , Option []   ["seq"]         (NoArg  (set configSeq True))               "use Accelerate sequencing"
   ]
 
 
