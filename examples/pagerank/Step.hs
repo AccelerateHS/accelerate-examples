@@ -19,22 +19,11 @@ type Update = (PageId, Rank)
 contribution
         :: Acc (Vector Int)    -- ^ Number of outgoing links for each page.
         -> Acc (Vector Rank)   -- ^ Old ranks vector.
-        -> Exp Link   -- ^ A link.
-        -> Exp Rank  -- ^ New rank.
+        -> Exp Link            -- ^ A link.
+        -> Exp Rank            -- ^ New rank.
 contribution sizes ranks link
   = let (from, _) = unlift link :: (Exp PageId, Exp PageId)
     in ranks ! index1 (A.fromIntegral from) / A.fromIntegral (sizes ! index1 (A.fromIntegral from))
-
--- | Updates a vector of ranks by a given vector of updates.
-addUpdates
-        :: Acc (Vector Link)
-        -> Acc (Vector Rank)   -- ^ Old partial ranks.
-        -> Acc (Vector Rank)   -- ^ Updates.
-        -> Acc (Vector Rank)   -- ^ New partial ranks.
-addUpdates links parRanks updates
- = let
-     to = A.map A.snd links
-   in A.permute (+) parRanks (index1 . A.fromIntegral . (to !)) updates
 
 stepRankSeq :: PageGraph
             -> Acc (Vector Int)  -- Sizes.
@@ -46,11 +35,11 @@ stepRankSeq p sizes ranks
       zeroes = A.fill (shape ranks) 0.0
 
       -- Ignore shape vector.
-      addUpdates' :: Acc (Vector Rank) -> Acc (Vector Z) -> Acc (Vector Link) -> Acc (Vector Rank)
-      addUpdates' ranks' _ links = addUpdates links ranks' (A.map (contribution sizes ranks) links)
+      addUpdates :: Acc (Vector Rank) -> Acc (Vector Z) -> Acc (Vector Link) -> Acc (Vector Rank)
+      addUpdates parRanks _ links = stepRank links sizes ranks parRanks
 
     in A.collect
-     $ A.foldSeqFlatten addUpdates' zeroes
+     $ A.foldSeqFlatten addUpdates zeroes
      $ A.toSeqInner (use p)
          -- (A.toSeq (constant (Z :. Split)) (use p))   -- TLM: ??
 
