@@ -31,7 +31,7 @@ hashcatSeq colMajor dict digest
   $ foldSeqFlatten find (unit (lift (-1 :: Int, 0 :: Int))) (words (use dict))
   where
     words :: Acc Dictionary -> Seq [Vector Word32]
-    words = if colMajor then toSeqInner else toSeqOuter
+    words = if colMajor then toSeqInner else toSeq2ndInner
     find fi ixs vs =
       let
           (found, i) = unlift (A.the fi)
