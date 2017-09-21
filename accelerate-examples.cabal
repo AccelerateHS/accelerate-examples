@@ -25,6 +25,7 @@ Category:               Compilers/Interpreters, Concurrency, Data, Parallelism
 Stability:              Experimental
 
 Extra-source-files:
+    README.md
     data/matrices/README.md
     examples/canny/README.md
     examples/fluid/README.md
@@ -58,10 +59,6 @@ Flag llvm-cpu
 Flag llvm-ptx
   Description:          Enable the LLVM PTX backend for NVIDIA GPUs
   Default:              True
-
-Flag cuda
-  Description:          Enable the CUDA parallel backend for NVIDIA GPUs (deprecated)
-  Default:              False
 
 -- Flags to specify which programs to build
 --
