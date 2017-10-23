@@ -27,7 +27,9 @@ module Data.Array.Accelerate.Examples.Internal.ParseArgs (
 
 ) where
 
+#if !MIN_VERSION_accelerate(1,2,0)
 import Data.Array.Accelerate.Debug                                              ( accInit )
+#endif
 import Data.Array.Accelerate.Examples.Internal.Backend
 import qualified Data.Array.Accelerate.Examples.Internal.Criterion.Config       as Criterion
 import qualified Data.Array.Accelerate.Examples.Internal.TestFramework.Config   as TestFramework
@@ -213,7 +215,9 @@ parseArgs :: [OptDescr (config -> config)]      -- ^ the user option description
           -> [String]                           -- ^ footer text
           -> IO (config, Options, [String])
 parseArgs programOptions programConfig header footer = do
+#if !MIN_VERSION_accelerate(1,2,0)
   accInit
+#endif
   args <- getArgs
 
   let

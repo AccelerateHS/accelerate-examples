@@ -6,13 +6,32 @@ resolver: lts-6.30
 packages:
 - '.'
 
+- location:
+    git:    https://github.com/tmcdonell/accelerate.git
+    commit: 98d10b1cc06b09b93e236623f0a053090061f15b
+  extra-dep: true
+
+- location:
+    git:    https://github.com/tmcdonell/accelerate-llvm.git
+    commit: ed24942cdebfdab34c8214296d85cc08f3111e43
+  extra-dep: true
+  subdirs:
+    - accelerate-llvm
+    - accelerate-llvm-native
+    - accelerate-llvm-ptx
+
+- location:
+    git:    https://github.com/tmcdonell/accelerate-fft.git
+    commit: 23b3992096d0c705cf8a5e646f20d966b6458221
+  extra-dep: true
+
 extra-deps:
-- 'accelerate-1.1.0.0'
-- 'accelerate-fft-1.1.0.0'
+# - 'accelerate-1.1.0.0'
+# - 'accelerate-fft-1.1.0.0'
 - 'accelerate-io-1.0.0.0'
-- 'accelerate-llvm-1.1.0.0'
-- 'accelerate-llvm-native-1.1.0.0'
-- 'accelerate-llvm-ptx-1.1.0.0'
+# - 'accelerate-llvm-1.1.0.0'
+# - 'accelerate-llvm-native-1.1.0.0'
+# - 'accelerate-llvm-ptx-1.1.0.0'
 - 'Cabal-2.0.0.2'
 - 'cabal-doctest-1.0.2'
 - 'chaselev-deque-0.5.0.5'
