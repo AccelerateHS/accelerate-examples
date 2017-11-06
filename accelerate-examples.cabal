@@ -217,9 +217,6 @@ Executable accelerate-nofib
         Test.Imaginary.DotP
         Test.Imaginary.SASUM
         Test.Imaginary.SAXPY
-        Test.IO
-        Test.IO.Ptr
-        Test.IO.Vector
         Test.Issues
         Test.Issues.Issue93
         Test.Issues.Issue102
@@ -270,9 +267,11 @@ Executable accelerate-nofib
   ghc-prof-options:
         -auto-all
 
-  extra-libraries:      stdc++
-  c-sources:            examples/nofib/Test/IO/fill_with_values.cpp
-                        examples/nofib/Test/Spectral/BlackScholes.cpp
+  extra-libraries:
+        stdc++
+
+  c-sources:
+        examples/nofib/Test/Spectral/BlackScholes.cpp
 
   if flag(ekg)
     ghc-options:        -with-rtsopts=-T
