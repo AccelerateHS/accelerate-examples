@@ -4,7 +4,7 @@ module FFT
 
 import qualified Prelude                                as P
 import Data.Array.Accelerate                            as A
-import Data.Array.Accelerate.IO                         as A
+import Data.Array.Accelerate.IO.Codec.BMP               as A
 import Data.Array.Accelerate.Data.Colour.RGBA           as A
 import Data.Array.Accelerate.Data.Complex               as A
 import Data.Array.Accelerate.Math.FFT                   as A

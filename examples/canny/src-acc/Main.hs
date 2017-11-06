@@ -11,8 +11,9 @@ import System.Environment
 
 import Data.Array.Accelerate                            as A
 import Data.Array.Accelerate.Examples.Internal          as A
-import qualified Data.Array.Accelerate.IO               as A
+import qualified Data.Array.Accelerate.IO.Codec.BMP     as A
 import qualified Data.Array.Repa.IO.BMP                 as R
+import qualified Data.Array.Repa.Repr.Accelerate        as A
 import qualified Data.Array.Repa.Repr.Unboxed           as R
 
 

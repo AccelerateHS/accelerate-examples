@@ -9,7 +9,7 @@ import Config
 import Data.Label
 
 import Prelude                                                      as P
-import Data.Array.Accelerate.IO                                     as A
+import Data.Array.Accelerate.IO.Codec.BMP                           as A
 import Data.Array.Accelerate.Examples.Internal                      as A
 import qualified Graphics.Gloss.Interface.IO.Game                   as G
 
