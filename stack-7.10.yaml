@@ -8,12 +8,12 @@ packages:
 
 - location:
     git:    https://github.com/tmcdonell/accelerate.git
-    commit: 3299df187a3b0d0400cde40002d343dd558ece18
+    commit: 9f72eea09b5505b016eeb408909dfc92ac70d054
   extra-dep: true
 
 - location:
     git:    https://github.com/tmcdonell/accelerate-llvm.git
-    commit: 6f423e6b9379feab174297d3cc558e5210db8068
+    commit: 0c86f27ee1206c03b2be05d4c7d83ec51e0e883e
   extra-dep: true
   subdirs:
     - accelerate-llvm
@@ -22,17 +22,12 @@ packages:
 
 - location:
     git:    https://github.com/tmcdonell/accelerate-fft.git
-    commit: 07e8c4edf76641c585ec2eb58b04817d50cfcaf0
+    commit: 7bbc3cdb40bcc8d2e726d6775e53f7eebecc5a07
   extra-dep: true
 
 - location:
     git:    https://github.com/tmcdonell/accelerate-io.git
-    commit: 8e64d2d8d7f1abe424d9f99cccfa766792de9379
-  extra-dep: true
-
-- location:
-    git:    https://github.com/tmcdonell/cuda.git
-    commit: 4272d6e2fdcfefdd6798d81c7af8aff6dc050b1a
+    commit: 0b47ae0f239efd30527f42988f9b8284dd407817
   extra-dep: true
 
 extra-deps:
@@ -47,7 +42,7 @@ extra-deps:
 - 'chaselev-deque-0.5.0.5'
 - 'colour-accelerate-0.2.0.0'
 - 'comonad-5.0.2'
-# - 'cuda-0.8.0.0'
+- 'cuda-0.9.0.0'
 - 'cufft-0.8.0.0'
 - 'gloss-1.11.1.1'
 - 'gloss-accelerate-2.0.0.0'
@@ -63,7 +58,7 @@ extra-deps:
 - 'llvm-hs-pure-4.1.0.0'
 - 'matrix-market-attoparsec-0.1.0.5'
 - 'normaldistribution-1.1.0.3'
-- 'nvvm-0.8.0.0'
+- 'nvvm-0.8.0.1'
 - 'process-1.4.3.0'
 - 'profunctors-5.2.1'
 - 'test-framework-quickcheck2-0.3.0.4'
