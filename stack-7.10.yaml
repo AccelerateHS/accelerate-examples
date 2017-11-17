@@ -61,6 +61,7 @@ extra-deps:
 - 'nvvm-0.8.0.1'
 - 'process-1.4.3.0'
 - 'profunctors-5.2.1'
+- 'tasty-hedgehog-0.1.0.1'
 - 'test-framework-quickcheck2-0.3.0.4'
 - 'th-abstraction-0.2.6.0'
 - 'transformers-0.5.5.0'
