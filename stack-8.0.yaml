@@ -6,37 +6,23 @@ resolver: lts-9.0
 packages:
 - '.'
 
-- location:
-    git:    https://github.com/tmcdonell/accelerate.git
-    commit: 9f72eea09b5505b016eeb408909dfc92ac70d054
-  extra-dep: true
-
-- location:
-    git:    https://github.com/tmcdonell/accelerate-llvm.git
-    commit: 0c86f27ee1206c03b2be05d4c7d83ec51e0e883e
-  extra-dep: true
-  subdirs:
-    - accelerate-llvm
-    - accelerate-llvm-native
-    - accelerate-llvm-ptx
-
-- location:
-    git:    https://github.com/tmcdonell/accelerate-fft.git
-    commit: 7bbc3cdb40bcc8d2e726d6775e53f7eebecc5a07
-  extra-dep: true
-
-- location:
-    git:    https://github.com/tmcdonell/accelerate-io.git
-    commit: 0b47ae0f239efd30527f42988f9b8284dd407817
-  extra-dep: true
-
 extra-deps:
-# - 'accelerate-1.1.0.0'
-# - 'accelerate-fft-1.1.0.0'
-# - 'accelerate-io-1.0.0.0'
-# - 'accelerate-llvm-1.1.0.0'
-# - 'accelerate-llvm-native-1.1.0.0'
-# - 'accelerate-llvm-ptx-1.1.0.0'
+- git:    https://github.com/tmcdonell/accelerate.git
+  commit: c6d87eeec0974b6cb39ecba60628a8dd52331812
+
+- git:    https://github.com/tmcdonell/accelerate-llvm.git
+  commit: 62f2f658a4ae1f71e8046bbf883b7dad35401824
+  subdirs:
+    - 'accelerate-llvm'
+    - 'accelerate-llvm-native'
+    - 'accelerate-llvm-ptx'
+
+- git:    https://github.com/tmcdonell/accelerate-fft.git
+  commit: e1c73891e473a6e3a361fe8837859dce94ec3871
+
+- git:    https://github.com/tmcdonell/accelerate-io.git
+  commit: 85f9b7a7bb00035af1e1368ec7919ce65a997ba7
+
 - 'Cabal-2.0.0.2'
 - 'colour-accelerate-0.2.0.0'
 - 'cuda-0.9.0.0'
