@@ -8,21 +8,32 @@ packages:
 
 extra-deps:
 - git:    https://github.com/tmcdonell/accelerate.git
-  commit: c6d87eeec0974b6cb39ecba60628a8dd52331812
+  commit: 1aa13b896811541dcd4b97b6c305e229d657d51e
 
 - git:    https://github.com/tmcdonell/accelerate-llvm.git
-  commit: 62f2f658a4ae1f71e8046bbf883b7dad35401824
+  commit: 9ccfc0969b8a3ac6d9280e890ca805c3b6ebc2dd
   subdirs:
     - 'accelerate-llvm'
     - 'accelerate-llvm-native'
     - 'accelerate-llvm-ptx'
 
 - git:    https://github.com/tmcdonell/accelerate-fft.git
-  commit: e1c73891e473a6e3a361fe8837859dce94ec3871
+  commit: d549bf31497d41b2ba35b81cef2cd822bbee0c7a
 
 - git:    https://github.com/tmcdonell/accelerate-io.git
   commit: 85f9b7a7bb00035af1e1368ec7919ce65a997ba7
 
+- git:    https://github.com/tmcdonell/cuda.git
+  commit: f04929808536fbcd28050d6bfd5ed682d8379d5b
+
+- git:    https://github.com/tmcdonell/colour-accelerate.git
+  commit: d69eb748a689df187012d0bd425a7bbfb9809655
+
+- git:    https://github.com/tmcdonell/linear-accelerate.git
+  commit: 8e518f39ad052024a2c96cf0054f93f983f240d0
+
+- git:    https://github.com/tmcdonell/gloss-accelerate.git
+  commit: 69900a2a68ad1dfded9c6173728120a2e1a35213
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
