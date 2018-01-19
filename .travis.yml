@@ -13,11 +13,10 @@ cache:
   directories:
     - $HOME/.stack/snapshots
     # - $HOME/llvm
-    # - .stack-work/install
+    - .stack-work/install
 
-# before_cache:
-#   - rm -rf $(stack path --local-install-root)/bin/accelerate-*
-#   - rm -rf $(stack path --local-install-root)/doc
+before_cache:
+  - rm -rf $(stack path --local-install-root)/doc
 
 addons:
   apt:
@@ -89,21 +88,14 @@ install:
   - c2hs --version
   - llc --version; true
   - opt --version; true
-  - |
-      if [ ${GHC} == head -o ! -e stack.yaml ]; then
-        travis_retry cabal install --only-dependencies || exit 1
-      else
-        travis_retry stack build --fast --only-dependencies --no-terminal || exit 1
-      fi
+  # - travis_retry travis_wait 60 stack build --fast --jobs=2 --only-dependencies --no-terminal --no-copy-bins
+
+  - travis_retry travis_wait 60 stack build --fast --jobs=2 --only-dependencies --no-terminal --no-copy-bins accelerate-llvm-native accelerate-llvm-ptx
 
 script:
-  - |
-      if [ ${GHC} == head -o ! -e stack.yaml ]; then
-        cabal install || exit 1
-      else
-        stack build --fast --no-terminal || exit 1
-      fi
+  - true
+  # - travis_retry stack build --fast --jobs=2 --no-terminal --no-copy-bins
 
 after_success:
-  - source .travis/update-accelerate-buildbot.sh
+  # - source .travis/update-accelerate-buildbot.sh
 
