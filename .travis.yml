@@ -88,6 +88,7 @@ install:
   - c2hs --version
   - llc --version; true
   - opt --version; true
+  - stack build --dry-run
   - travis_retry travis_wait 60 stack build --fast --jobs=2 --only-dependencies --no-terminal --no-copy-bins
 
 script:
