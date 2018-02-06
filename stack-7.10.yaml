@@ -27,7 +27,7 @@ extra-deps:
   commit: f04929808536fbcd28050d6bfd5ed682d8379d5b
 
 - git:    https://github.com/tmcdonell/colour-accelerate.git
-  commit: 51670aa22488ae9ed6ed9369b82c53d99dff6e22
+  commit: 6740c35e10fe3db655943fb56901418b8e99a946
 
 - git:    https://github.com/tmcdonell/linear-accelerate.git
   commit: feaf458f4ecbebc33846420cf6f4cfcf9ea090c5
