@@ -17,7 +17,7 @@ import qualified Prelude                                  as P
 
 
 mandelbrot
-    :: forall a. (Num a, RealFloat a, FromIntegral Int a)
+    :: forall a. (Num a, RealFloat a, FromIntegral Int a, Elt (Complex a))
     => Int                                  -- ^ image width
     -> Int                                  -- ^ image height
     -> Acc (Scalar a)                       -- ^ centre x
@@ -71,7 +71,7 @@ mandelbrot screenX screenY (the -> x0) (the -> y0) (the -> width) (the -> limit)
 -- <http://stackoverflow.com/questions/16500656/which-color-gradient-is-used-to-color-mandelbrot-in-wikipedia>
 --
 escapeToColour
-    :: (RealFloat a, ToFloating Int32 a)
+    :: (RealFloat a, ToFloating Int32 a, Elt (Complex a))
     => Acc (Scalar Int32)
     -> Exp (Complex a, Int32)
     -> Exp Colour
@@ -89,7 +89,7 @@ escapeToColour (the -> limit) (unlift -> (z, n)) =
         points  = 2048 :: Exp Int
 
 escapeToRGBA
-    :: (RealFloat a, ToFloating Int32 a)
+    :: (RealFloat a, ToFloating Int32 a, Elt (Complex a))
     => Acc (Scalar Int32)
     -> Acc (Vector Word32)
     -> Exp (Complex a, Int32)

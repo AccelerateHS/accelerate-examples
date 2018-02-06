@@ -195,10 +195,10 @@ instance Elt Plane where
   fromElt (Plane p n c s)       = fromElt (p, n, c, s)
 
 instance IsProduct Elt Plane where
-  type ProdRepr Plane = ProdRepr (Position, Direction, Colour, Float)
-  fromProd _ (Plane p n c s)     = fromTuple (p, n, c, s)
-  toProd _ t                     = let (p, n, c, s) = toTuple t in Plane p n c s
-  prod cst _                     = prod cst (undefined :: (Position, Direction, Colour, Float))
+  type ProdRepr Plane           = ProdRepr (Position, Direction, Colour, Float)
+  fromProd _ (Plane p n c s)    = fromTuple (p, n, c, s)
+  toProd _ t                    = let (p, n, c, s) = toTuple t in Plane p n c s
+  prod cst _                    = prod cst (undefined :: (Position, Direction, Colour, Float))
 
 instance Lift Exp Plane where
   type Plain Plane = Plane

@@ -8,29 +8,32 @@ packages:
 
 extra-deps:
 - git:    https://github.com/tmcdonell/accelerate.git
-  commit: 1aa13b896811541dcd4b97b6c305e229d657d51e
+  commit: 2a19ab7e892c2fed3c9e29145e5c616b9be3444a
 
 - git:    https://github.com/tmcdonell/accelerate-llvm.git
-  commit: 9ccfc0969b8a3ac6d9280e890ca805c3b6ebc2dd
+  commit: 64cc22e59eee159a93489c07b81e70a1c98e59ce
   subdirs:
     - 'accelerate-llvm'
     - 'accelerate-llvm-native'
     - 'accelerate-llvm-ptx'
 
 - git:    https://github.com/tmcdonell/accelerate-fft.git
-  commit: d549bf31497d41b2ba35b81cef2cd822bbee0c7a
+  commit: 9b9aa63ef9ed163829700ba5630ff9be1bd19a67
 
 - git:    https://github.com/tmcdonell/accelerate-io.git
-  commit: 85f9b7a7bb00035af1e1368ec7919ce65a997ba7
+  commit: 6e2cbcc915310e6fed0dcfb7dc09fa497a2efe2a
 
 - git:    https://github.com/tmcdonell/cuda.git
   commit: f04929808536fbcd28050d6bfd5ed682d8379d5b
 
 - git:    https://github.com/tmcdonell/colour-accelerate.git
-  commit: d69eb748a689df187012d0bd425a7bbfb9809655
+  commit: 6740c35e10fe3db655943fb56901418b8e99a946
 
 - git:    https://github.com/tmcdonell/linear-accelerate.git
-  commit: 8e518f39ad052024a2c96cf0054f93f983f240d0
+  commit: feaf458f4ecbebc33846420cf6f4cfcf9ea090c5
+
+- git:    https://github.com/tmcdonell/lens-accelerate.git
+  commit: 9abe5836aa2bbfd0ca76e103fc58e9615ad59284
 
 - git:    https://github.com/tmcdonell/gloss-accelerate.git
   commit: 69900a2a68ad1dfded9c6173728120a2e1a35213
