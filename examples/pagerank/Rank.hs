@@ -60,6 +60,7 @@ initialRanks backend pageCount
 
 
 -- | Run several iterations of the internal PageRank algorithm.
+--
 pageRank
         :: Backend
         -> Bool                 -- ^ Do not use Accelerate sequencing.
@@ -72,7 +73,6 @@ pageRank
         -> FilePath             -- ^ Path to titles file.
         -> A.Vector Rank        -- ^ Initial ranks.
         -> IO ()
-
 pageRank backend _noSeq maxIters chunkSize pageCount from to sizes0 _titlesFile ranks0 =
   go maxIters ranks0
   where
@@ -93,26 +93,26 @@ pageRank backend _noSeq maxIters chunkSize pageCount from to sizes0 _titlesFile 
 
                 -- Run a step of the algorithm.
                 -- let ranks1 = if noSeq then stepInChunks ranks zeros 0 else stepInSeq ranks
-                let ranks1 = stepInChunks ranks zeros 0
-                let ranks2 = addDangles (ranks1, sizes0)
+                let !ranks1 = stepInChunks ranks zeros 0
+                let !ranks2 = addDangles ranks1 sizes0
 
                 -- Sum up the ranks for all the pages,
                 -- this should be very close to 1, minus some some round-off error.
-                let rankSum = run1 backend A.sum ranks2
+                let rankSum = runN backend A.sum ranks2
                 putStrLn $ "  rank sum   : "  P.++ show rankSum
 
                 go (i - 1) ranks2
 
         -- Add to the rank the score due to dangling vectors.
-        addDangles :: (Vector Rank, Vector Int) -> Vector Rank
-        addDangles = run1 backend $ A.uncurry $ \ranks sizes -> let
+        addDangles :: Vector Rank -> Vector Int -> Vector Rank
+        addDangles = runN backend $ \ !ranks !sizes ->
+          let
+              dangleScore = A.fold (+) 0 (A.zipWith d ranks sizes)
 
-            dangleScore = A.fold (+) 0 (A.zipWith d ranks sizes)
+              dangleContrib :: Acc (Scalar Rank)
+              dangleContrib = A.unit (the dangleScore / (A.lift (P.fromIntegral pageCount :: Float)))
 
-            dangleContrib :: Acc (Scalar Rank)
-            dangleContrib = A.unit (the dangleScore / (A.lift (P.fromIntegral pageCount :: Float)))
-
-            d r s = s A.== 0 ? (r, 0)
+              d r s = s A.== 0 ? (r, 0)
 
           in A.map (+ A.the dangleContrib) ranks
 
@@ -130,17 +130,18 @@ pageRank backend _noSeq maxIters chunkSize pageCount from to sizes0 _titlesFile 
           | start P.>= edgeCount
           = parRanks
           | otherwise
-          = let end     = P.min (start + chunkSize) edgeCount
-                from'   = S.slice start (end - start) from
-                to'     = S.slice start (end - start) to
-                !pages  = A.fromVectors (Z:.(end - start)) (((), from'), to')
-                !parRanks1 = step (pages, sizes0, ranks, parRanks)
-            in stepInChunks ranks parRanks1 (start + chunkSize)
+          = let end        = P.min (start + chunkSize) edgeCount
+                from'      = S.slice start (end - start) from
+                to'        = S.slice start (end - start) to
+                !pages     = A.fromVectors (Z:.(end - start)) (((), from'), to')
+                !parRanks1 = step pages sizes0 ranks parRanks
+            in
+            stepInChunks ranks parRanks1 (start + chunkSize)
 
-        step :: (PageGraph, Vector Int, Vector Rank, Vector Rank) -> Vector Rank
-        step = run1 backend $ (\t -> let (p,s,r,pr) = unlift t in stepRank p s r pr)
+        step :: PageGraph -> Vector Int -> Vector Rank -> Vector Rank -> Vector Rank
+        step = runN backend stepRank
 
         -- Computer the index of the maximum rank.
         maxIndex :: A.Vector Rank -> A.Scalar Int
-        maxIndex = run1 backend $ (\ranks -> A.fold (\x y -> ranks ! index1 x A.> ranks ! index1 y ? (x,y)) 0 (A.enumFromN (A.shape ranks) 0))
+        maxIndex = runN backend $ (\ranks -> A.fold (\x y -> ranks ! index1 x A.> ranks ! index1 y ? (x,y)) 0 (A.enumFromN (A.shape ranks) 0))
 
