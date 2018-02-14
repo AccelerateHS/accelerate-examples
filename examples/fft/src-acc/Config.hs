@@ -49,8 +49,6 @@ header =
   , ""
   , "Usage: accelerate-fft [OPTIONS] fileIn.bmp fileOut.bmp"
   , ""
-  , "Image dimensions must be a power of two, eg 128x512 or 64x256"
-  , ""
   , "For FFT, the output magnitude has a high dynamic range. We need to clip it"
   , "otherwise most of the pixels in the output BMP will be black. Start with a"
   , "value equal to about the width of the image (eg 512)"
