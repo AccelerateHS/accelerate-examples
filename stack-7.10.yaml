@@ -8,23 +8,26 @@ packages:
 
 extra-deps:
 - git:    https://github.com/tmcdonell/accelerate.git
-  commit: 2a19ab7e892c2fed3c9e29145e5c616b9be3444a
+  commit: 2082d1e5a61d25ba893723e41eddaae33a3fbc4b
 
 - git:    https://github.com/tmcdonell/accelerate-llvm.git
-  commit: 64cc22e59eee159a93489c07b81e70a1c98e59ce
+  commit: f4d6817788337b874f3bdb5d3a02979f08e4fa89
   subdirs:
     - 'accelerate-llvm'
     - 'accelerate-llvm-native'
     - 'accelerate-llvm-ptx'
 
 - git:    https://github.com/tmcdonell/accelerate-fft.git
-  commit: 9b9aa63ef9ed163829700ba5630ff9be1bd19a67
+  commit: 540332967616dacdf76b905112153726e2c89142
 
 - git:    https://github.com/tmcdonell/accelerate-io.git
   commit: 6e2cbcc915310e6fed0dcfb7dc09fa497a2efe2a
 
 - git:    https://github.com/tmcdonell/cuda.git
   commit: f04929808536fbcd28050d6bfd5ed682d8379d5b
+
+- git:    https://github.com/tmcdonell/cufft.git
+  commit: 71d0260be5a2a52206fed0e7c33ac53a0d5ec749
 
 - git:    https://github.com/tmcdonell/colour-accelerate.git
   commit: 6740c35e10fe3db655943fb56901418b8e99a946
@@ -42,7 +45,6 @@ extra-deps:
 - 'cabal-doctest-1.0.2'
 - 'chaselev-deque-0.5.0.5'
 - 'comonad-5.0.2'
-- 'cufft-0.8.0.0'
 - 'gloss-1.11.1.1'
 - 'gloss-raster-accelerate-2.0.0.0'
 - 'gloss-rendering-1.11.1.1'
