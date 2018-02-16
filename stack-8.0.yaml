@@ -8,10 +8,10 @@ packages:
 
 extra-deps:
 - git:    https://github.com/tmcdonell/accelerate.git
-  commit: 2082d1e5a61d25ba893723e41eddaae33a3fbc4b
+  commit: c2946299193ac55547d51ff32abc3bfd9ad42d59
 
 - git:    https://github.com/tmcdonell/accelerate-llvm.git
-  commit: f4d6817788337b874f3bdb5d3a02979f08e4fa89
+  commit: 380225bf25e237c08b079e681f82ce5541295fdf
   subdirs:
     - 'accelerate-llvm'
     - 'accelerate-llvm-native'
@@ -22,9 +22,6 @@ extra-deps:
 
 - git:    https://github.com/tmcdonell/accelerate-io.git
   commit: 6e2cbcc915310e6fed0dcfb7dc09fa497a2efe2a
-
-- git:    https://github.com/tmcdonell/cuda.git
-  commit: f04929808536fbcd28050d6bfd5ed682d8379d5b
 
 - git:    https://github.com/tmcdonell/cufft.git
   commit: 71d0260be5a2a52206fed0e7c33ac53a0d5ec749
@@ -42,6 +39,7 @@ extra-deps:
   commit: 69900a2a68ad1dfded9c6173728120a2e1a35213
 
 - 'Cabal-2.0.0.2'
+- 'cuda-0.9.0.1'
 - 'gloss-raster-accelerate-2.0.0.0'
 - 'normaldistribution-1.1.0.3'
 - 'nvvm-0.8.0.1'
