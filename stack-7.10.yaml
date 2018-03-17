@@ -8,61 +8,52 @@ packages:
 
 extra-deps:
 - git:    https://github.com/tmcdonell/accelerate.git
-  commit: c2946299193ac55547d51ff32abc3bfd9ad42d59
+  commit: 08447726b27d0b91c872c7bf2afd8401afd17c32
 
 - git:    https://github.com/tmcdonell/accelerate-llvm.git
-  commit: 380225bf25e237c08b079e681f82ce5541295fdf
+  commit: 597574f2a6e4f3e38e635834311a0b4efc0a2f9f
   subdirs:
     - 'accelerate-llvm'
     - 'accelerate-llvm-native'
     - 'accelerate-llvm-ptx'
 
 - git:    https://github.com/tmcdonell/accelerate-fft.git
-  commit: 540332967616dacdf76b905112153726e2c89142
+  commit: 62c72e5adbd5f11a095127f075fc3eb465857c89
 
 - git:    https://github.com/tmcdonell/accelerate-io.git
-  commit: 6e2cbcc915310e6fed0dcfb7dc09fa497a2efe2a
-
-- git:    https://github.com/tmcdonell/cufft.git
-  commit: 71d0260be5a2a52206fed0e7c33ac53a0d5ec749
+  commit: df7951a94174f72676f829fc5ca076a8211a903f
 
 - git:    https://github.com/tmcdonell/colour-accelerate.git
-  commit: 6740c35e10fe3db655943fb56901418b8e99a946
+  commit: e347b28b0d5a6306890c37b8df8086de7edfc0ba
 
 - git:    https://github.com/tmcdonell/linear-accelerate.git
-  commit: feaf458f4ecbebc33846420cf6f4cfcf9ea090c5
+  commit: f2c2694c32e7a3a15a2812043cc6407169622d85
 
 - git:    https://github.com/tmcdonell/lens-accelerate.git
-  commit: 9abe5836aa2bbfd0ca76e103fc58e9615ad59284
+  commit: 8893c758145d70cd08035c185a2f0bb24fd52de9
 
 - git:    https://github.com/tmcdonell/gloss-accelerate.git
-  commit: 69900a2a68ad1dfded9c6173728120a2e1a35213
+  commit: d5cadb454a6bd4d2d9e3d67b5229a4e048ab726c
 
-- 'Cabal-2.0.0.2'
-- 'cabal-doctest-1.0.2'
+- git:    https://github.com/tmcdonell/gloss-raster-accelerate.git
+  commit: 134f7362518d9595f38375e68568f2976751f909
+
+- 'Cabal-2.0.1.1'
 - 'chaselev-deque-0.5.0.5'
-- 'comonad-5.0.2'
-- 'cuda-0.9.0.1'
+- 'constraints-0.9.1'
+- 'cuda-0.9.0.3'
+- 'cufft-0.9.0.0'
 - 'gloss-1.11.1.1'
-- 'gloss-raster-accelerate-2.0.0.0'
 - 'gloss-rendering-1.11.1.1'
-- 'hedgehog-0.5'
-- 'kan-extensions-5.0.2'
-- 'lens-4.15.4'
+- 'hedgehog-0.5.3'
 - 'libffi-0.1'
-- 'llvm-hs-4.1.0.0'
+- 'llvm-hs-4.2.0'
 - 'llvm-hs-pure-4.1.0.0'
-- 'matrix-market-attoparsec-0.1.0.5'
+- 'matrix-market-attoparsec-0.1.0.8'
 - 'normaldistribution-1.1.0.3'
-- 'nvvm-0.8.0.1'
+- 'nvvm-0.8.0.3'
 - 'process-1.4.3.0'
-- 'profunctors-5.2.1'
-- 'tagged-0.8.5'
-- 'tasty-hedgehog-0.1.0.1'
-- 'test-framework-quickcheck2-0.3.0.4'
-- 'th-abstraction-0.2.6.0'
-- 'transformers-0.5.5.0'
-- 'transformers-compat-0.5.1.4'
+- 'tasty-hedgehog-0.2.0.0'
 - 'unique-0'
 - 'wl-pprint-annotated-0.1.0.0'
 

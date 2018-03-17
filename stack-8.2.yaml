@@ -1,44 +1,45 @@
 # For more information, see: https://github.com/commercialhaskell/stack/blob/release/doc/yaml_configuration.md
 # vim: nospell
 
-resolver: lts-10.0
+resolver: lts-11.0
 
 packages:
 - '.'
 
 extra-deps:
 - git:    https://github.com/tmcdonell/accelerate.git
-  commit: c2946299193ac55547d51ff32abc3bfd9ad42d59
+  commit: 08447726b27d0b91c872c7bf2afd8401afd17c32
 
 - git:    https://github.com/tmcdonell/accelerate-llvm.git
-  commit: 380225bf25e237c08b079e681f82ce5541295fdf
+  commit: 597574f2a6e4f3e38e635834311a0b4efc0a2f9f
   subdirs:
     - 'accelerate-llvm'
     - 'accelerate-llvm-native'
     - 'accelerate-llvm-ptx'
 
 - git:    https://github.com/tmcdonell/accelerate-fft.git
-  commit: 540332967616dacdf76b905112153726e2c89142
+  commit: 62c72e5adbd5f11a095127f075fc3eb465857c89
 
 - git:    https://github.com/tmcdonell/accelerate-io.git
-  commit: 6e2cbcc915310e6fed0dcfb7dc09fa497a2efe2a
-
-- git:    https://github.com/tmcdonell/cufft.git
-  commit: 71d0260be5a2a52206fed0e7c33ac53a0d5ec749
+  commit: df7951a94174f72676f829fc5ca076a8211a903f
 
 - git:    https://github.com/tmcdonell/colour-accelerate.git
-  commit: 6740c35e10fe3db655943fb56901418b8e99a946
+  commit: e347b28b0d5a6306890c37b8df8086de7edfc0ba
 
 - git:    https://github.com/tmcdonell/linear-accelerate.git
-  commit: feaf458f4ecbebc33846420cf6f4cfcf9ea090c5
+  commit: f2c2694c32e7a3a15a2812043cc6407169622d85
 
 - git:    https://github.com/tmcdonell/lens-accelerate.git
-  commit: 9abe5836aa2bbfd0ca76e103fc58e9615ad59284
+  commit: 8893c758145d70cd08035c185a2f0bb24fd52de9
 
 - git:    https://github.com/tmcdonell/gloss-accelerate.git
-  commit: 69900a2a68ad1dfded9c6173728120a2e1a35213
+  commit: d5cadb454a6bd4d2d9e3d67b5229a4e048ab726c
 
-- 'cuda-0.9.0.1'
+- git:    https://github.com/tmcdonell/gloss-raster-accelerate.git
+  commit: 134f7362518d9595f38375e68568f2976751f909
+
+- 'cufft-0.9.0.0'
+- 'normaldistribution-1.1.0.3'
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
