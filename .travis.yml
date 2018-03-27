@@ -106,8 +106,7 @@ install:
   - travis_retry travis_wait 60 stack build --fast --jobs=2 --only-dependencies --no-terminal --no-copy-bins
 
 script:
-  - true
-  # - travis_retry stack build --fast --jobs=2 --no-terminal --no-copy-bins
+  - travis_retry stack build --fast --jobs=2 --no-terminal --no-copy-bins
 
 # after_success:
 #   - source .travis/update-accelerate-buildbot.sh
