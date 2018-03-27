@@ -1,27 +1,27 @@
 # For more information, see: https://github.com/commercialhaskell/stack/blob/release/doc/yaml_configuration.md
 # vim: nospell
 
-resolver: lts-11.0
+resolver: lts-11.2
 
 packages:
 - '.'
 
 extra-deps:
 - git:    https://github.com/tmcdonell/accelerate.git
-  commit: 08447726b27d0b91c872c7bf2afd8401afd17c32
+  commit: 0a5d8f622f9c7541afbbf3d6848d6fa636e510d2
 
 - git:    https://github.com/tmcdonell/accelerate-llvm.git
-  commit: 597574f2a6e4f3e38e635834311a0b4efc0a2f9f
+  commit: fd2cb894c702e3cb4a243bc54586e018163f8d5b
   subdirs:
     - 'accelerate-llvm'
     - 'accelerate-llvm-native'
     - 'accelerate-llvm-ptx'
 
 - git:    https://github.com/tmcdonell/accelerate-fft.git
-  commit: 62c72e5adbd5f11a095127f075fc3eb465857c89
+  commit: a3d06786cf5e4b3c41f2d358448ba6fbeace21e5
 
 - git:    https://github.com/tmcdonell/accelerate-io.git
-  commit: df7951a94174f72676f829fc5ca076a8211a903f
+  commit: 652e4a1831f144628a0ca8cae582032815dd64c9
 
 - git:    https://github.com/tmcdonell/colour-accelerate.git
   commit: e347b28b0d5a6306890c37b8df8086de7edfc0ba
@@ -33,10 +33,10 @@ extra-deps:
   commit: 8893c758145d70cd08035c185a2f0bb24fd52de9
 
 - git:    https://github.com/tmcdonell/gloss-accelerate.git
-  commit: d5cadb454a6bd4d2d9e3d67b5229a4e048ab726c
+  commit: 046f625fd9102618b9635b10c4ee7aae0075147f
 
 - git:    https://github.com/tmcdonell/gloss-raster-accelerate.git
-  commit: 134f7362518d9595f38375e68568f2976751f909
+  commit: 164c6ee43f04dd8c17ab526bf13d1b3b6eacd6d0
 
 - 'cufft-0.9.0.0'
 - 'normaldistribution-1.1.0.3'
