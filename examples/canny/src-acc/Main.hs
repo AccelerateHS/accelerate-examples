@@ -12,6 +12,7 @@ import System.Environment
 import Data.Array.Accelerate                            as A
 import Data.Array.Accelerate.Examples.Internal          as A
 import qualified Data.Array.Accelerate.IO.Codec.BMP     as A
+import qualified Data.Array.Repa                        as R
 import qualified Data.Array.Repa.IO.BMP                 as R
 import qualified Data.Array.Repa.Repr.Accelerate        as A
 import qualified Data.Array.Repa.Repr.Unboxed           as R
@@ -54,7 +55,7 @@ main
              -- write the final image to file
              --
              let (image, strong) = run backend $ A.lift (canny threshLow threshHigh (use img))
-             edges              <- wildfire (A.toRepa image) (A.toRepa strong)
+             edges              <- flipV <$> wildfire (A.toRepa image) (A.toRepa strong)
              R.writeImageToBMP fileOut (R.zip3 edges edges edges)
 
           else do
@@ -78,4 +79,14 @@ main
                 , bench "run1"    $ whnf (run1 backend  (P.snd . canny threshLow threshHigh)) img
                 ]
               ]
+
+-- | Flip the image vertically
+--
+flipV :: R.Array R.U R.DIM2 Word8 -> R.Array R.U R.DIM2 Word8
+flipV arr
+  = R.computeUnboxedS
+  $ R.backpermute sh p arr
+  where
+    sh@(R.Z R.:. rows R.:. _) = R.extent arr
+    p (R.Z R.:. j R.:. i)     = R.Z R.:. rows-j-1 R.:. i
 
