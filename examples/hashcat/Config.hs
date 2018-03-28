@@ -17,8 +17,6 @@ data Config
   , _configMaxWords             :: Maybe Int
   , _configSkipWords            :: Int
   -- , _configNoSeq                :: Bool
-
-  , _configHelp                 :: Bool
   }
   deriving Show
 
@@ -32,7 +30,6 @@ defaults = Config
   , _configMaxWords             = Nothing
   , _configSkipWords            = 0
   -- , _configNoSeq                = True
-  , _configHelp                 = False
   }
 
 
@@ -59,10 +56,6 @@ options =
   -- , Option      [] ["noseq"]
   --               (NoArg (set configNoSeq True))
   --               "do not use sequencing"
-
-  , Option      ['h', '?'] ["help"]
-                (NoArg (set configHelp True))
-                "show this help message"
   ]
 
 
