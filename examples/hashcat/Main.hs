@@ -71,8 +71,9 @@ main = do
 --}
 
       recover hash =
-        let abcd = readMD5 hash
-            idx  = run1 backend (hashcatDict (A.use dict)) (A.fromList Z [abcd])
+        let !go  = runN backend (hashcatDict (A.use dict))
+            abcd = readMD5 hash
+            idx  = go (A.fromList Z [abcd])
         --
         in case idx `A.indexArray` Z of
              -1 -> Nothing
