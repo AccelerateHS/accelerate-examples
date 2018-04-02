@@ -55,7 +55,7 @@ rank backend noSeq steps chunkSize pagesPath titlesPath
 -- | Construct the initial ranks vector.
 initialRanks :: Backend -> Int -> A.Vector Rank
 initialRanks backend pageCount
- = let  !startRank   = 1 / P.fromIntegral pageCount
+ = let  !startRank  = 1 / P.fromIntegral pageCount
    in   run backend $ A.fill (index1 (A.lift pageCount)) startRank
 
 

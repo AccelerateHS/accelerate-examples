@@ -29,9 +29,10 @@ import qualified Data.Array.Accelerate          as A
 -- matches the given unknown md5, returns the index into the dictionary of said
 -- match. If not found, this returns (-1).
 --
-hashcatDict :: Acc Dictionary
-         -> Acc (Scalar MD5)
-         -> Acc (Scalar Int)
+hashcatDict
+    :: Acc Dictionary
+    -> Acc (Scalar MD5)
+    -> Acc (Scalar Int)
 hashcatDict dict passwd
   = reshape (constant Z)
   $ permute const res (\ix -> crypt A.! ix `cmp` the passwd ? (constant (Z:.0), ignore))
@@ -49,10 +50,11 @@ hashcatDict dict passwd
 -- given unknown md5, returns the given index. If not matched, this
 -- returns (-1).
 --
-hashcatWord :: Acc (Scalar MD5)
-            -> Acc (Vector Word32)
-            -> Acc (Scalar Int)
-            -> Acc (Scalar Int)
+hashcatWord
+    :: Acc (Scalar MD5)
+    -> Acc (Vector Word32)
+    -> Acc (Scalar Int)
+    -> Acc (Scalar Int)
 hashcatWord passwd word ix
   = unit (crypt `cmp` the passwd ? (the ix, -1))
   where
@@ -174,3 +176,4 @@ readMD5 =
         return . P.fst $ fromMaybe (error "readHex32be: parse failure") (readHexadecimal s)
   in
   either error id . S.runGetLazy get
+
