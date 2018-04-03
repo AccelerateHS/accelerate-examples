@@ -108,6 +108,6 @@ install:
 script:
   - travis_retry stack build --fast --jobs=2 --no-terminal --no-copy-bins
 
-# after_success:
-#   - source .travis/update-accelerate-buildbot.sh
+after_success:
+  - source .travis/update-accelerate-buildbot.sh
 
