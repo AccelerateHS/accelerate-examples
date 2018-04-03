@@ -98,16 +98,17 @@ install:
   - opt-${LLVM:0:3} --version; true
 
   # bootstrap
-  # - travis_retry travis_wait 60 stack build --fast --jobs=2 --only-dependencies --no-terminal accelerate
+  - travis_retry travis_wait 60 stack build --fast --jobs=2 --only-dependencies --no-terminal accelerate
   # - travis_retry travis_wait 60 stack build --fast --jobs=2 --only-dependencies --no-terminal accelerate-llvm-native accelerate-llvm-ptx
 
-  # standard build
-  - stack build --dry-run
-  - travis_retry travis_wait 60 stack build --fast --jobs=2 --only-dependencies --no-terminal --no-copy-bins
+  # # standard build
+  # - stack build --dry-run
+  # - travis_retry travis_wait 60 stack build --fast --jobs=2 --only-dependencies --no-terminal --no-copy-bins
 
 script:
-  - travis_retry stack build --fast --jobs=2 --no-terminal --no-copy-bins
+  - true
+  # - travis_retry stack build --fast --jobs=2 --no-terminal --no-copy-bins
 
-after_success:
-  - source .travis/update-accelerate-buildbot.sh
+# after_success:
+#   - source .travis/update-accelerate-buildbot.sh
 
