@@ -72,6 +72,11 @@ smoothlife conf _opts aa
     kr          = generate (constant sh) (\ix -> let r = radius ix
                                                  in  linear r ri b * (1 - linear r ra b))
 
+    -- kflr''      = constant (kflr' `A.indexArray` Z)
+    -- kfld''      = constant (kfld' `A.indexArray` Z)
+    -- (kflr', kfld', krf', kdf')
+    --             = run (get optBackend opts) $ lift (kflr, kfld, krf, kdf)
+
     -- Auxiliary
     --
     get1 f c    = constant  $ get f c
