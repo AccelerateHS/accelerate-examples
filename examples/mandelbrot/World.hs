@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns        #-}
 {-# LANGUAGE ConstraintKinds     #-}
 {-# LANGUAGE FlexibleContexts    #-}
 {-# LANGUAGE GADTs               #-}
@@ -41,7 +42,7 @@ data World where
     { worldPicture      :: !Picture
     , worldDirty        :: Bool
     , worldPrecision    :: Precision
-    , worldPalette      :: Vector Word32
+    , worldPalette      :: !(Vector Word32)
     , worldRender       :: (Scalar a, Scalar a, Scalar a, Scalar Int32, Scalar a) -> Array DIM2 Word32
     , worldSizeX        :: !Int
     , worldSizeY        :: !Int
@@ -189,7 +190,8 @@ updateWorld world =
 
 renderWorld :: World -> Array DIM2 Word32
 renderWorld World{..} =
-  worldRender (worldPosX, worldPosY, worldWidth, worldIters, worldRadius)
+  let !r = worldRender (worldPosX, worldPosY, worldWidth, worldIters, worldRadius)
+  in r
 
 
 -- Miscellaneous
