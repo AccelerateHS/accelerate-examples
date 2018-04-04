@@ -1,18 +1,19 @@
+{-# LANGUAGE FlexibleContexts #-}
 
 module FFT
   where
 
 import qualified Prelude                                as P
 import Data.Array.Accelerate                            as A
-import Data.Array.Accelerate.IO                         as A
+import Data.Array.Accelerate.IO.Codec.BMP               as A
 import Data.Array.Accelerate.Data.Colour.RGBA           as A
 import Data.Array.Accelerate.Data.Complex               as A
 import Data.Array.Accelerate.Math.FFT                   as A
 import Data.Array.Accelerate.Math.DFT.Centre            as A
 
 
-imageFFT :: DIM2 -> Int -> Acc (Array DIM2 RGBA32) -> Acc (Array DIM2 RGBA32, Array DIM2 RGBA32)
-imageFFT sh cutoff img = lift (arrMag, arrPhase)
+imageFFT :: Int -> Acc (Array DIM2 RGBA32) -> Acc (Array DIM2 RGBA32, Array DIM2 RGBA32)
+imageFFT cutoff img = lift (arrMag, arrPhase)
   where
     -- Load in the image luminance
     arrComplex :: Acc (Array DIM2 (Complex Float))
@@ -24,7 +25,7 @@ imageFFT sh cutoff img = lift (arrMag, arrPhase)
     arrCentered = centre2D arrComplex
 
     -- Do the transform
-    arrFreq     = fft2D' Forward sh arrCentered
+    arrFreq     = fft2D Forward arrCentered
 
     -- Clip the magnitude of the transformed array
     clipMag     = the (unit (constant (P.fromIntegral cutoff)))

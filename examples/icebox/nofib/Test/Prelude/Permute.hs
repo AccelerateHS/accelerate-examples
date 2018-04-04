@@ -24,7 +24,7 @@ import Test.Base
 import QuickCheck.Arbitrary.Array
 
 import Data.Array.Accelerate                                    as A
-import Data.Array.Accelerate.IO                                 as A
+import Data.Array.Accelerate.IO.Data.Array.IArray               as A
 import Data.Array.Accelerate.Array.Sugar                        ( rank )
 import Data.Array.Accelerate.Examples.Internal                  as A
 
@@ -125,7 +125,7 @@ test_permute backend opt = testGroup "permute" $ catMaybes
       forAll (arbitraryArray (Z:.n))                    $ \(inputV :: Vector e) ->
         toList (runN backend A.scatter mapV defaultV inputV)
         ~?=
-        IArray.elems (scatterRef (toIArray mapV) (toIArray defaultV) (toIArray inputV))
+        IArray.elems (scatterRef (toIArray Nothing mapV) (toIArray Nothing defaultV) (toIArray Nothing inputV))
 
     -- test_scatterIf :: forall e. (Elt e, Similar e, Arbitrary e) => e -> Property
     -- test_scatterIf _ =
@@ -136,7 +136,7 @@ test_permute backend opt = testGroup "permute" $ catMaybes
     --   forAll (arbitraryArray (Z:.n))                    $ \(inputV :: Vector e) ->
     --     toList (runN backend (\p v d x -> A.scatterIf p v A.even d x) mapV maskV defaultV inputV)
     --     ~?=
-    --     IArray.elems (scatterIfRef (toIArray mapV) (toIArray maskV) P.even (toIArray defaultV) (toIArray inputV))
+    --     IArray.elems (scatterIfRef (toIArray Nothing mapV) (toIArray Nothing maskV) P.even (toIArray Nothing defaultV) (toIArray Nothing inputV))
 
 
 

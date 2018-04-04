@@ -11,7 +11,7 @@ RUN apt-get update \
 
 # Copy over just the cabal and stack file and install dependencies
 WORKDIR /opt/accelerate-examples
-COPY ./stack-8.0.yaml /opt/accelerate-examples/stack.yaml
+COPY ./stack-8.2.yaml /opt/accelerate-examples/stack.yaml
 COPY ./accelerate-examples.cabal /opt/accelerate-examples/
 RUN stack build accelerate-examples \
   --only-dependencies \

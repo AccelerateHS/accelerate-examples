@@ -1,5 +1,5 @@
 Name:                   accelerate-examples
-Version:                1.1.0.0
+Version:                1.2.0.0
 Cabal-version:          >=1.8
 Tested-with:            GHC >= 7.8
 Build-type:             Simple
@@ -62,10 +62,6 @@ Flag llvm-ptx
 
 -- Flags to specify which programs to build
 --
-Flag nofib
-  Description:          Regression test suite
-  Default:              True
-
 Flag smvm
   Description:          Sparse-matrix vector multiplication benchmark
   Default:              True
@@ -125,8 +121,8 @@ Flag kmeans
 Library
   hs-source-dirs:       lib
   Build-depends:
-          base                            >= 4.7 && < 4.11
-        , accelerate                      == 1.1.*
+          base                            >= 4.7 && < 4.12
+        , accelerate                      >= 1.2
         , ansi-wl-pprint                  >= 0.6
         , containers                      >= 0.5
         , criterion                       >= 1.0
@@ -163,20 +159,15 @@ Library
   if flag(gui)
     CPP-options:        -DACCELERATE_ENABLE_GUI
 
-  -- if flag(cuda)
-  --   CPP-options:        -DACCELERATE_CUDA_BACKEND
-  --   build-depends:
-  --       accelerate-cuda                   == 0.17.*
-
   if flag(llvm-cpu)
     CPP-options:        -DACCELERATE_LLVM_NATIVE_BACKEND
     build-depends:
-        accelerate-llvm-native            == 1.1.*
+        accelerate-llvm-native            >= 1.2
 
   if flag(llvm-ptx)
     CPP-options:        -DACCELERATE_LLVM_PTX_BACKEND
     build-depends:
-        accelerate-llvm-ptx               == 1.1.*
+        accelerate-llvm-ptx               >= 1.2
 
   if flag(ekg)
     CPP-options:        -DACCELERATE_ENABLE_EKG
@@ -198,119 +189,6 @@ Library
     other-modules:
         Data.Array.Accelerate.Examples.Internal.Codespeed
         Data.Array.Accelerate.Examples.Internal.TH
-
-
--- The main test program. This includes randomised quickcheck testing for array
--- primitives, unit tests, imaginary/spectral/real programs, and benchmarks.
---
--- TODO: add an analysis script to scrape benchmark results
---
-Executable accelerate-nofib
-  Main-is:              Main.hs
-  hs-source-dirs:
-        examples/nofib
-        examples/smvm
-
-  other-modules:
-        Config
-        QuickCheck.Arbitrary.Array
-        QuickCheck.Arbitrary.Shape
-        SMVM
-        Test.Base
-        Test.FFT
-        Test.Foreign
-        Test.Imaginary
-        Test.Imaginary.DotP
-        Test.Imaginary.SASUM
-        Test.Imaginary.SAXPY
-        Test.IO
-        Test.IO.Ptr
-        Test.IO.Vector
-        Test.Issues
-        Test.Issues.Issue93
-        Test.Issues.Issue102
-        Test.Issues.Issue114
-        Test.Issues.Issue119
-        Test.Issues.Issue123
-        Test.Issues.Issue137
-        Test.Issues.Issue168
-        Test.Issues.Issue184
-        Test.Issues.Issue185
-        Test.Issues.Issue187
-        Test.Issues.Issue228
-        Test.Issues.Issue255
-        Test.Issues.Issue264
-        Test.Issues.Issue286
-        Test.Issues.Issue287
-        Test.Issues.Issue288
-        Test.Issues.Issue362
-        Test.Prelude
-        Test.Prelude.Backpermute
-        Test.Prelude.Filter
-        Test.Prelude.Fold
-        Test.Prelude.Map
-        Test.Prelude.Permute
-        Test.Prelude.Replicate
-        Test.Prelude.Scan
-        -- Test.Prelude.Sequences
-        Test.Prelude.Stencil
-        Test.Prelude.ZipWith
-        Test.Sharing
-        Test.Spectral
-        Test.Spectral.BlackScholes
-        Test.Spectral.RadixSort
-        Test.Spectral.SMVM
-
-  ghc-options:
-        -O2
-        -Wall
-        -threaded
-        -fpedantic-bottoms
-        -fno-excess-precision
-        -eventlog
-        -rtsopts
-        -with-rtsopts=-n2M
-        -with-rtsopts=-A64M
-        -with-rtsopts=-qg
-
-  ghc-prof-options:
-        -auto-all
-
-  extra-libraries:      stdc++
-  c-sources:            examples/nofib/Test/IO/fill_with_values.cpp
-                        examples/nofib/Test/Spectral/BlackScholes.cpp
-
-  -- if flag(cuda)
-  --   CPP-options:        -DACCELERATE_CUDA_BACKEND
-  --   build-depends:
-  --       accelerate-cuda                   == 0.17.*
-  --
-  --   other-modules:
-  --       Test.Foreign.CUDA
-
-  if flag(ekg)
-    ghc-options:        -with-rtsopts=-T
-
-  if !flag(nofib)
-    buildable:          False
-  else
-    build-depends:
-          base                            >= 4.7 && < 4.11
-        , accelerate                      == 1.1.*
-        , accelerate-examples
-        , accelerate-fft                  >= 1.0
-        , accelerate-io                   >= 1.0
-        , array                           >= 0.3
-        , containers                      >= 0.5
-        , fclabels                        >= 2.0
-        , HUnit                           >= 1.2
-        , pipes                           >= 4.1.6
-        , QuickCheck                      >= 2.7
-        , random
-        , test-framework                  >= 0.5
-        , test-framework-hunit            >= 0.3
-        , test-framework-quickcheck2      >= 0.2
-        , vector                          >= 0.7
 
 
 -- Sparse matrix vector multiplication
@@ -343,10 +221,10 @@ Executable accelerate-smvm
     buildable:          False
   else
     build-depends:
-          base                            >= 4.7 && < 4.11
-        , accelerate                      == 1.1.*
+          base                            >= 4.7 && < 4.12
+        , accelerate                      >= 1.2
         , accelerate-examples
-        , accelerate-io                   >= 1.0
+        , accelerate-io                   >= 1.1
         , fclabels                        >= 2.0
         , matrix-market-attoparsec        >= 0.1
         , mwc-random                      >= 0.8
@@ -382,8 +260,8 @@ Executable accelerate-crystal
     buildable:          False
   else
     build-depends:
-          base                            >= 4.7 && < 4.11
-        , accelerate                      == 1.1.*
+          base                            >= 4.7 && < 4.12
+        , accelerate                      >= 1.2
         , accelerate-examples
         , colour-accelerate               >= 0.1
         , fclabels                        >= 2.0
@@ -417,8 +295,8 @@ Executable accelerate-tunnel
     buildable:          False
   else
     build-depends:
-          base                            >= 4.7 && < 4.11
-        , accelerate                      == 1.1.*
+          base                            >= 4.7 && < 4.12
+        , accelerate                      >= 1.2
         , accelerate-examples
         , fclabels                        >= 2.0
         , gloss-raster-accelerate         >= 2.0
@@ -454,10 +332,10 @@ Executable accelerate-canny
     buildable:          False
   else
     build-depends:
-          base                            >= 4.7 && < 4.11
-        , accelerate                      == 1.1.*
+          base                            >= 4.7 && < 4.12
+        , accelerate                      >= 1.2
         , accelerate-examples
-        , accelerate-io                   >= 1.0
+        , accelerate-io                   >= 1.2
         , colour-accelerate               >= 0.1
         , fclabels                        >= 2.0
         , repa                            >= 3.1
@@ -492,10 +370,10 @@ Executable accelerate-mandelbrot
     buildable:          False
   else
     build-depends:
-          base                            >= 4.7 && < 4.11
-        , accelerate                      == 1.1.*
+          base                            >= 4.7 && < 4.12
+        , accelerate                      >= 1.2
         , accelerate-examples
-        , accelerate-io                   >= 1.0
+        , accelerate-io                   >= 1.2
         , colour-accelerate               >= 0.1
         , fclabels                        >= 2.0
         , gloss                           >= 1.7
@@ -529,10 +407,10 @@ Executable accelerate-fluid
     buildable:          False
   else
     build-depends:
-          base                            >= 4.7 && < 4.11
-        , accelerate                      == 1.1.*
+          base                            >= 4.7 && < 4.12
+        , accelerate                      >= 1.2
         , accelerate-examples
-        , accelerate-io                   >= 1.0
+        , accelerate-io                   >= 1.2
         , bmp                             >= 1.2
         , colour-accelerate               >= 0.1
         , fclabels                        >= 2.0
@@ -580,8 +458,8 @@ Executable accelerate-nbody
     buildable:          False
   else
     build-depends:
-          base                            >= 4.7 && < 4.11
-        , accelerate                      == 1.1.*
+          base                            >= 4.7 && < 4.12
+        , accelerate                      >= 1.2
         , accelerate-examples
         , fclabels                        >= 2.0
         , gloss                           >= 1.7
@@ -616,11 +494,6 @@ Executable accelerate-smoothlife
   ghc-prof-options:
         -auto-all
 
-  -- if flag(cuda)
-  --   cpp-options:        -DACCELERATE_CUDA_BACKEND
-  --   build-depends:
-  --       accelerate-cuda                   == 0.17.*
-
   if flag(ekg)
     ghc-options:        -with-rtsopts=-T
 
@@ -628,10 +501,10 @@ Executable accelerate-smoothlife
     buildable:          False
   else
     build-depends:
-          base                            >= 4.7 && < 4.11
-        , accelerate                      == 1.1.*
+          base                            >= 4.7 && < 4.12
+        , accelerate                      >= 1.2
         , accelerate-examples
-        , accelerate-fft                  >= 1.0
+        , accelerate-fft                  >= 1.2
         , colour-accelerate               >= 0.1
         , fclabels                        >= 2.0
         , gloss                           >= 1.7
@@ -666,8 +539,8 @@ Executable accelerate-hashcat
     buildable:          False
   else
     build-depends:
-          base                            >= 4.7 && < 4.11
-        , accelerate                      == 1.1.*
+          base                            >= 4.7 && < 4.12
+        , accelerate                      >= 1.2
         , accelerate-examples
         , bytestring                      >= 0.9
         , bytestring-lexing               >= 0.5
@@ -704,11 +577,11 @@ Executable accelerate-fft
     buildable:          False
   else
     build-depends:
-          base                            >= 4.7 && < 4.11
-        , accelerate                      == 1.1.*
+          base                            >= 4.7 && < 4.12
+        , accelerate                      >= 1.2
         , accelerate-examples
-        , accelerate-fft                  >= 1.0
-        , accelerate-io                   >= 1.0
+        , accelerate-fft                  >= 1.2
+        , accelerate-io                   >= 1.2
         , colour-accelerate               >= 0.1
         , fclabels                        >= 2.0
         , filepath                        >= 1.0
@@ -747,10 +620,10 @@ Executable accelerate-pagerank
     buildable:          False
   else
     build-depends:
-          base                            >= 4.7 && < 4.11
-        , accelerate                      == 1.1.*
+          base                            >= 4.7 && < 4.12
+        , accelerate                      >= 1.2
         , accelerate-examples
-        , accelerate-io                   >= 1.0
+        , accelerate-io                   >= 1.2
         , bytestring                      >= 0.9.2
         , containers                      >= 0.4.2
         , directory                       >= 1.1
@@ -796,8 +669,8 @@ Executable accelerate-ray
     buildable:          False
   else
     build-depends:
-          base                            >= 4.7 && < 4.11
-        , accelerate                      == 1.1.*
+          base                            >= 4.7 && < 4.12
+        , accelerate                      >= 1.2
         , accelerate-examples
         , colour-accelerate               >= 0.1
         , fclabels                        >= 1.0
@@ -835,8 +708,8 @@ Executable accelerate-kmeans
     buildable:          False
   else
     build-depends:
-          base                            >= 4.7 && < 4.11
-        , accelerate                      == 1.1.*
+          base                            >= 4.7 && < 4.12
+        , accelerate                      >= 1.2
         , accelerate-examples
         , binary                          >= 0.7
         , directory                       >= 1.1
@@ -851,8 +724,7 @@ source-repository head
 
 source-repository this
   type:                 git
-  tag:                  1.1.0.0
+  tag:                  1.2.0.0
   location:             https://github.com/AccelerateHS/accelerate-examples
 
 -- vim: nospell
-

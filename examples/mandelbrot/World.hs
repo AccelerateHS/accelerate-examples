@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns        #-}
 {-# LANGUAGE ConstraintKinds     #-}
 {-# LANGUAGE FlexibleContexts    #-}
 {-# LANGUAGE GADTs               #-}
@@ -26,6 +27,7 @@ import System.Exit
 import Prelude                                                      as P
 
 import Data.Array.Accelerate                                        ( Arrays, Array, Scalar, Vector, DIM2, Elt, Acc, Z(..), (:.)(..) )
+import Data.Array.Accelerate.Data.Complex
 import Data.Array.Accelerate.Examples.Internal                      as A
 import qualified Data.Array.Accelerate                              as A
 
@@ -36,11 +38,11 @@ import qualified Data.Array.Accelerate                              as A
 data Precision  = Float | Double
 
 data World where
-  World :: (P.RealFloat a, A.RealFloat a) =>
+  World :: (P.RealFloat a, A.RealFloat a, A.Elt (Complex a)) =>
     { worldPicture      :: !Picture
     , worldDirty        :: Bool
     , worldPrecision    :: Precision
-    , worldPalette      :: Vector Word32
+    , worldPalette      :: !(Vector Word32)
     , worldRender       :: (Scalar a, Scalar a, Scalar a, Scalar Int32, Scalar a) -> Array DIM2 Word32
     , worldSizeX        :: !Int
     , worldSizeY        :: !Int
@@ -77,7 +79,7 @@ initialWorld conf opts
 setPrecision :: Options -> Precision -> World -> World
 setPrecision opts prec World{..} =
   let
-      mandel :: (A.RealFloat a, A.FromIntegral Int a, A.ToFloating Int32 a)
+      mandel :: (A.RealFloat a, A.FromIntegral Int a, A.ToFloating Int32 a, A.Elt (Complex a))
              => Acc (Scalar a) -> Acc (Scalar a) -> Acc (Scalar a) -> Acc (Scalar Int32) -> Acc (Scalar a) -> Acc (Array DIM2 Word32)
       mandel x y w l r = A.map (escapeToRGBA l (A.use worldPalette)) $ mandelbrot worldSizeX worldSizeY x y w l r
 
@@ -188,7 +190,8 @@ updateWorld world =
 
 renderWorld :: World -> Array DIM2 Word32
 renderWorld World{..} =
-  worldRender (worldPosX, worldPosY, worldWidth, worldIters, worldRadius)
+  let !r = worldRender (worldPosX, worldPosY, worldWidth, worldIters, worldRadius)
+  in r
 
 
 -- Miscellaneous

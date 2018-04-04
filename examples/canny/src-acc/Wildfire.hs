@@ -16,7 +16,7 @@ module Wildfire where
 import Canny
 
 import Data.Word
-import Data.Array.Accelerate.IO                         ( A )
+import Data.Array.Repa.Repr.Accelerate                  ( A )
 import Data.Array.Repa.Repr.Unboxed                     ( U )
 import qualified Data.Array.Repa                        as R
 import qualified Data.Vector.Unboxed                    as V

@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP             #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeOperators   #-}
 -- |
@@ -44,9 +45,11 @@ defaultOptions =
             (ReqArg (set confInterval . read) "CI")
             (describe confInterval "confidence interval")
 
+#if !MIN_VERSION_criterion(1,1,0)
   , Option  [] ["no-gc"]
             (NoArg (set forceGC False))
             "do not collect garbage between iterations"
+#endif
 
   , Option  [] ["time-limit"]
             (ReqArg (set timeLimit . read) "SECS")

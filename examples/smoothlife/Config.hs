@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP             #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Config
@@ -11,7 +12,9 @@ import Data.Label
 import Control.Category
 import System.Console.GetOpt
 
+#if !MIN_VERSION_accelerate(1,2,0)
 import Data.Array.Accelerate                            ( Array, DIM2 )
+#endif
 import Data.Array.Accelerate.Data.Complex               ( Complex )
 
 
@@ -20,7 +23,9 @@ import Data.Array.Accelerate.Data.Complex               ( Complex )
 type R          = Float
 type C          = Complex R
 type RGBA32     = Word32
+#if !MIN_VERSION_accelerate(1,2,0)
 type Matrix a   = Array DIM2 a
+#endif
 
 data SigmoidFunction
   = Hard

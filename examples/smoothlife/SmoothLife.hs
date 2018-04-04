@@ -34,16 +34,16 @@ smoothlife
     -> Options
     -> Acc (Matrix R)
     -> Acc (Matrix R)
-smoothlife conf opts aa
+smoothlife conf _opts aa
   = aa''
   where
     -- A simulation step
     --
-    aaf         = fft2D' Forward sh (complex aa)
-    nf          = zipWith (*) aaf (use krf')
-    mf          = zipWith (*) aaf (use kdf')
-    n           = map (\x -> real x / kflr'') (fft2D' Inverse sh nf)
-    m           = map (\x -> real x / kfld'') (fft2D' Inverse sh mf)
+    aaf         = fft2D Forward (complex aa)
+    nf          = zipWith (*) aaf krf
+    mf          = zipWith (*) aaf kdf
+    n           = map (\x -> real x / the kflr) (fft2D Inverse nf)
+    m           = map (\x -> real x / the kfld) (fft2D Inverse mf)
     aa'         = snm conf sn sm b1 b2 d1 d2 n m
     aa''        = clamp $ zipWith timestepMode aa' aa
 
@@ -65,17 +65,17 @@ smoothlife conf opts aa
     --
     kflr        = sum (flatten kr)
     kfld        = sum (flatten kd)
-    krf         = fft2D' Forward sh (shift2D (complex kr))
-    kdf         = fft2D' Forward sh (shift2D (complex kd))
+    krf         = fft2D Forward (shift2D (complex kr))
+    kdf         = fft2D Forward (shift2D (complex kd))
 
     kd          = generate (constant sh) (\ix -> 1 - linear (radius ix) ri b)
     kr          = generate (constant sh) (\ix -> let r = radius ix
                                                  in  linear r ri b * (1 - linear r ra b))
 
-    kflr''      = constant (kflr' `A.indexArray` Z)
-    kfld''      = constant (kfld' `A.indexArray` Z)
-    (kflr', kfld', krf', kdf')
-                = run (get optBackend opts) $ lift (kflr, kfld, krf, kdf)
+    -- kflr''      = constant (kflr' `A.indexArray` Z)
+    -- kfld''      = constant (kfld' `A.indexArray` Z)
+    -- (kflr', kfld', krf', kdf')
+    --             = run (get optBackend opts) $ lift (kflr, kfld, krf, kdf)
 
     -- Auxiliary
     --

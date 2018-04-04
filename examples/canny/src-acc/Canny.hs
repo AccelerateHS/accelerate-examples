@@ -17,7 +17,7 @@ module Canny where
 import qualified Prelude                                as P
 
 import Data.Array.Accelerate                            as A
-import Data.Array.Accelerate.IO                         as A
+import Data.Array.Accelerate.IO.Codec.BMP               as A
 import Data.Array.Accelerate.Data.Colour.RGB
 
 

@@ -105,10 +105,10 @@ instance Elt Light where
   fromElt (Light p c)   = fromElt (p,c)
 
 instance IsProduct Elt Light where
-  type ProdRepr Light = ProdRepr (Position, Colour)
-  fromProd _ (Light p c) = fromTuple (p,c)
-  toProd _ t             = let (p,c) = toTuple t in Light p c
-  prod cst _             = prod cst (undefined :: (Position, Colour))
+  type ProdRepr Light     = ProdRepr (Position, Colour)
+  fromProd _ (Light p c)  = fromTuple (p,c)
+  toProd _ t              = let (p,c) = toTuple t in Light p c
+  prod cst _              = prod cst (undefined :: (Position, Colour))
 
 instance Lift Exp Light where
   type Plain Light = Light
