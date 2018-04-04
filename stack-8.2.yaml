@@ -7,38 +7,18 @@ packages:
 - '.'
 
 extra-deps:
-- git:    https://github.com/tmcdonell/accelerate.git
-  commit: aaee256106530f106ed7dce160f7acde571de8eb
-
-- git:    https://github.com/tmcdonell/accelerate-llvm.git
-  commit: 46ebfdfb59ae8454fa9307c6912d7ab4f7896519
-  subdirs:
-    - 'accelerate-llvm'
-    - 'accelerate-llvm-native'
-    - 'accelerate-llvm-ptx'
-
-- git:    https://github.com/tmcdonell/accelerate-fft.git
-  commit: a3d06786cf5e4b3c41f2d358448ba6fbeace21e5
-
-- git:    https://github.com/tmcdonell/accelerate-io.git
-  commit: 652e4a1831f144628a0ca8cae582032815dd64c9
-
-- git:    https://github.com/tmcdonell/colour-accelerate.git
-  commit: e347b28b0d5a6306890c37b8df8086de7edfc0ba
-
-- git:    https://github.com/tmcdonell/linear-accelerate.git
-  commit: f2c2694c32e7a3a15a2812043cc6407169622d85
-
-- git:    https://github.com/tmcdonell/lens-accelerate.git
-  commit: 8893c758145d70cd08035c185a2f0bb24fd52de9
-
-- git:    https://github.com/tmcdonell/gloss-accelerate.git
-  commit: 046f625fd9102618b9635b10c4ee7aae0075147f
-
-- git:    https://github.com/tmcdonell/gloss-raster-accelerate.git
-  commit: 164c6ee43f04dd8c17ab526bf13d1b3b6eacd6d0
-
+- 'accelerate-1.2.0.0'
+- 'accelerate-fft-1.2.0.0'
+- 'accelerate-io-1.2.0.0'
+- 'accelerate-llvm-1.2.0.0'
+- 'accelerate-llvm-native-1.2.0.0'
+- 'accelerate-llvm-ptx-1.2.0.0'
+- 'colour-accelerate-0.3.0.0'
 - 'cufft-0.9.0.0'
+- 'gloss-accelerate-2.0.0.1'
+- 'gloss-raster-accelerate-2.0.0.0'
+- 'lens-accelerate-0.2.0.0'
+- 'linear-accelerate-0.6.0.0'
 - 'normaldistribution-1.1.0.3'
 
 # Override default flag values for local packages and extra-deps
