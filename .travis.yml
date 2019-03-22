@@ -69,17 +69,6 @@ matrix:
             - *apt_packages
             - llvm-5.0-dev
 
-    - env: GHC=8.0.2 LLVM=4.0.1 CUDA=8.0.61-1
-      compiler: "GHC 8.0"
-      addons:
-        apt:
-          sources:
-            - *apt_sources
-            - llvm-toolchain-trusty-4.0
-          packages:
-            - *apt_packages
-            - llvm-4.0-dev
-
 before_install:
   - export PATH=/opt/alex/3.1.4/bin:/opt/happy/1.19.5/bin:$PATH
   # - source .travis/install-cuda-trusty.sh
