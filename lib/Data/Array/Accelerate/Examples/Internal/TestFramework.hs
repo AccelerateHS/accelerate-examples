@@ -20,12 +20,12 @@ module Data.Array.Accelerate.Examples.Internal.TestFramework (
   Assertion, testCase, assertEqual,
 
   -- ** Similarity
-  module Data.Array.Accelerate.Examples.Internal.Similar,
+  module Data.Array.Accelerate.Test.Similar
 
 ) where
 
+import Data.Array.Accelerate.Test.Similar
 import Data.Array.Accelerate.Examples.Internal.ParseArgs
-import Data.Array.Accelerate.Examples.Internal.Similar
 
 import Data.Label
 import Control.Monad

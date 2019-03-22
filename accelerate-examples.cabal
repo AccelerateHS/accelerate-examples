@@ -146,9 +146,7 @@ Library
         Data.Array.Accelerate.Examples.Internal.Interactive
         Data.Array.Accelerate.Examples.Internal.Monitoring
         Data.Array.Accelerate.Examples.Internal.ParseArgs
-        Data.Array.Accelerate.Examples.Internal.Random.Array
         Data.Array.Accelerate.Examples.Internal.Report
-        Data.Array.Accelerate.Examples.Internal.Similar
         Data.Array.Accelerate.Examples.Internal.TestFramework
         Data.Array.Accelerate.Examples.Internal.TestFramework.Config
         Data.Array.Accelerate.Examples.Internal.Util
