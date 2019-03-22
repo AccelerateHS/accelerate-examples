@@ -52,6 +52,7 @@ extra-deps:
 - git:    https://github.com/tmcdonell/mwc-random-accelerate.git
   commit: e840871e2edbc583bc90230b1bb9d9452e89d3d6
 
+- criterion-measurement-0.1.1.0
 - cufft-0.9.0.1
 - GLURaw-2.0.0.4
 - half-0.3
