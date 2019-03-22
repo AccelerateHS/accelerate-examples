@@ -6,15 +6,16 @@
 #
 language: minimal
 dist: trusty
-sudo: required
 
 cache:
   timeout: 600
   directories:
     - $HOME/.stack/snapshots
+    - $HOME/.local/bin
     - .stack-work/install
 
 before_cache:
+  # - rm -rf $(stack path --local-install-root)/bin
   - rm -rf $(stack path --local-install-root)/doc
 
 addons:
@@ -23,90 +24,98 @@ addons:
       - hvr-ghc
       - ubuntu-toolchain-r-test
       - llvm-toolchain-trusty
-      - llvm-toolchain-trusty-4.0
-      - llvm-toolchain-trusty-5.0
-      - llvm-toolchain-trusty-6.0
-
     packages: &apt_packages
       - alex-3.1.4
+      - dpkg
       - freeglut3-dev
-      - g++-4.8
+      - g++-8
+      - gcc-8
       - happy-1.19.5
       - libfftw3-dev
 
 matrix:
+  fast_finish: true
   include:
-    - env: GHC=7.10.3 CABAL=1.22 LLVM=4.0.0 CUDA=8.0.61-1
-      compiler: "GHC 7.10"
+    - env: GHC=8.6.4 LLVM=7.0.1 CUDA=10.1.105-1
+      compiler: "GHC 8.6"
       addons:
         apt:
-          sources: *apt_sources
+          sources:
+            - *apt_sources
+            - llvm-toolchain-trusty-7
           packages:
             - *apt_packages
-            - cabal-install-1.22
-            - llvm-4.0-dev
+            - llvm-7-dev
 
-    - env: GHC=8.0.2 CABAL=1.24 LLVM=4.0.0 CUDA=8.0.61-1
-      compiler: "GHC 8.0"
-      addons:
-        apt:
-          sources: *apt_sources
-          packages:
-            - *apt_packages
-            - cabal-install-1.24
-            - llvm-4.0-dev
-
-    - env: GHC=8.2.2 CABAL=2.0 LLVM=5.0.0 CUDA=8.0.61-1
-      compiler: "GHC 8.2"
-      addons:
-        apt:
-          sources: *apt_sources
-          packages:
-            - *apt_packages
-            - cabal-install-2.0
-            - llvm-5.0-dev
-
-    - env: GHC=8.4.1 CABAL=2.0 LLVM=6.0.0 CUDA=8.0.61-1
+    - env: GHC=8.4.3 LLVM=6.0.1 CUDA=10.0.130-1
       compiler: "GHC 8.4"
       addons:
         apt:
-          sources: *apt_sources
+          sources:
+            - *apt_sources
+            - llvm-toolchain-trusty-6.0
           packages:
             - *apt_packages
-            - cabal-install-2.0
             - llvm-6.0-dev
 
-  fast_finish: true
+    - env: GHC=8.2.2 LLVM=5.0.2 CUDA=8.0.61-1
+      compiler: "GHC 8.2"
+      addons:
+        apt:
+          sources:
+            - *apt_sources
+            - llvm-toolchain-trusty-5.0
+          packages:
+            - *apt_packages
+            - llvm-5.0-dev
+
+    - env: GHC=8.0.2 LLVM=4.0.1 CUDA=8.0.61-1
+      compiler: "GHC 8.0"
+      addons:
+        apt:
+          sources:
+            - *apt_sources
+            - llvm-toolchain-trusty-4.0
+          packages:
+            - *apt_packages
+            - llvm-4.0-dev
 
 before_install:
-  - export PATH=/opt/cabal/$CABAL/bin:/opt/alex/3.1.4/bin:/opt/happy/1.19.5/bin:$HOME/.cabal/bin:$PATH
-  # - |
-  #     case ${LLVM} in
-  #       3.5.*) source .travis/install-llvm-trusty.sh ;;
-  #     esac
-  - source .travis/install-cuda-trusty.sh
+  - export PATH=/opt/alex/3.1.4/bin:/opt/happy/1.19.5/bin:$PATH
+  # - source .travis/install-cuda-trusty.sh
   - source .travis/install-stack.sh
-  # - source .travis/update-ghc-settings.sh
-  - travis_retry stack install c2hs --fast --no-terminal
 
-install:
-  - echo "$(ghc --version) [$(ghc --print-project-git-commit-id 2> /dev/null || echo '?')]"
-  - cabal --version
-  - stack --version
-  - c2hs --version
+  # llvm-hs requires new g++
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8
+
+  # ghc-8.4+ require libffi7
+  - echo "deb http://deb.debian.org/debian experimental main" | sudo tee -a /etc/apt/sources.list
+  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key 0x7638D0442B90D010 0x8B48AD6246925553 0x04EE7237B7D453EC
+  - sudo apt-get install debian-archive-keyring
+  - sudo apt-get update
+  - sudo apt-get install libffi7
+
+  # build environment
+  - echo "$(stack exec ghc -- --version) [$(stack exec ghc -- --print-project-git-commit-id 2> /dev/null || echo '?')]"
+  - stack --version; true
+  - nvcc --version; true
   - llc-${LLVM:0:3} --version; true
   - opt-${LLVM:0:3} --version; true
+
+install:
+  # how much do we have to do?
+  - export FLAGS="--jobs=2 --no-terminal --no-copy-bins --flag accelerate-examples:-llvm-cpu --flag accelerate-examples:-llvm-ptx --flag accelerate-fft:-llvm-cpu --flag accelerate-fft:-llvm-ptx"
+  - stack build $FLAGS --dry-run
 
   # bootstrap
   # - travis_retry travis_wait 60 stack build --fast --jobs=2 --only-dependencies --no-terminal accelerate
   # - travis_retry travis_wait 60 stack build --fast --jobs=2 --only-dependencies --no-terminal accelerate-llvm-native accelerate-llvm-ptx
 
-  # standard build
-  - stack build --dry-run
-  - travis_retry travis_wait 60 stack build --fast --jobs=2 --only-dependencies --no-terminal --no-copy-bins
+  # build dependencies
+  - travis_retry stack build $FLAGS --only-dependencies
 
 script:
-  - travis_retry stack build --fast --jobs=2 --no-terminal --no-copy-bins
+  - travis_retry stack build $FLAGS
 
 after_success:
   - source .travis/update-accelerate-buildbot.sh

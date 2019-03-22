@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Test (makeTests)
   where
@@ -28,6 +29,12 @@ makeTests step =
     t40'        = advance t30'
     t50'        = advance t40'
 
+
+instance Similar a => Similar (V3 a) where
+  V3 x1 y1 z1 ~= V3 x2 y2 z2 =
+    x1 ~= x2 P.&&
+    y1 ~= y2 P.&&
+    z1 ~= z2
 
 -- Input data
 --

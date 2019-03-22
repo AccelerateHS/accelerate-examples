@@ -58,8 +58,8 @@ traceRay limit objects lights ambient = go limit
   where
     (spheres, planes)   = unlift objects
 
-    dummySphere         = constant (Sphere (V3 0 0 0) 0          (RGB 0 0 0) 0)
-    dummyPlane          = constant (Plane  (V3 0 0 0) (V3 0 0 1) (RGB 0 0 0) 0)
+    dummySphere         = constant (Sphere_ (V3 0 0 0) 0          (RGB 0 0 0) 0)
+    dummyPlane          = constant (Plane_  (V3 0 0 0) (V3 0 0 1) (RGB 0 0 0) 0)
 
     -- Stop once there are too many reflections, in case we've found two
     -- parallel mirrors.
