@@ -548,6 +548,7 @@ Executable accelerate-hashcat
         , bytestring-lexing               >= 0.5
         , cereal                          >= 0.3
         , criterion                       >= 1.0
+        , criterion-measurement           >= 0.1
         , fclabels                        >= 2.0
         , mwc-random                      >= 0.8
 
