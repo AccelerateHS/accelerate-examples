@@ -1,5 +1,5 @@
 Name:                   accelerate-examples
-Version:                1.2.0.0
+Version:                1.2.0.1
 Cabal-version:          >=1.8
 Tested-with:            GHC >= 7.8
 Build-type:             Simple
@@ -724,7 +724,7 @@ source-repository head
 
 source-repository this
   type:                 git
-  tag:                  1.2.0.0
+  tag:                  v1.2.0.1
   location:             https://github.com/AccelerateHS/accelerate-examples
 
 -- vim: nospell
