@@ -24,14 +24,14 @@ external packages. You may need to adjust the package names or versions slightly
 for your system.
 
   * Ubuntu/Debian (apt-get):
-    - llvm-4.0-dev
+    - llvm-8-dev
     - freeglut3-dev
     - libfftw3-dev
 
   * Mac OS ([homebrew](http://brew.sh/index.html))
     - fftw
     - libffi
-    - llvm-hs/homebrew-llvm/llvm-4.0
+    - llvm-hs/homebrew-llvm/llvm-8.0.0
 
 If you want to use the CUDA GPU enabled backend
 [`accelerate-llvm-ptx`](https://github.com/AccelerateHS/accelerate-llvm), you
@@ -63,5 +63,4 @@ Adding new backends
 
 Adding support for new Accelerate backends should require only a few minor
 additions to the cabal file and the module
-'Data.Array.Accelerate.Examples.Internal.Backend'. 
-
+'Data.Array.Accelerate.Examples.Internal.Backend'.

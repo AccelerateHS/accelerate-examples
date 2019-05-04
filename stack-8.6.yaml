@@ -11,7 +11,7 @@ extra-deps:
   commit: 4f2916fc8671a16a5b8658cf904d2444a6c72634
 
 - git:    https://github.com/tmcdonell/accelerate-llvm.git
-  commit: 6a5df92e72d2babd56ada4087e2032d0e498c0c3
+  commit: e0f1a7676d160168440ed8338f2054014976646b
   subdirs:
     - accelerate-llvm
     - accelerate-llvm-native
@@ -52,9 +52,10 @@ extra-deps:
 - git:    https://github.com/tmcdonell/mwc-random-accelerate.git
   commit: e840871e2edbc583bc90230b1bb9d9452e89d3d6
 
-- llvm-hs-7.0.1
+- llvm-hs-8.0.0
 - normaldistribution-1.1.0.3
 - tasty-hedgehog-0.2.0.0
+- llvm-hs-pure-8.0.0
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
