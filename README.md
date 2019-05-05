@@ -64,3 +64,4 @@ Adding new backends
 Adding support for new Accelerate backends should require only a few minor
 additions to the cabal file and the module
 'Data.Array.Accelerate.Examples.Internal.Backend'.
+
