@@ -31,7 +31,7 @@ for your system.
   * Mac OS ([homebrew](http://brew.sh/index.html))
     - fftw
     - libffi
-    - llvm-hs/homebrew-llvm/llvm-8.0.0
+    - llvm-hs/homebrew-llvm/llvm-8
 
 If you want to use the CUDA GPU enabled backend
 [`accelerate-llvm-ptx`](https://github.com/AccelerateHS/accelerate-llvm), you
