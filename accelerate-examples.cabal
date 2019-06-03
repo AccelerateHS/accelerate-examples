@@ -64,55 +64,59 @@ Flag llvm-ptx
 --
 Flag smvm
   Description:          Sparse-matrix vector multiplication benchmark
-  Default:              True
+  Default:              False
 
 Flag crystal
   Description:          A visualisation of a sum of waves in a plane
-  Default:              True
+  Default:              False
 
 Flag tunnel
   Description:          The slit-scan effect creating a Doctor Who time vortex
-  Default:              True
+  Default:              False
 
 Flag canny
   Description:          Canny edge detection benchmark
-  Default:              True
+  Default:              False
 
 Flag mandelbrot
   Description:          A Mandelbrot fractal benchmark
+  Default:              False
+
+Flag juliasets
+  Description:          An interactive julia-set simulator
   Default:              True
 
 Flag fluid
   Description:          An interactive particle-based fluid simulation
-  Default:              True
+  Default:              False
 
 Flag nbody
   Description:          Simulation of gravitational attraction between solid particles
-  Default:              True
+  Default:              False
 
 Flag smoothlife
   Description:          A cellular automata simulation
-  Default:              True
+  Default:              False
 
 Flag hashcat
   Description:          A "password recovery" application for MD5 cracking
-  Default:              True
+  Default:              False
 
 Flag fft
   Description:          Simple FFT-based high/low-pass image filtering
-  Default:              True
+  Default:              False
 
 Flag pagerank
   Description:          Implementation of the PageRank algorithm
-  Default:              True
+  Default:              False
 
 Flag ray
   Description:          A simple real-time ray tracer
-  Default:              True
+  Default:              False
 
 Flag kmeans
   Description:          An implementation of k-means clustering in a plane
-  Default:              True
+  Default:              False
 
 
 -- Test harness
@@ -377,6 +381,65 @@ Executable accelerate-mandelbrot
         , fclabels                        >= 2.0
         , gloss                           >= 1.7
         , gloss-accelerate                >= 2.0
+
+
+
+
+
+
+-- A julia set generator
+-- ---------------------
+
+Executable accelerate-juliaset
+  hs-source-dirs:       examples/juliasets
+  Main-is:              Main.hs
+  other-modules:        Config
+                        IterFuns
+                        Lib
+                        World
+
+  ghc-options:
+        -Wall
+        -threaded
+
+  if !flag(juliasets)
+    buildable:          False
+  else
+    build-depends:
+          base                            >= 4.7 && < 5
+        , accelerate                      == 1.3.*
+        , accelerate-examples
+        -- , accelerate-io-bmp               >= 0.1
+        , colour-accelerate               >= 0.1
+        , fclabels                        >= 2.0
+        , gloss                           >= 1.7
+        , gloss-accelerate                >= 2.0
+-- ********** *******************************************************************
+-- *****************************************************************************
+-- *****************************************************************************
+        -- Are the opts below needed? What for?
+        -- -eventlog
+        -- -rtsopts
+        -- -with-rtsopts=-n2M
+        -- -with-rtsopts=-A64M
+        -- -with-rtsopts=-qg
+
+
+  -- ghc-prof-options:
+  --       -auto-all
+  --
+  -- if flag(ekg)
+  --   ghc-options:        -with-rtsopts=-T
+-- *****************************************************************************
+-- *****************************************************************************
+-- *****************************************************************************
+
+
+
+
+
+
+
 
 
 -- A stable fluid simulation
