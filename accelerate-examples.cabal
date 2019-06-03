@@ -64,23 +64,23 @@ Flag llvm-ptx
 --
 Flag smvm
   Description:          Sparse-matrix vector multiplication benchmark
-  Default:              False
+  Default:              True
 
 Flag crystal
   Description:          A visualisation of a sum of waves in a plane
-  Default:              False
+  Default:              True
 
 Flag tunnel
   Description:          The slit-scan effect creating a Doctor Who time vortex
-  Default:              False
+  Default:              True
 
 Flag canny
   Description:          Canny edge detection benchmark
-  Default:              False
+  Default:              True
 
 Flag mandelbrot
   Description:          A Mandelbrot fractal benchmark
-  Default:              False
+  Default:              True
 
 Flag juliasets
   Description:          An interactive julia-set simulator
@@ -88,35 +88,35 @@ Flag juliasets
 
 Flag fluid
   Description:          An interactive particle-based fluid simulation
-  Default:              False
+  Default:              True
 
 Flag nbody
   Description:          Simulation of gravitational attraction between solid particles
-  Default:              False
+  Default:              True
 
 Flag smoothlife
   Description:          A cellular automata simulation
-  Default:              False
+  Default:              True
 
 Flag hashcat
   Description:          A "password recovery" application for MD5 cracking
-  Default:              False
+  Default:              True
 
 Flag fft
   Description:          Simple FFT-based high/low-pass image filtering
-  Default:              False
+  Default:              True
 
 Flag pagerank
   Description:          Implementation of the PageRank algorithm
-  Default:              False
+  Default:              True
 
 Flag ray
   Description:          A simple real-time ray tracer
-  Default:              False
+  Default:              True
 
 Flag kmeans
   Description:          An implementation of k-means clustering in a plane
-  Default:              False
+  Default:              True
 
 
 -- Test harness
