@@ -382,11 +382,6 @@ Executable accelerate-mandelbrot
         , gloss                           >= 1.7
         , gloss-accelerate                >= 2.0
 
-
-
-
-
-
 -- A julia set generator
 -- ---------------------
 
@@ -424,7 +419,6 @@ Executable accelerate-juliaset
         -- -with-rtsopts=-A64M
         -- -with-rtsopts=-qg
 
-
   -- ghc-prof-options:
   --       -auto-all
   --
@@ -433,14 +427,6 @@ Executable accelerate-juliaset
 -- *****************************************************************************
 -- *****************************************************************************
 -- *****************************************************************************
-
-
-
-
-
-
-
-
 
 -- A stable fluid simulation
 -- -------------------------
