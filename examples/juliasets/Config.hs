@@ -31,7 +31,7 @@ header :: [String]
 header =
   [ "accelerate-juliasets (c) [2011..2016] Roger Bosman"
   , ""
-  , "Usage: accelerate-mandelbrot [OPTIONS]"
+  , "Usage: accelerate-juliasets [OPTIONS]"
   , "Or, if using stack: stack exec accelerate-juliasets [OPTIONS]"
   , ""
   ]

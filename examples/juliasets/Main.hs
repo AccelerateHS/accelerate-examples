@@ -21,20 +21,12 @@ import           IterFuns
 import           Lib
 import           World
 
--- main :: IO ()
--- main = do
---   beginMonitoring
---   (conf, opts, rest)    <- parseArgs options defaults header footer
---   putStrLn "Hello wolrd"
---   return ()
-
 main :: IO ()
 main = do
   beginMonitoring
   (conf, opts, _) <- parseArgs options defaults header footer
 
   let world  = starterWorld conf
-      -- world  = initialWorld conf opts
       width  = get configWidth conf   :: Int
       height = get configHeight conf  :: Int
 
@@ -105,15 +97,6 @@ makePicture backend World{..} = return $ A.bitmapOfArray arr False
 
 unit :: Elt a => a -> Scalar a
 unit a = A.fromList A.Z [a]
-
--- -- juliaArray :: Int
--- -- juliaArray :: Array DIM2 Word32
--- juliaArray :: Int
---            -> Scalar Float -- time
---            -> Scalar Float -- zoom
---            -> Scalar (Float, Float) -- zoom
---            -> Array DIM2 Word32
--- juliaArray dimens = undefined
 
 juliaArray :: Backend
            -> Int
