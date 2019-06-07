@@ -82,6 +82,10 @@ Flag mandelbrot
   Description:          A Mandelbrot fractal benchmark
   Default:              True
 
+Flag juliasets
+  Description:          An interactive julia-set simulator
+  Default:              True
+
 Flag fluid
   Description:          An interactive particle-based fluid simulation
   Default:              True
@@ -378,6 +382,51 @@ Executable accelerate-mandelbrot
         , gloss                           >= 1.7
         , gloss-accelerate                >= 2.0
 
+-- A julia set generator
+-- ---------------------
+
+Executable accelerate-juliaset
+  hs-source-dirs:       examples/juliasets
+  Main-is:              Main.hs
+  other-modules:        Config
+                        IterFuns
+                        Lib
+                        World
+
+  ghc-options:
+        -Wall
+        -threaded
+
+  if !flag(juliasets)
+    buildable:          False
+  else
+    build-depends:
+          base                            >= 4.7 && < 5
+        , accelerate                      == 1.3.*
+        , accelerate-examples
+        -- , accelerate-io-bmp               >= 0.1
+        , colour-accelerate               >= 0.1
+        , fclabels                        >= 2.0
+        , gloss                           >= 1.7
+        , gloss-accelerate                >= 2.0
+-- ********** *******************************************************************
+-- *****************************************************************************
+-- *****************************************************************************
+        -- Are the opts below needed? What for?
+        -- -eventlog
+        -- -rtsopts
+        -- -with-rtsopts=-n2M
+        -- -with-rtsopts=-A64M
+        -- -with-rtsopts=-qg
+
+  -- ghc-prof-options:
+  --       -auto-all
+  --
+  -- if flag(ekg)
+  --   ghc-options:        -with-rtsopts=-T
+-- *****************************************************************************
+-- *****************************************************************************
+-- *****************************************************************************
 
 -- A stable fluid simulation
 -- -------------------------

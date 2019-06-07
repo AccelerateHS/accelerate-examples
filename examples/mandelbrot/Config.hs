@@ -2,15 +2,15 @@
 
 module Config where
 
-import Data.Label
-import System.Console.GetOpt
+import           Data.Label
+import           System.Console.GetOpt
 
 
 data Config = Config
   {
-    _configWidth        :: Int
-  , _configHeight       :: Int
-  , _configFilePath     :: Maybe FilePath
+    _configWidth    :: Int
+  , _configHeight   :: Int
+  , _configFilePath :: Maybe FilePath
   }
   deriving Show
 
@@ -54,4 +54,3 @@ footer =
   , "     p             switch between single/double precision"
   , ""
   ]
-
