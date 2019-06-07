@@ -46,6 +46,7 @@ footer =
   , "     z/c           escape radius"
   , "     q/e           speed up/slow down"
   , "     left/right    forward/backwards in time"
+  , "     0 .. 9        select presets"
   , "     r             reset"
   , "     .             print current configuration"
   , "     space         pause/resume"
