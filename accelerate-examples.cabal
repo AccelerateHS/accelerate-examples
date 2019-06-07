@@ -389,10 +389,7 @@ Executable accelerate-mandelbrot
 Executable accelerate-julia
   hs-source-dirs:       examples/julia
   Main-is:              Main.hs
-  other-modules:        Config
-                        IterFuns
-                        Lib
-                        World
+  other-modules:        Config Julia Palette World
 
   ghc-options:
         -Wall
