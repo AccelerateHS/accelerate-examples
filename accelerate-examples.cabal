@@ -110,6 +110,10 @@ Flag pagerank
   Description:          Implementation of the PageRank algorithm
   Default:              True
 
+Flag quicksort
+  Description:          Implementation of the QuickSort algorithm
+  Default:              True
+
 Flag ray
   Description:          A simple real-time ray tracer
   Default:              True
@@ -673,6 +677,41 @@ Executable accelerate-pagerank
         , vector                          >= 0.9
         , vector-algorithms               >= 0.5.4
 
+-- QuickSort
+-- ---------
+
+Executable accelerate-quicksort
+  hs-source-dirs:       examples/quicksort
+  Main-is:              Main.hs
+  other-modules:
+        Config
+        QuickSort
+
+  ghc-options:
+        -Wall
+        -threaded
+        -eventlog
+        -rtsopts
+        -with-rtsopts=-n2M
+        -with-rtsopts=-A64M
+        -with-rtsopts=-qg
+
+  ghc-prof-options:
+        -auto-all
+
+  if flag(ekg)
+    ghc-options:        -with-rtsopts=-T
+
+  if !flag(quicksort)
+    buildable:          False
+  else
+    build-depends:
+          base                            >= 4.7 && < 5
+        , accelerate                      == 1.3.*
+        , accelerate-examples
+        , array                           >= 0.5.3
+        , fclabels                        >= 1.0
+        , random
 
 -- Ray tracer
 -- ----------
