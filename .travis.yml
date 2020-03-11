@@ -12,7 +12,7 @@ cache:
   directories:
     - $HOME/.stack/snapshots
     - $HOME/.local/bin
-    - .stack-work/install
+    - $TRAVIS_BUILD_DIR/.stack-work
 
 before_cache:
   # - rm -rf $(stack path --local-install-root)/bin
@@ -78,11 +78,7 @@ before_install:
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8
 
   # ghc-8.4+ require libffi7
-  - echo "deb http://deb.debian.org/debian experimental main" | sudo tee -a /etc/apt/sources.list
-  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key 0x7638D0442B90D010 0x8B48AD6246925553 0x04EE7237B7D453EC
-  - sudo apt-get install debian-archive-keyring
-  - sudo apt-get update
-  - sudo apt-get install libffi7
+  - export LD_LIBRARY_PATH=$(stack exec ghc -- --print-libdir)/rts:$LD_LIBRARY_PATH
 
   # build environment
   - echo "$(stack exec ghc -- --version) [$(stack exec ghc -- --print-project-git-commit-id 2> /dev/null || echo '?')]"
@@ -93,7 +89,7 @@ before_install:
 
 install:
   # how much do we have to do?
-  - export FLAGS="--jobs=2 --no-terminal --no-copy-bins --flag accelerate-examples:-llvm-cpu --flag accelerate-examples:-llvm-ptx --flag accelerate-fft:-llvm-cpu --flag accelerate-fft:-llvm-ptx"
+  - export FLAGS="--no-terminal --no-copy-bins --flag accelerate-examples:-llvm-cpu --flag accelerate-examples:-llvm-ptx --flag accelerate-fft:-llvm-cpu --flag accelerate-fft:-llvm-ptx"
   - stack build $FLAGS --dry-run
 
   # bootstrap
