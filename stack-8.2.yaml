@@ -7,18 +7,18 @@ packages:
 - .
 
 extra-deps:
-- git:    https://github.com/tmcdonell/accelerate.git
-  commit: 1010d97f8cc8cbecff28200cf6e176455769c644
+- github: tmcdonell/accelerate
+  commit: cc78ca8ba7397b445418e0646111753ec86bfcdd
 
-- git:    https://github.com/tmcdonell/accelerate-llvm.git
-  commit: 60b0ebc38549e887159e0bec7493fad2231a2550
+- github: tmcdonell/accelerate-llvm
+  commit: 46156ed599be5093aceed685711dc0fa3700f5e6
   subdirs:
     - accelerate-llvm
     - accelerate-llvm-native
     - accelerate-llvm-ptx
 
-- git:    https://github.com/tmcdonell/accelerate-io.git
-  commit: e83461b194bb046a6f129a6be7f0e865653ed365
+- github: tmcdonell/accelerate-io
+  commit: 58b33a84c3d23bbafb1b4353dd24c464d60ca6d0
   subdirs:
     - accelerate-io
     - accelerate-io-array
@@ -28,25 +28,25 @@ extra-deps:
     - accelerate-io-repa
     - accelerate-io-vector
 
-- git:    https://github.com/tmcdonell/accelerate-fft.git
-  commit: 1ecec4e16ca30d87ee8d10a63276e02f55f39031
+- github: tmcdonell/accelerate-fft
+  commit: e9e6e1799e839a6f40d3ce539a9682bb75e1aa0e
 
-- git:    https://github.com/tmcdonell/colour-accelerate.git
-  commit: edc575cc6a810f5cce8d4b4423ef3968f30a93a3
+- github: tmcdonell/colour-accelerate
+  commit: f8b4eebc6b0f40a589664d2162f81fabecb0066d
 
-- git:    https://github.com/tmcdonell/gloss-accelerate.git
+- github: tmcdonell/gloss-accelerate
   commit: de4da479dfa236f4b7c08348cfc7e9fef70476ea
 
-- git:    https://github.com/tmcdonell/gloss-raster-accelerate.git
+- github: tmcdonell/gloss-raster-accelerate
   commit: a2f29879d87222f68a8b8e06fa8f1960d7e5a671
 
-- git:    https://github.com/tmcdonell/lens-accelerate.git
+- github: tmcdonell/lens-accelerate
   commit: b74eb8098735b1ad6cff3c5655af03d3f29b9f8e
 
-- git:    https://github.com/tmcdonell/linear-accelerate.git
-  commit: 7d3bb1d40cdcc75f2f658c31b2eb7541c949e52e
+- github: tmcdonell/linear-accelerate
+  commit: 2f4dfe92854f53c2aac9be51c9da25899a659273
 
-- git:    https://github.com/tmcdonell/mwc-random-accelerate.git
+- github: tmcdonell/mwc-random-accelerate
   commit: e840871e2edbc583bc90230b1bb9d9452e89d3d6
 
 - criterion-measurement-0.1.1.0
