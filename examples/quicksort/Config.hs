@@ -28,7 +28,8 @@ header =
   , ""
   , "Usage: accelerate-quicksort input.txt"
   , "  where input.txt is a file containing a list of integers seperated by spaces"
-  , "Or:    accelerate-quicksort --size n"
+  , ""
+  , "Usage: accelerate-quicksort --size n"
   , "  where n is a number, denoting the size of a random input"
   , ""
   ]

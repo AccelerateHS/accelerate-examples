@@ -1,16 +1,19 @@
-module Main where
+{-# LANGUAGE ScopedTypeVariables #-}
 
-import System.Random
-import Data.Array.IO
-import Data.Maybe
-import Data.Label
-import Text.Read (readMaybe)
-import Control.Monad
-import qualified Data.Array.Accelerate as A
-import Data.Array.Accelerate.Examples.Internal
+module Main where
 
 import Config
 import QuickSort
+
+import Control.Monad
+import Data.Array.IO
+import Data.Label
+import Data.Maybe
+import System.Random
+import Text.Read (readMaybe)
+
+import Data.Array.Accelerate.Examples.Internal
+import qualified Data.Array.Accelerate                              as A
 
 main :: IO ()
 main = do
@@ -22,7 +25,7 @@ main = do
     (Nothing, [path]) -> do
       -- Read input from file
       file <- readFile path
-      let input = map (fromMaybe (error "Parse error. Input file should contain integers seperated by spaces") . readMaybe) $ words file
+      let input = map (fromMaybe (error "Parse error. Input file should contain integers separated by spaces") . readMaybe) $ words file
       let result = A.toList $ qsort $ A.fromList (A.Z A.:. length input) input
       putStrLn $ unwords $ map show result
     (Just size, _) -> do
@@ -39,21 +42,19 @@ randomRun qsort size = do
   input <- shuffle [1 .. size]
   let result = A.toList $ qsort $ A.fromList (A.Z A.:. length input) input
   putStrLn $ unwords (map show $ take 30 result) ++ (if size <= 30 then "" else " ...")
-  putStrLn "" 
+  putStrLn ""
 
--- | Randomly shuffle a list
---   /O(N)/
+-- | /O(N)/ Randomly shuffle a list
 -- From https://wiki.haskell.org/Random_shuffle
-shuffle :: [a] -> IO [a]
+--
+shuffle :: forall a. [a] -> IO [a]
 shuffle xs = do
-        ar <- newArray' n xs
-        forM [1..n] $ \i -> do
-            j <- randomRIO (i,n)
-            vi <- readArray ar i
-            vj <- readArray ar j
-            writeArray ar j vi
-            return vj
-  where
-    n = length xs
-    newArray' :: Int -> [a] -> IO (IOArray Int a)
-    newArray' m ys =  newListArray (1,m) ys
+  let n = length xs
+  ar <- newListArray (1,n) xs :: IO (IOArray Int a)
+  forM [1..n] $ \i -> do
+      j <- randomRIO (i,n)
+      vi <- readArray ar i
+      vj <- readArray ar j
+      writeArray ar j vi
+      return vj
+

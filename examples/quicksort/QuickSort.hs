@@ -1,125 +1,155 @@
-{-# language FlexibleInstances #-}
-{-# language FlexibleContexts #-}
-{-# language ScopedTypeVariables #-}
+{-# LANGUAGE FlexibleContexts    #-}
+{-# LANGUAGE FlexibleInstances   #-}
+{-# LANGUAGE RebindableSyntax    #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module QuickSort (quicksort) where
 
-import qualified Data.Array.Accelerate as A
-import qualified Data.Array.Accelerate.Unsafe as A
-import qualified Data.Array.Accelerate.Data.Bits as A
-import qualified Data.Array.Accelerate.Examples.Internal as A
-import Control.Monad
+import Data.Array.Accelerate
+import Data.Array.Accelerate.Unsafe
+import Data.Array.Accelerate.Data.Bits
+import Data.Array.Accelerate.Examples.Internal
 
-quicksort :: A.Backend -> A.Vector Int -> A.Vector Int
-quicksort backend = A.runN backend quicksort'
 
-quicksort' :: A.Acc (A.Vector Int) -> A.Acc (A.Vector Int)
+quicksort :: Backend -> Vector Int -> Vector Int
+quicksort backend = runN backend quicksort'
+
+quicksort' :: Ord a => Acc (Vector a) -> Acc (Vector a)
 quicksort' input = result
   where
-    emptyFlags = A.fill (A.index1 $ 1 + A.unindex1 (A.shape input)) (A.constant False)
     -- Initially, we have one segment, namely the whole array
-    initialFlags = A.scatter (singleton 0 A.++ A.fill (A.index1 1) (A.unindex1 $ A.shape input)) emptyFlags (A.use $ A.fromList (A.Z A.:. 2) [True, True])
+    initialFlags = scatter (fill (I1 1) 0 ++ fill (I1 1) (length input)) emptyFlags fullFlags
+    emptyFlags   = fill (I1 (1 + length input)) False_
+    fullFlags    = fill (I1 2) True_
 
-    -- We stop when each segment contains just one element, as segments of one element are sorted.
-    A.T2 result _ = A.awhile condition step $ A.T2 input initialFlags
+    -- We stop when each segment contains just one element, as segments of
+    -- one element are sorted.
+    T2 result _ = awhile condition step $ T2 input initialFlags
 
-singleton :: A.Elt e => e -> A.Acc (A.Vector e)
-singleton e = A.use $ A.fromList (A.Z A.:. 1) [e]
-
-type State =
-  -- Values
-  ( A.Vector Int
-  -- Head flags, denoting the starting points of the unsorted segments
-  , A.Vector Bool
+type State a =
+  ( Vector a      -- Values
+  , Vector Bool   -- Head flags, denoting the starting points of the unsorted segments
   )
 
-step :: A.Acc State -> A.Acc State
-step (A.T2 values headFlags) = (A.T2 values' headFlags')
+step :: Ord a => Acc (State a) -> Acc (State a)
+step (T2 values headFlags) = (T2 values' headFlags')
   where
     -- Per element, the pivot of the segment of that element
     -- For each segment, we just take the first element as pivot
     pivots = propagateSegmentHead headFlags values
 
     -- Find which elements are larger than the pivot
-    isLarger = A.zipWith (A.>=) values pivots
+    isLarger = zipWith (>=) values pivots
 
     -- Propagate the start index of a segment to all elements
-    startIndex = propagateSegmentHead headFlags (A.generate (A.shape values) A.unindex1)
+    startIndex = propagateSegmentHead headFlags (generate (shape values) unindex1)
 
     -- Compute the offsets to which the elements must be moved using a scan
-    indicesLarger, indicesSmaller :: A.Acc (A.Vector Int)
-    indicesLarger  = A.map (\x -> x - 1) $ postscanSegHead (+) headFlags $ A.map (A.? (1, 0)) isLarger
-    indicesSmaller = A.map (\x -> x - 1) $ postscanSegHead (+) headFlags $ A.map (A.? (0, 1)) isLarger
+    indicesLarger, indicesSmaller :: Acc (Vector Int)
+    indicesLarger  = map (\x -> x - 1) $ postscanSegHead (+) headFlags $ map (? (1, 0)) isLarger
+    indicesSmaller = map (\x -> x - 1) $ postscanSegHead (+) headFlags $ map (? (0, 1)) isLarger
 
     -- Propagate the number of smaller elements to each segment
     -- This is needed as an offset for the larger elements
-    countSmaller :: A.Acc (A.Vector Int)
-    countSmaller = A.map (+1) $ propagateSegmentLast headFlags indicesSmaller
+    countSmaller :: Acc (Vector Int)
+    countSmaller = map (+1) $ propagateSegmentLast headFlags indicesSmaller
 
     -- Compute the new indices of the elements
-    permutation = A.zipWith5 partitionPermuteIndex isLarger startIndex indicesSmaller indicesLarger countSmaller
-    
+    permutation = zipWith5 partitionPermuteIndex isLarger startIndex indicesSmaller indicesLarger countSmaller
+
     -- Perform the permutation
-    values' = A.scatter permutation (A.fill (A.shape values) A.undef) values
+    values' = scatter permutation (fill (shape values) undef) values
 
     -- Update the head flags for the next iteration (the 'recursive call' in a traditional implementation)
     -- Mark new section starts at:
-    -- * the position of the pivot
-    -- * the position of the pivot + 1
+    --  * the position of the pivot
+    --  * the position of the pivot + 1
     headFlags' =
       let
-        f :: Int -> A.Exp Bool -> A.Exp Int -> A.Exp Int -> A.Exp A.DIM1
-        f inc headF start countSmall =
-          headF A.? (A.index1 $ start + countSmall + A.constant inc, A.ignore)
-        writes :: Int -> A.Acc (A.Vector A.DIM1)
-        writes inc = A.zipWith3 (f inc) headFlags startIndex countSmaller
+          f :: Int -> Exp Bool -> Exp Int -> Exp Int -> Exp DIM1
+          f inc headF start countSmall =
+            headF ? (index1 $ start + countSmall + constant inc, ignore)
+
+          writes :: Int -> Acc (Vector DIM1)
+          writes inc = zipWith3 (f inc) headFlags startIndex countSmaller
       in
-        -- Note that (writes 1) may go out of bounds of the values array.
-        -- We made the headFlags array one larger, such that this gives no problems.
-        writeFlags (writes 0) $ writeFlags (writes 1) $ headFlags
+      -- Note that (writes 1) may go out of bounds of the values array.
+      -- We made the headFlags array one larger, such that this gives no problems.
+      writeFlags (writes 0) $ writeFlags (writes 1) $ headFlags
 
--- Checks whether all segments have length 1. If that is the case, then the loop may terminate.
-condition :: A.Acc State -> A.Acc (A.Scalar Bool)
-condition (A.T2 _ headFlags) = A.map A.not $ A.fold (A.&&) (A.constant True) headFlags
+-- Checks whether all segments have length 1. If that is the case, then the
+-- loop may terminate.
+--
+condition :: Elt a => Acc (State a) -> Acc (Scalar Bool)
+condition (T2 _ headFlags) = map not $ fold (&&) True_ headFlags
 
--- Finds the new index of an element of the list, as the result of the partition
-partitionPermuteIndex :: A.Exp Bool -> A.Exp Int -> A.Exp Int -> A.Exp Int -> A.Exp Int -> A.Exp Int
+-- Finds the new index of an element of the list, as the result of the
+-- partition
+--
+partitionPermuteIndex :: Exp Bool -> Exp Int -> Exp Int -> Exp Int -> Exp Int -> Exp Int
 partitionPermuteIndex isLarger start indexIfSmaller indexIfLarger countSmaller =
-  start + (isLarger A.? (countSmaller + indexIfLarger, indexIfSmaller))
+  start + (isLarger ? (countSmaller + indexIfLarger, indexIfSmaller))
 
--- Given head flags, propagates the value of the head to all elements in the segment
-propagateSegmentHead :: A.Elt a => A.Acc (A.Vector Bool) -> A.Acc (A.Vector a) -> A.Acc (A.Vector a)
+-- Given head flags, propagates the value of the head to all elements in
+-- the segment
+--
+propagateSegmentHead
+    :: Elt a
+    => Acc (Vector Bool)
+    -> Acc (Vector a)
+    -> Acc (Vector a)
 propagateSegmentHead headFlags values
-  = A.map A.fst
-  $ A.postscanl f (A.T2 A.undef $ A.constant True)
-  $ A.zip values headFlags
+  = map fst
+  $ postscanl f (T2 undef True_)
+  $ zip values headFlags
   where
-    f left (A.T2 rightValue rightFlag) =
-      A.cond rightFlag (A.T2 rightValue $ A.constant True) left
+    f left (T2 rightValue rightFlag) =
+      if rightFlag
+         then T2 rightValue True_
+         else left
 
--- Given head flags, propagates the value of the head to all elements in the segment
-propagateSegmentLast :: A.Elt a => A.Acc (A.Vector Bool) -> A.Acc (A.Vector a) -> A.Acc (A.Vector a)
+-- Given head flags, propagates the value of the head to all elements in
+-- the segment
+--
+propagateSegmentLast
+    :: Elt a
+    => Acc (Vector Bool)
+    -> Acc (Vector a)
+    -> Acc (Vector a)
 propagateSegmentLast headFlags values
-  = A.map A.fst
-  $ A.postscanr f (A.T2 A.undef $ A.constant True)
-  $ A.zip values 
-  $ A.tail headFlags
+  = map fst
+  $ postscanr f (T2 undef True_)
+  $ zip values
+  $ tail headFlags
   where
-    f (A.T2 leftValue leftFlag) right =
-      A.cond leftFlag (A.T2 leftValue $ A.constant True) right
+    f (T2 leftValue leftFlag) right =
+      if leftFlag
+         then T2 leftValue True_
+         else right
 
 -- Segmented postscan, where the segments are defined with head flags
-postscanSegHead :: A.Elt a => (A.Exp a -> A.Exp a -> A.Exp a) -> A.Acc (A.Vector Bool) -> A.Acc (A.Vector a) -> A.Acc (A.Vector a)
+--
+postscanSegHead
+    :: Elt a
+    => (Exp a -> Exp a -> Exp a)
+    -> Acc (Vector Bool)
+    -> Acc (Vector a)
+    -> Acc (Vector a)
 postscanSegHead f headFlags values
-  = A.map A.fst
-  $ A.postscanl g (A.T2 A.undef $ A.constant True)
-  $ A.zip values headFlags
+  = map fst
+  $ postscanl g (T2 undef True_)
+  $ zip values headFlags
   where
-    g (A.T2 leftValue leftFlag) (A.T2 rightValue rightFlag)
-      = A.T2
-          (rightFlag A.? (rightValue, f leftValue rightValue))
-          (leftFlag A..|. rightFlag)
+    g (T2 leftValue leftFlag) (T2 rightValue rightFlag)
+      = T2
+          (rightFlag ? (rightValue, f leftValue rightValue))
+          (leftFlag .|. rightFlag)
 
 -- Writes True to the specified indices in a flags arrays
-writeFlags :: A.Acc (A.Vector A.DIM1) -> A.Acc (A.Vector Bool) -> A.Acc (A.Vector Bool)
-writeFlags writes flags = A.permute const flags (writes A.!) (A.fill (A.shape writes) $ A.constant True)
+--
+writeFlags
+    :: Acc (Vector DIM1)
+    -> Acc (Vector Bool)
+    -> Acc (Vector Bool)
+writeFlags writes flags = permute const flags (writes !) (fill (shape writes) True_)
+
