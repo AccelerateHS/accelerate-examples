@@ -27,7 +27,6 @@ import System.Exit
 import Prelude                                                      as P
 
 import Data.Array.Accelerate                                        ( Arrays, Array, Scalar, Vector, DIM2, Elt, Acc, Z(..), (:.)(..) )
-import Data.Array.Accelerate.Data.Complex
 import Data.Array.Accelerate.Examples.Internal                      as A
 import qualified Data.Array.Accelerate                              as A
 
@@ -38,7 +37,7 @@ import qualified Data.Array.Accelerate                              as A
 data Precision  = Float | Double
 
 data World where
-  World :: (P.RealFloat a, A.RealFloat a, A.Elt (Complex a)) =>
+  World :: (P.Show a, P.RealFloat a, A.RealFloat a) =>
     { worldPicture      :: !Picture
     , worldDirty        :: Bool
     , worldPrecision    :: Precision
@@ -79,7 +78,7 @@ initialWorld conf opts
 setPrecision :: Options -> Precision -> World -> World
 setPrecision opts prec World{..} =
   let
-      mandel :: (A.RealFloat a, A.FromIntegral Int a, A.ToFloating Int32 a, A.Elt (Complex a))
+      mandel :: (A.RealFloat a, A.FromIntegral Int a, A.ToFloating Int32 a)
              => Acc (Scalar a) -> Acc (Scalar a) -> Acc (Scalar a) -> Acc (Scalar Int32) -> Acc (Scalar a) -> Acc (Array DIM2 Word32)
       mandel x y w l r = A.map (escapeToRGBA l (A.use worldPalette)) $ mandelbrot worldSizeX worldSizeY x y w l r
 
@@ -136,8 +135,8 @@ react conf opts event world@World{..} =
              dy = (y0-y) * P.realToFrac (the worldWidth) / P.fromIntegral worldSizeX
          in
          return . dirty
-                $ World { worldPosX    = unit (P.realToFrac dx + the worldPosX)
-                        , worldPosY    = unit (P.realToFrac dy + the worldPosY)
+                $ World { worldPosX    = unit (the worldPosX + P.realToFrac dx)
+                        , worldPosY    = unit (the worldPosY - P.realToFrac dy)
                         , worldPanning = Just (x,y)
                         , ..
                         }

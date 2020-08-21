@@ -8,17 +8,17 @@ packages:
 
 extra-deps:
 - github: tmcdonell/accelerate
-  commit: cc78ca8ba7397b445418e0646111753ec86bfcdd
+  commit: b54ce53cff506ba9e9edab21f7a37c3dfbd96173
 
 - github: tmcdonell/accelerate-llvm
-  commit: 46156ed599be5093aceed685711dc0fa3700f5e6
+  commit: 4217ca6c68402691dcefb5d578846a41353aaa2a
   subdirs:
     - accelerate-llvm
     - accelerate-llvm-native
     - accelerate-llvm-ptx
 
 - github: tmcdonell/accelerate-io
-  commit: 58b33a84c3d23bbafb1b4353dd24c464d60ca6d0
+  commit: 1ba4c7db50c255b327e5d037c4c52bb0c1a297fc
   subdirs:
     - accelerate-io
     - accelerate-io-array
@@ -29,27 +29,26 @@ extra-deps:
     - accelerate-io-vector
 
 - github: tmcdonell/accelerate-fft
-  commit: e9e6e1799e839a6f40d3ce539a9682bb75e1aa0e
+  commit: 7f9ac682b915b47b2974cecf5ec76632a1619e76
 
 - github: tmcdonell/colour-accelerate
-  commit: f8b4eebc6b0f40a589664d2162f81fabecb0066d
+  commit: 24808b07bd410e5d51b7543496d10f73c8f78e0b
 
 - github: tmcdonell/gloss-accelerate
-  commit: de4da479dfa236f4b7c08348cfc7e9fef70476ea
+  commit: ea8ab62a3beee5f451a161ccd9897b4370fa6b95
 
 - github: tmcdonell/gloss-raster-accelerate
-  commit: a2f29879d87222f68a8b8e06fa8f1960d7e5a671
+  commit: 72da9c29b664a3b2021cd998544e403a36b5d147
 
 - github: tmcdonell/lens-accelerate
-  commit: b74eb8098735b1ad6cff3c5655af03d3f29b9f8e
+  commit: 4a652bc0f0574cd5e715b2f523a41107a11dbcbe
 
 - github: tmcdonell/linear-accelerate
-  commit: 2f4dfe92854f53c2aac9be51c9da25899a659273
+  commit: e0956017d938a05f2ef4180b364f4d2cd71eb5b9
 
 - github: tmcdonell/mwc-random-accelerate
-  commit: e840871e2edbc583bc90230b1bb9d9452e89d3d6
+  commit: 804b2e7cced00c59cd6db36a1076fcb1dca3cfb0
 
-- cuda-0.10.1.0
 - normaldistribution-1.1.0.3
 
 # Override default flag values for local packages and extra-deps

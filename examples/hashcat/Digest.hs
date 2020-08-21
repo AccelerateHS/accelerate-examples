@@ -1,4 +1,5 @@
-{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE BangPatterns     #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Digest (readDict, extract)
   where
@@ -6,18 +7,22 @@ module Digest (readDict, extract)
 import MD5
 import Config
 
-import Data.Label
-import Control.Monad
 import Control.Applicative
-import Data.ByteString.Internal                 ( w2c )
-import qualified Data.Serialize                 as S
-import qualified Data.ByteString                as S
-import qualified Data.ByteString.Lazy.Char8     as L
+import Control.Monad
+import Data.ByteString.Internal                                     ( w2c )
+import Data.Label
+import Data.Word
 import Prelude
+import qualified Data.ByteString                                    as S
+import qualified Data.ByteString.Lazy.Char8                         as L
+import qualified Data.Serialize                                     as S
 
-import Data.Array.Accelerate.Array.Data         as A
-import Data.Array.Accelerate.Array.Sugar        as A
-import qualified Data.Array.Accelerate          as A
+import Data.Array.Accelerate.Array.Data                             as A
+import Data.Array.Accelerate.Sugar.Array
+import Data.Array.Accelerate.Sugar.Elt
+import Data.Array.Accelerate.Sugar.Shape
+import qualified Data.Array.Accelerate                              as A
+import qualified Data.Array.Accelerate.Representation.Array         as R
 
 
 -- MD5 block sizes
@@ -62,18 +67,18 @@ readDict c fp = do
 
   let sh        = Z :. blockSizeWords :. entries
       (adata,_) = runArrayData $ do
-        arr <- newArrayData (size sh)
+        arr <- newArrayData (eltR @Word32) (size sh)
 
         let go !_ []     = return ()
             go !n (b:bs) = do
-              foldM_ (\i w -> do unsafeWriteArrayData arr (toIndex sh (Z:.i:.n)) (fromElt w)
+              foldM_ (\i w -> do writeArrayData (eltR @Word32) arr (toIndex sh (Z:.i:.n)) (fromElt w)
                                  return (i+1)) 0 (bytes b)
               go (n+1) bs
 
         go 0 blocks
-        return (arr, undefined)
+        return (arr, 0 :: Word32)
 
-  adata `seq` return $ Array (fromElt sh) adata
+  adata `seq` return $ Array (R.Array (fromElt sh) adata)
 
   where
     chunk = maybe id take (get configMaxWords c)

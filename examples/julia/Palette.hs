@@ -19,7 +19,7 @@ import qualified Prelude                                  as P
 -- <http://stackoverflow.com/questions/16500656/which-color-gradient-is-used-to-color-mandelbrot-in-wikipedia>
 --
 escapeToRGBA
-    :: (RealFloat a, ToFloating Int32 a, Elt (Complex a))
+    :: (RealFloat a, ToFloating Int32 a)
     => Acc (Scalar Int32)
     -> Acc (Vector Word32)
     -> Exp (Complex a, Int32)

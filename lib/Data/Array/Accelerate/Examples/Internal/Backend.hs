@@ -22,7 +22,8 @@ import Data.Label
 import System.Console.GetOpt
 
 import Data.Array.Accelerate
-import Data.Array.Accelerate.Trafo                                  ( Afunction, AfunctionR )
+import Data.Array.Accelerate.Trafo                                  ( Afunction )
+import Data.Array.Accelerate.Trafo.Sharing                          ( AfunctionR )
 import qualified Data.Array.Accelerate.Interpreter                  as Interp
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
 import qualified Data.Array.Accelerate.LLVM.Native                  as CPU

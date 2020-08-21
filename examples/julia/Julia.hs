@@ -14,7 +14,7 @@ import qualified Prelude                                  as P
 
 
 julia
-    :: forall a. (Num a, RealFloat a, FromIntegral Int a, Elt (Complex a))
+    :: forall a. (Num a, RealFloat a, FromIntegral Int a)
     => Int                                                -- ^ image width
     -> Int                                                -- ^ image height
     -> (Exp Float -> Exp (Complex a) -> Exp (Complex a))  -- ^ iteration function

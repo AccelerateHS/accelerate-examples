@@ -23,7 +23,7 @@ import Data.Array.Accelerate.Linear.Vector
 --   distance from the source.
 --
 data Light = Light_ Position Colour
-  deriving (Show, Generic, Elt, IsTuple)
+  deriving (Show, Generic, Elt)
 
 type Lights = Array DIM1 Light
 

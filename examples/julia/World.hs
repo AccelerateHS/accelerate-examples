@@ -96,8 +96,8 @@ react conf opts event world@World{..} =
              dy = (y0-y) * P.realToFrac (the' worldWidth) / P.fromIntegral worldSizeX
          in
          return . dirty
-                $ world { worldPosX    = unit' (P.realToFrac dx + the' worldPosX)
-                        , worldPosY    = unit' (P.realToFrac dy + the' worldPosY)
+                $ world { worldPosX    = unit' (the' worldPosX + P.realToFrac dx)
+                        , worldPosY    = unit' (the' worldPosY - P.realToFrac dy)
                         , worldPanning = Just (x,y)
                         }
 
@@ -220,7 +220,7 @@ golden :: Floating a => a
 golden = (1 + sqrt 5) / 2
 
 presets
-    :: (Fractional a, A.RealFloat a, A.Elt (Complex a))
+    :: (Fractional a, A.RealFloat a)
     => [ (Exp a -> Exp (Complex a) -> Exp (Complex a), a, a, a, Int32, a) ]
 presets =
   [ (\t z -> z ^ (2::Int) + mkPolar 0.7885 t,                                   0, 0, 4, 255, 16.0)

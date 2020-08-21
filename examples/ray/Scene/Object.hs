@@ -29,10 +29,10 @@ type Objects = (Vector Sphere, Vector Plane)
 --   object separately (and hope this works out...)
 --
 data Sphere = Sphere_ Position Float Colour Float
-  deriving (Show, Generic, Elt, IsTuple)
+  deriving (Show, Generic, Elt)
 
 data Plane = Plane_ Position Direction Colour Float
-  deriving (Show, Generic, Elt, IsTuple)
+  deriving (Show, Generic, Elt)
 
 pattern Sphere :: Exp Position -> Exp Float -> Exp Colour -> Exp Float -> Exp Sphere
 pattern Sphere { spherePos, sphereRadius, sphereColor, sphereShine } =

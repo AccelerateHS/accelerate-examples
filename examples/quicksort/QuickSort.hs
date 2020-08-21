@@ -66,11 +66,11 @@ step (T2 values headFlags) = (T2 values' headFlags')
     --  * the position of the pivot + 1
     headFlags' =
       let
-          f :: Int -> Exp Bool -> Exp Int -> Exp Int -> Exp DIM1
+          f :: Int -> Exp Bool -> Exp Int -> Exp Int -> Exp (Maybe DIM1)
           f inc headF start countSmall =
-            headF ? (index1 $ start + countSmall + constant inc, ignore)
+            headF ? (Just_ (I1 $ start + countSmall + constant inc), Nothing_)
 
-          writes :: Int -> Acc (Vector DIM1)
+          writes :: Int -> Acc (Vector (Maybe DIM1))
           writes inc = zipWith3 (f inc) headFlags startIndex countSmaller
       in
       -- Note that (writes 1) may go out of bounds of the values array.
@@ -148,7 +148,7 @@ postscanSegHead f headFlags values
 -- Writes True to the specified indices in a flags arrays
 --
 writeFlags
-    :: Acc (Vector DIM1)
+    :: Acc (Vector (Maybe DIM1))
     -> Acc (Vector Bool)
     -> Acc (Vector Bool)
 writeFlags writes flags = permute const flags (writes !) (fill (shape writes) True_)

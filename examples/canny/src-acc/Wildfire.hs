@@ -1,6 +1,7 @@
 {-# LANGUAGE BangPatterns  #-}
 {-# LANGUAGE TypeFamilies  #-}
 {-# LANGUAGE TypeOperators #-}
+{-# OPTIONS_GHC -fllvm -optlo-O3 -O3 -fmax-simplifier-iterations=20 -fsimplifier-phases=3 -fno-liberate-case -funfolding-use-threshold100 -funfolding-keeness-factor100 #-}
 -- This module defines the final phase of the Canny algorithm, a recursive
 -- algorithm to "connect" pixels of the output image.
 --

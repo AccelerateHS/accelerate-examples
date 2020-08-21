@@ -207,5 +207,5 @@ selectStrong img =
       indices           = enumFromN (index1 $ size img) 0
       zeros             = fill (index1 $ the len) 0
   in
-  permute const zeros (\ix -> strong!ix == 0 ? (ignore, index1 $ targetIdx!ix)) indices
+  permute const zeros (\ix -> strong!ix == 0 ? (Nothing_, Just_ (I1 (targetIdx!ix)))) indices
 

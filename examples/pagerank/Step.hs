@@ -72,6 +72,6 @@ stepRank links sizes ranks parRanks
 
         -- Add to the partial ranks the contribution of the supplied links.
         ranks' = A.permute (+) parRanks (\ix -> let (_, to) = unlift $ links ! ix :: (Exp PageId, Exp PageId)
-                                              in index1 (A.fromIntegral to)) contribution
+                                                 in Just_ (index1 (A.fromIntegral to))) contribution
         in ranks'
 

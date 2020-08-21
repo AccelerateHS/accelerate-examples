@@ -6,7 +6,7 @@ module Test (makeTests)
 import Common.Type
 
 import Prelude                                          as P
-import Data.Array.Accelerate                            as A
+import Data.Array.Accelerate                            as A hiding ( V3 )
 import Data.Array.Accelerate.Examples.Internal
 
 -- Generate the tests

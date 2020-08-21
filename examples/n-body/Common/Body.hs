@@ -21,7 +21,7 @@ module Common.Body (
 
 import Common.Type
 
-import Data.Array.Accelerate                                        as A
+import Data.Array.Accelerate                                        as A hiding ( V3 )
 import Data.Array.Accelerate.Linear.Metric
 import Data.Array.Accelerate.Linear.Vector
 import Data.Array.Accelerate.Control.Lens

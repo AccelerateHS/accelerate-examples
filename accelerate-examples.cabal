@@ -453,6 +453,7 @@ Executable accelerate-fluid
           base                            >= 4.7 && < 5
         , accelerate                      == 1.4.*
         , accelerate-examples
+        , accelerate-io                   >= 1.3
         , accelerate-io-bmp               >= 0.1
         , bmp                             >= 1.2
         , colour-accelerate               >= 0.1

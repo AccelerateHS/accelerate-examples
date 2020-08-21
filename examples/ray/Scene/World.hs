@@ -6,7 +6,7 @@ import Scene.Light
 import Scene.Object
 
 -- frenemies
-import Data.Array.Accelerate                                    as A
+import Data.Array.Accelerate                                    as A hiding ( V3 )
 import Data.Array.Accelerate.Data.Colour.RGB
 
 

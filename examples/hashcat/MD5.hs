@@ -34,12 +34,11 @@ hashcatDict
     -> Acc (Scalar MD5)
     -> Acc (Scalar Int)
 hashcatDict dict passwd
-  = reshape (constant Z)
-  $ permute const res (\ix -> crypt A.! ix `cmp` the passwd ? (constant (Z:.0), ignore))
+  = permute const res (\ix -> crypt A.! ix `cmp` the passwd ? (Just_ Z_, Nothing_))
                       (enumFromN (index1 n) 0)
   where
     n           = A.size crypt
-    res         = use $ fromList (Z:.1) [-1]    :: Acc (Vector Int)
+    res         = fill Z_ (-1)
     crypt       = md5 dict
 
     cmp x y     = let (x1,x2,x3,x4) = unlift x

@@ -10,7 +10,7 @@ import Scene.Object
 import Scene.World
 
 -- frenemies
-import Data.Array.Accelerate                                    as A
+import Data.Array.Accelerate                                    as A hiding ( V3 )
 
 -- library
 import Prelude                                                  hiding ( (.), id )

@@ -18,11 +18,10 @@ import Foreign.Ptr
 import Foreign.ForeignPtr
 import Foreign.Storable
 import Foreign.Marshal.Alloc
-import Data.Array.Accelerate                            ( Z(..), (:.)(..) )
-import Data.Array.Accelerate.Array.Sugar                ( Array(..) )
 
-import qualified Data.Array.Accelerate                  as A
-import qualified Data.Array.Accelerate.Array.Data       as A
+import Data.Array.Accelerate                                        ( Z(..), (:.)(..) )
+import Data.Array.Accelerate.IO.Foreign.Ptr
+import qualified Data.Array.Accelerate                              as A
 
 
 data World = World
@@ -81,7 +80,7 @@ render opt world = do
 
 
 renderDensity :: DensityField -> IO Picture
-renderDensity df@(Array _ ad) = do
+renderDensity df = do
   dst   <- mallocBytes (n*4)
   fill 0 src dst
   fptr  <- newForeignPtr finalizerFree dst
@@ -92,7 +91,7 @@ renderDensity df@(Array _ ad) = do
   return $ bitmapOfForeignPtr w h     fptr False
 #endif
   where
-    src         = A.ptrsOfArrayData ad
+    src         = toPtrs df
     Z:.h:.w     = A.arrayShape df
     n           = h*w
     colour !f   = let c = 0 `max` f `min` 1
