@@ -1,17 +1,25 @@
-Examples programs using Accelerate
-==================================
+<div align="center">
+<img width="450" src="https://github.com/AccelerateHS/accelerate/raw/master/images/accelerate-logo-text-v.png?raw=true" alt="henlo, my name is Theia"/>
 
-[![Build Status](https://travis-ci.org/AccelerateHS/accelerate-examples.svg?branch=master)](https://travis-ci.org/AccelerateHS/accelerate-examples)
+# Example programs using Accelerate
+
+[![GitHub CI](https://github.com/tmcdonell/accelerate-examples/workflows/CI/badge.svg)](https://github.com/tmcdonell/accelerate-examples/actions)
+[![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/AccelerateHS/Lobby)
+<br>
+[![Stackage LTS](https://stackage.org/package/accelerate-examples/badge/lts)](https://stackage.org/lts/package/accelerate-examples)
+[![Stackage Nightly](https://stackage.org/package/accelerate-examples/badge/nightly)](https://stackage.org/nightly/package/accelerate-examples)
 [![Hackage](https://img.shields.io/hackage/v/accelerate-examples.svg)](https://hackage.haskell.org/package/accelerate-examples)
+<br>
 [![Docker Automated build](https://img.shields.io/docker/automated/tmcdonell/accelerate-examples.svg)](https://hub.docker.com/r/tmcdonell/accelerate-examples/)
 [![Docker status](https://images.microbadger.com/badges/image/tmcdonell/accelerate-examples.svg)](https://microbadger.com/images/tmcdonell/accelerate-examples)
 
-Example programs using the Accelerate library. If you add new features to the
-base library or find a bug, please add a test case. The aim is for this program
-to evolve and be useful for both performance and regression testing.
+</div>
 
-If you have found a bug, please report it to:
-https://github.com/AccelerateHS/accelerate/issues
+Example programs using the Accelerate library. The aim is for this package to
+evolve and be useful for both performance and regression testing.
+
+Contributions and bug reports are welcome!<br>
+Please feel free to contact me through [GitHub](https://github.com/AccelerateHS/accelerate/issues) or [gitter.im](https://gitter.im/AccelerateHS/Lobby).
 
 
 Installation
@@ -24,14 +32,14 @@ external packages. You may need to adjust the package names or versions slightly
 for your system.
 
   * Ubuntu/Debian (apt-get):
-    - llvm-8-dev
+    - llvm-9-dev
     - freeglut3-dev
     - libfftw3-dev
 
   * Mac OS ([homebrew](http://brew.sh/index.html))
     - fftw
     - libffi
-    - llvm-hs/homebrew-llvm/llvm-8
+    - llvm-hs/homebrew-llvm/llvm-9
 
 If you want to use the CUDA GPU enabled backend
 [`accelerate-llvm-ptx`](https://github.com/AccelerateHS/accelerate-llvm), you
@@ -41,14 +49,14 @@ installer on NVIDIA's website here:
   * https://developer.nvidia.com/cuda-downloads
 
 
-### stack
+### Building: stack
 
 For development, the recommend build method is via the
 [`stack`](http://haskellstack.org) tool. This will simplify pulling in
-dependencies not yet on Hackage. For example, to build using ghc-8.0:
+dependencies not yet on Hackage. For example, to build using ghc-8.10:
 
 ```bash
-ln -s stack-8.0.yaml stack.yaml     # only once
+ln -s stack-8.10.yaml stack.yaml    # only once
 stack build                         # or, 'stack install' to install the executables globally
 ```
 
