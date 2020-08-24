@@ -8,10 +8,10 @@ packages:
 
 extra-deps:
 - github: tmcdonell/accelerate
-  commit: b54ce53cff506ba9e9edab21f7a37c3dfbd96173
+  commit: d7caff6f9153b93ca467360f8f3cdc5975685c2f
 
 - github: tmcdonell/accelerate-llvm
-  commit: 4217ca6c68402691dcefb5d578846a41353aaa2a
+  commit: d1b3be2a018933cd692f11babb245d042c8e003c
   subdirs:
     - accelerate-llvm
     - accelerate-llvm-native
