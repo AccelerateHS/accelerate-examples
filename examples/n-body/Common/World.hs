@@ -35,9 +35,7 @@ advanceBodies calcAccels timeStep bodies
                         $ A.map pointMassOfBody bodies
 
         -- Apply the accelerations to the bodies and advance them
-        advance b a     = let m         = massOfPointMass (pointMassOfBody b)
-                              a'        = m *^ a
-                          in advanceBody (the timeStep) (setAccelOfBody a' b)
+        advance b a     = advanceBody (the timeStep) (setAccelOfBody a b)
     in
     A.zipWith advance bodies accels
 
