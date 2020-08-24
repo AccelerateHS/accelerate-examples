@@ -90,7 +90,7 @@ jobs:
         brew install fftw
         brew install llvm-${{ matrix.llvm }}
         echo "::set-env name=PKG_CONFIG_PATH::$(brew --prefix)/opt/libffi/lib/pkgconfig:$PKG_CONFIG_PATH"
-        echo "::set-env name=STACK_FLAGS::$STACK_FLAGS --flag:accelerate-fft:-llvm-ptx --flag:accelerate-examples:-llvm-ptx"
+        echo "::set-env name=STACK_FLAGS::$STACK_FLAGS --flag accelerate-fft:-llvm-ptx --flag accelerate-examples:-llvm-ptx"
 
     # - name: Setup (Windows)
     #   if: runner.os == 'Windows'
