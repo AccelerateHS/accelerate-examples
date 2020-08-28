@@ -20,7 +20,7 @@ maintainer:             Trevor L. McDonell <trevor.mcdonell@gmail.com>
 homepage:               https://github.com/AccelerateHS/accelerate-examples
 bug-reports:            https://github.com/AccelerateHS/accelerate/issues
 
-category:               Compilers/Interpreters, Concurrency, Data, Parallelism
+category:               Accelerate
 stability:              Experimental
 
 extra-source-files:
