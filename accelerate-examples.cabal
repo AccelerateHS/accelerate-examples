@@ -1,30 +1,29 @@
-Name:                   accelerate-examples
-Version:                1.3.0.0
-Cabal-version:          >=1.8
-Tested-with:            GHC >= 8.0
-Build-type:             Simple
+name:                   accelerate-examples
+version:                1.3.0.0
+cabal-version:          >=1.10
+tested-with:            GHC >= 8.6
+build-type:             Simple
 
-Synopsis:               Examples using the Accelerate library
-Description:
-  This package demonstrates a number of computation kernels and applications
-  showcasing the /Accelerate/ language and associated backend implementations.
-  It is also used for performance and regression testing.
+synopsis:               Examples using the Accelerate library
+description:
+  Example programs using the Accelerate library. The aim is for this package to
+  evolve and be useful for both performance and regression testing.
   .
   Refer to the main /Accelerate/ package for more information:
   <http://hackage.haskell.org/package/accelerate>
   .
 
-License:                BSD3
-License-file:           LICENSE
-Author:                 The Accelerate Team
-Maintainer:             Trevor L. McDonell <trevor.mcdonell@gmail.com>
-Homepage:               https://github.com/AccelerateHS/accelerate-examples
-Bug-reports:            https://github.com/AccelerateHS/accelerate/issues
+license:                BSD3
+license-file:           LICENSE
+author:                 The Accelerate Team
+maintainer:             Trevor L. McDonell <trevor.mcdonell@gmail.com>
+homepage:               https://github.com/AccelerateHS/accelerate-examples
+bug-reports:            https://github.com/AccelerateHS/accelerate/issues
 
-Category:               Compilers/Interpreters, Concurrency, Data, Parallelism
-Stability:              Experimental
+category:               Compilers/Interpreters, Concurrency, Data, Parallelism
+stability:              Experimental
 
-Extra-source-files:
+extra-source-files:
     README.md
     data/matrices/README.md
     examples/canny/README.md
@@ -37,98 +36,99 @@ Extra-source-files:
 
 -- Flags that control features of the benchmark programs
 --
-Flag gui
-  Description:          Enable gloss-based GUIs, where applicable. If not
+flag gui
+  description:          Enable gloss-based GUIs, where applicable. If not
                         enabled, the application always runs in benchmark mode.
-  Default:              True
+  default:              True
 
-Flag ekg
-  Description:          Enable EKG remote monitoring server at <http://localhost:8000>
-  Default:              True
+flag ekg
+  description:          Enable EKG remote monitoring server at <http://localhost:8000>
+  default:              True
 
-Flag codespeed
-  Description:          Enable upload of results to benchmark server
-  Default:              False
+flag codespeed
+  description:          Enable upload of results to benchmark server
+  default:              False
 
 -- Flags that control which Accelerate backends that are linked against
 --
-Flag llvm-cpu
-  Description:          Enable the LLVM backend for multicore CPUs
-  Default:              True
+flag llvm-cpu
+  description:          Enable the LLVM backend for multicore CPUs
+  default:              True
 
-Flag llvm-ptx
-  Description:          Enable the LLVM PTX backend for NVIDIA GPUs
-  Default:              True
+flag llvm-ptx
+  description:          Enable the LLVM PTX backend for NVIDIA GPUs
+  default:              True
 
 -- Flags to specify which programs to build
 --
-Flag smvm
-  Description:          Sparse-matrix vector multiplication benchmark
-  Default:              True
+flag smvm
+  description:          Sparse-matrix vector multiplication benchmark
+  default:              True
 
-Flag crystal
-  Description:          A visualisation of a sum of waves in a plane
-  Default:              True
+flag crystal
+  description:          A visualisation of a sum of waves in a plane
+  default:              True
 
-Flag tunnel
-  Description:          The slit-scan effect creating a Doctor Who time vortex
-  Default:              True
+flag tunnel
+  description:          The slit-scan effect creating a Doctor Who time vortex
+  default:              True
 
-Flag canny
-  Description:          Canny edge detection benchmark
-  Default:              True
+flag canny
+  description:          Canny edge detection benchmark
+  default:              True
 
-Flag mandelbrot
-  Description:          A Mandelbrot fractal benchmark
-  Default:              True
+flag mandelbrot
+  description:          A Mandelbrot fractal benchmark
+  default:              True
 
-Flag julia
-  Description:          An interactive julia-set simulator
-  Default:              True
+flag julia
+  description:          An interactive julia-set simulator
+  default:              True
 
-Flag fluid
-  Description:          An interactive particle-based fluid simulation
-  Default:              True
+flag fluid
+  description:          An interactive particle-based fluid simulation
+  default:              True
 
-Flag nbody
-  Description:          Simulation of gravitational attraction between solid particles
-  Default:              True
+flag nbody
+  description:          Simulation of gravitational attraction between solid particles
+  default:              True
 
-Flag smoothlife
-  Description:          A cellular automata simulation
-  Default:              True
+flag smoothlife
+  description:          A cellular automata simulation
+  default:              True
 
-Flag hashcat
-  Description:          A "password recovery" application for MD5 cracking
-  Default:              True
+flag hashcat
+  description:          A "password recovery" application for MD5 cracking
+  default:              True
 
-Flag fft
-  Description:          Simple FFT-based high/low-pass image filtering
-  Default:              True
+flag fft
+  description:          Simple FFT-based high/low-pass image filtering
+  default:              True
 
-Flag pagerank
-  Description:          Implementation of the PageRank algorithm
-  Default:              True
+flag pagerank
+  description:          Implementation of the PageRank algorithm
+  default:              True
 
-Flag quicksort
-  Description:          Implementation of the QuickSort algorithm
-  Default:              True
+flag quicksort
+  description:          Implementation of the QuickSort algorithm
+  default:              True
 
-Flag ray
-  Description:          A simple real-time ray tracer
-  Default:              True
+flag ray
+  description:          A simple real-time ray tracer
+  default:              True
 
-Flag kmeans
-  Description:          An implementation of k-means clustering in a plane
-  Default:              True
+flag kmeans
+  description:          An implementation of k-means clustering in a plane
+  default:              True
 
 
 -- Test harness
 -- ------------
 
-Library
+library
+  default-language:     Haskell2010
   hs-source-dirs:       lib
-  Build-depends:
+  build-depends:
           base                            >= 4.7 && < 5
         , accelerate                      == 1.3.*
         , ansi-wl-pprint                  >= 0.6
@@ -142,7 +142,7 @@ Library
         , test-framework-hunit            >= 0.3
         , test-framework-quickcheck2      >= 0.2
 
-  Exposed-modules:
+  exposed-modules:
         Data.Array.Accelerate.Examples.Internal
 
   Other-modules:
@@ -198,9 +198,10 @@ Library
 -- Sparse matrix vector multiplication
 -- -----------------------------------
 
-Executable accelerate-smvm
+executable accelerate-smvm
+  default-language:     Haskell2010
   hs-source-dirs:       examples/smvm
-  Main-is:              Main.hs
+  main-is:              Main.hs
   other-modules:        Config Matrix SMVM
 
   ghc-options:
@@ -240,9 +241,10 @@ Executable accelerate-smvm
 -- A quasicrystal demo as the sum of waves in a plane
 -- --------------------------------------------------
 
-Executable accelerate-crystal
+executable accelerate-crystal
+  default-language:     Haskell2010
   hs-source-dirs:       examples/crystal
-  Main-is:              Main.hs
+  main-is:              Main.hs
   other-modules:        Config
 
   ghc-options:
@@ -275,9 +277,10 @@ Executable accelerate-crystal
 -- The slit-scan effect creating a Doctor Who time vortex
 -- ------------------------------------------------------
 
-Executable accelerate-tunnel
+executable accelerate-tunnel
+  default-language:     Haskell2010
   hs-source-dirs:       examples/tunnel
-  Main-is:              Main.hs
+  main-is:              Main.hs
   other-modules:        Config
 
   ghc-options:
@@ -311,9 +314,10 @@ Executable accelerate-tunnel
 -- Image edge detection
 -- --------------------
 
-Executable accelerate-canny
+executable accelerate-canny
+  default-language:     Haskell2010
   hs-source-dirs:       examples/canny/src-acc
-  Main-is:              Main.hs
+  main-is:              Main.hs
   other-modules:        Config Canny Wildfire
 
   ghc-options:
@@ -353,9 +357,10 @@ Executable accelerate-canny
 -- A simple mandelbrot generator
 -- -----------------------------
 
-Executable accelerate-mandelbrot
+executable accelerate-mandelbrot
+  default-language:     Haskell2010
   hs-source-dirs:       examples/mandelbrot
-  Main-is:              Main.hs
+  main-is:              Main.hs
   other-modules:        Config Mandel World
 
   ghc-options:
@@ -390,9 +395,10 @@ Executable accelerate-mandelbrot
 -- A julia set generator
 -- ---------------------
 
-Executable accelerate-julia
+executable accelerate-julia
+  default-language:     Haskell2010
   hs-source-dirs:       examples/julia
-  Main-is:              Main.hs
+  main-is:              Main.hs
   other-modules:        Config Julia Palette World
 
   ghc-options:
@@ -426,9 +432,10 @@ Executable accelerate-julia
 -- A stable fluid simulation
 -- -------------------------
 
-Executable accelerate-fluid
-  Main-is:              Main.hs
+executable accelerate-fluid
+  default-language:     Haskell2010
   hs-source-dirs:       examples/fluid/src-acc
+  main-is:              Main.hs
   other-modules:        Config Event Fluid Type World
 
   ghc-options:
@@ -465,9 +472,10 @@ Executable accelerate-fluid
 -- Simulation of gravitational attraction between solid particles
 -- --------------------------------------------------------------
 
-Executable accelerate-nbody
+executable accelerate-nbody
+  default-language:     Haskell2010
   hs-source-dirs:       examples/n-body
-  Main-is:              Main.hs
+  main-is:              Main.hs
   other-modules:
         Common.Body
         Common.Tree
@@ -516,9 +524,10 @@ Executable accelerate-nbody
 -- A celular automata
 -- ------------------
 
-Executable accelerate-smoothlife
+executable accelerate-smoothlife
+  default-language:     Haskell2010
   hs-source-dirs:       examples/smoothlife
-  Main-is:              Main.hs
+  main-is:              Main.hs
   other-modules:
         Config
         Gloss.Draw
@@ -561,9 +570,10 @@ Executable accelerate-smoothlife
 -- A "password recovery" tool
 -- --------------------------
 
-Executable accelerate-hashcat
+executable accelerate-hashcat
+  default-language:     Haskell2010
   hs-source-dirs:       examples/hashcat
-  Main-is:              Main.hs
+  main-is:              Main.hs
   other-modules:        Config Digest MD5
 
   ghc-options:
@@ -600,8 +610,9 @@ Executable accelerate-hashcat
 -- FFT examples
 -- ------------
 
-Executable accelerate-fft
-  Main-is:              Main.hs
+executable accelerate-fft
+  default-language:     Haskell2010
+  main-is:              Main.hs
   hs-source-dirs:       examples/fft/src-acc
   other-modules:        Config HighPass FFT
 
@@ -636,9 +647,10 @@ Executable accelerate-fft
 -- PageRank
 -- --------
 
-Executable accelerate-pagerank
+executable accelerate-pagerank
+  default-language:     Haskell2010
   hs-source-dirs:       examples/pagerank
-  Main-is:              Main.hs
+  main-is:              Main.hs
   other-modules:
         Config
         Count
@@ -681,9 +693,10 @@ Executable accelerate-pagerank
 -- QuickSort
 -- ---------
 
-Executable accelerate-quicksort
+executable accelerate-quicksort
+  default-language:     Haskell2010
   hs-source-dirs:       examples/quicksort
-  Main-is:              Main.hs
+  main-is:              Main.hs
   other-modules:
         Config
         QuickSort
@@ -717,9 +730,10 @@ Executable accelerate-quicksort
 -- Ray tracer
 -- ----------
 
-Executable accelerate-ray
+executable accelerate-ray
+  default-language:     Haskell2010
   hs-source-dirs:       examples/ray
-  Main-is:              Main.hs
+  main-is:              Main.hs
   other-modules:
         Common.Type
         Config
@@ -766,9 +780,10 @@ Executable accelerate-ray
 -- K-means
 -- -------
 
-Executable accelerate-kmeans
+executable accelerate-kmeans
+  default-language:     Haskell2010
   hs-source-dirs:       examples/kmeans
-  Main-is:              Main.hs
+  main-is:              Main.hs
   other-modules:        Config Kmeans
 
   ghc-options:
