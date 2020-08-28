@@ -1,0 +1,107 @@
+# vim: nospell
+#
+# Basic template to test with GHC=[7.8, 7.10, 8.0], but also installs the
+# relevant version of LLVM as (a very old version of) the CUDA toolkit (4.0).
+# Caches the 'stack' build directory to speed subsequent compilations.
+#
+language: minimal
+dist: xenial
+
+cache:
+  timeout: 600
+  directories:
+    - $HOME/.stack/snapshots
+    - $HOME/.local/bin
+    - $TRAVIS_BUILD_DIR/.stack-work
+
+before_cache:
+  # - rm -rf $(stack path --local-install-root)/bin
+  - rm -rf $(stack path --local-install-root)/doc
+
+addons:
+  apt:
+    sources: &apt_sources
+      - hvr-ghc
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-xenial
+    packages: &apt_packages
+      - alex-3.1.7
+      - dpkg
+      - freeglut3-dev
+      - g++-8
+      - gcc-8
+      - happy-1.19.5
+      - libfftw3-dev
+      - libgmp-dev
+
+matrix:
+  fast_finish: true
+  include:
+    - env: GHC=8.6.5 LLVM=8.0.0 CUDA=10.1.105-1
+      compiler: "GHC 8.6"
+      addons:
+        apt:
+          sources:
+            - *apt_sources
+            - llvm-toolchain-xenial-8
+          packages:
+            - *apt_packages
+            - llvm-8-dev
+
+    - env: GHC=8.4.3 LLVM=6.0.1 CUDA=10.0.130-1
+      compiler: "GHC 8.4"
+      addons:
+        apt:
+          sources:
+            - *apt_sources
+            - llvm-toolchain-xenial-6.0
+          packages:
+            - *apt_packages
+            - llvm-6.0-dev
+
+    - env: GHC=8.2.2 LLVM=5.0.2 CUDA=8.0.61-1
+      compiler: "GHC 8.2"
+      addons:
+        apt:
+          sources:
+            - *apt_sources
+            - llvm-toolchain-xenial-5.0
+          packages:
+            - *apt_packages
+            - llvm-5.0-dev
+
+before_install:
+  - export PATH=/opt/alex/3.1.7/bin:/opt/happy/1.19.5/bin:$PATH
+  - source .travis/install-stack.sh
+
+  # llvm-hs requires new g++
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8
+
+  # ghc-8.4+ require libffi7
+  - export LD_LIBRARY_PATH=$(stack exec ghc -- --print-libdir)/rts:$LD_LIBRARY_PATH
+
+  # build environment
+  - echo "$(stack exec ghc -- --version) [$(stack exec ghc -- --print-project-git-commit-id 2> /dev/null || echo '?')]"
+  - stack --version; true
+  - nvcc --version; true
+  - llc-${LLVM:0:3} --version; true
+  - opt-${LLVM:0:3} --version; true
+
+install:
+  # how much do we have to do?
+  - export FLAGS="--no-terminal --no-copy-bins --flag accelerate-examples:-llvm-cpu --flag accelerate-examples:-llvm-ptx --flag accelerate-fft:-llvm-cpu --flag accelerate-fft:-llvm-ptx"
+  - stack build $FLAGS --dry-run
+
+  # bootstrap
+  # - travis_retry travis_wait 60 stack build --fast --jobs=2 --only-dependencies --no-terminal accelerate
+  # - travis_retry travis_wait 60 stack build --fast --jobs=2 --only-dependencies --no-terminal accelerate-llvm-native accelerate-llvm-ptx
+
+  # build dependencies
+  - travis_retry travis_wait 60 stack build $FLAGS --only-dependencies
+
+script:
+  - travis_retry stack build $FLAGS
+
+after_success:
+  - source .travis/update-accelerate-buildbot.sh
+

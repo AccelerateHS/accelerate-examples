@@ -12,7 +12,7 @@ import Page
 import Step
 
 import Data.Array.Accelerate                            as A
-import Data.Array.Accelerate.Array.Sugar                as A ( EltRepr )
+import Data.Array.Accelerate.Sugar.Elt                  as A
 import Data.Array.Accelerate.Examples.Internal          as A
 import Data.Array.Accelerate.IO.Data.Vector.Storable    as A
 
@@ -23,7 +23,7 @@ import Prelude                                          as P
 
 
 arrayize
-    :: (Vectors (EltRepr e) ~ S.Vector a, Elt e, S.Storable a)
+    :: (Vectors (EltR e) ~ S.Vector a, Elt e, S.Storable a)
     => S.Vector a
     -> Vector e
 arrayize vec = (A.fromVectors (Z :. S.length vec) vec)

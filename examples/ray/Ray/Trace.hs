@@ -10,7 +10,7 @@ import Scene.Light
 import Ray.Intersect
 
 -- frenemies
-import Data.Array.Accelerate                                    as A
+import Data.Array.Accelerate                                    as A hiding ( V3 )
 import Data.Array.Accelerate.Data.Colour.RGB                    as RGB
 import Data.Array.Accelerate.Data.Colour.Names
 import Data.Array.Accelerate.Linear.Metric
@@ -41,7 +41,7 @@ castViewRays sizeX sizeY fov eyePos
     in
     A.generate (constant (Z :. sizeY :. sizeX))
                (\ix -> let (x, y) = xyOfPoint $ pointOfIndex sizeX sizeY ix
-                       in  normalize $ lift (V3 (x * fovX) ((-y) * fovY) 0) - eyePos)
+                       in  normalize $ lift (V3 (x * fovX) (y * fovY) 0) - eyePos)
 
 
 -- | Cast a single ray into the scene
@@ -58,8 +58,8 @@ traceRay limit objects lights ambient = go limit
   where
     (spheres, planes)   = unlift objects
 
-    dummySphere         = constant (Sphere (V3 0 0 0) 0          (RGB 0 0 0) 0)
-    dummyPlane          = constant (Plane  (V3 0 0 0) (V3 0 0 1) (RGB 0 0 0) 0)
+    dummySphere         = constant (Sphere_ (V3 0 0 0) 0          (RGB 0 0 0) 0)
+    dummyPlane          = constant (Plane_  (V3 0 0 0) (V3 0 0 1) (RGB 0 0 0) 0)
 
     -- Stop once there are too many reflections, in case we've found two
     -- parallel mirrors.

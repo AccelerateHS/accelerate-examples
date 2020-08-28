@@ -3,10 +3,10 @@
 {-# LANGUAGE TypeOperators #-}
 -- |
 -- Module:      : Data.Array.Accelerate.Examples.Internal.Backend
--- Copyright    : [2014] Trevor L. McDonell
+-- Copyright    : [2014..2020] Trevor L. McDonell
 -- License      : BSD3
 --
--- Maintainer   : Trevor L. McDonell <tmcdonell@cse.unsw.edu.au>
+-- Maintainer   : Trevor L. McDonell <trevor.mcdonell@gmail.com>
 -- Stability    : experimental
 -- Portability  : non-portable (GHC extensions)
 --
@@ -22,7 +22,8 @@ import Data.Label
 import System.Console.GetOpt
 
 import Data.Array.Accelerate
-import Data.Array.Accelerate.Trafo                                  ( Afunction, AfunctionR )
+import Data.Array.Accelerate.Trafo                                  ( Afunction )
+import Data.Array.Accelerate.Trafo.Sharing                          ( AfunctionR )
 import qualified Data.Array.Accelerate.Interpreter                  as Interp
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
 import qualified Data.Array.Accelerate.LLVM.Native                  as CPU

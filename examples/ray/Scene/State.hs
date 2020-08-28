@@ -10,7 +10,7 @@ import Scene.Object
 import Scene.World
 
 -- frenemies
-import Data.Array.Accelerate                                    as A
+import Data.Array.Accelerate                                    as A hiding ( V3 )
 
 -- library
 import Prelude                                                  hiding ( (.), id )
@@ -108,11 +108,11 @@ setTime time state
 
 translateObjects :: Position -> Objects -> Objects
 translateObjects v (spheres, planes)
-  = ( fromList (arrayShape spheres) [ Sphere (p + v) r c s | Sphere p r c s <- toList spheres ]
-    , fromList (arrayShape planes)  [ Plane  (p + v) d c s | Plane  p d c s <- toList planes  ]
+  = ( fromList (arrayShape spheres) [ Sphere_ (p + v) r c s | Sphere_ p r c s <- toList spheres ]
+    , fromList (arrayShape planes)  [ Plane_  (p + v) d c s | Plane_  p d c s <- toList planes  ]
     )
 
 translateLights :: Position -> Lights -> Lights
 translateLights v lights
-  = fromList (arrayShape lights) [ Light (p + v) c | Light p c <- toList lights ]
+  = fromList (arrayShape lights) [ Light_ (p + v) c | Light_ p c <- toList lights ]
 

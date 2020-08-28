@@ -10,8 +10,8 @@ module Random.Position
 import Common.Type
 
 import System.Random.MWC                                ( uniformR )
-import Data.Array.Accelerate.Examples.Internal          ( (:~>) )
-import Data.Array.Accelerate.Array.Sugar                as A
+import Data.Array.Accelerate.System.Random.MWC          ( (:~>) )
+import Data.Array.Accelerate.Sugar.Shape
 
 
 -- | Points distributed as a disc
@@ -36,7 +36,7 @@ cloud (fromIntegral -> sizeX, fromIntegral -> sizeY) radiusMax ix gen
           = disc (V3 (sx * sizeX) (sy * sizeY) (sz * (sizeX `min` sizeY)))
                  (radiusMax * r)
 
-    in case A.size ix `mod` 5 of
+    in case size ix `mod` 5 of
         0 -> blob ( 0.25, 0.25, 0.25) 1.00 ix gen
         1 -> blob (-0.10, 0.10, 0.10) 0.60 ix gen
         2 -> blob (-0.05, 0.30,-0.30) 0.35 ix gen

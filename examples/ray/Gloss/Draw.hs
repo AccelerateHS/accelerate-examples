@@ -10,7 +10,7 @@ import Scene.State
 import Ray.Trace
 
 -- frenemies
-import Data.Array.Accelerate                                    as A
+import Data.Array.Accelerate                                    as A hiding ( V3 )
 import Data.Array.Accelerate.Data.Colour.RGB                    as RGB
 import Data.Array.Accelerate.Linear.Metric
 import qualified Data.Array.Accelerate.Data.Colour.RGBA         as RGBA
@@ -56,7 +56,7 @@ tracePixel sizeX sizeY fov bounces ambient state point
 
         (x,y)           = xyOfPoint point
 
-        eyeDir          = normalize $ lift (V3 (x * fovX) ((-y) * fovY) 0) - eyePos
+        eyeDir          = normalize $ lift (V3 (x * fovX) (y * fovY) 0) - eyePos
         eyePos          = the eyePos'
         (objects, lights, eyePos')
                         = unlift state

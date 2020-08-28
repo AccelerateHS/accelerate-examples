@@ -5,10 +5,10 @@
 {-# LANGUAGE ViewPatterns    #-}
 -- |
 -- Module:      : Data.Array.Accelerate.Examples.Internal.ParseArgs
--- Copyright    : [2014] Trevor L. McDonell
+-- Copyright    : [2014..2020] Trevor L. McDonell
 -- License      : BSD3
 --
--- Maintainer   : Trevor L. McDonell <tmcdonell@cse.unsw.edu.au>
+-- Maintainer   : Trevor L. McDonell <trevor.mcdonell@gmail.com>
 -- Stability    : experimental
 -- Portability  : non-portable (GHC extensions)
 --

@@ -16,6 +16,7 @@ import qualified Solver.Naive2                          as Naive2
 import qualified Solver.BarnsHut                        as BarnsHut
 
 import Data.Array.Accelerate                            as A hiding ( size )
+import Data.Array.Accelerate.System.Random.MWC          as A
 import Data.Array.Accelerate.Examples.Internal          as A
 
 -- system
@@ -42,14 +43,14 @@ main
             radius      = get configStartDiscSize conf
             backend     = get optBackend opts
 
-            -- Generate random particle positions in a disc layout centred at
-            -- the origin. Start the system rotating with particle speed
-            -- proportional to distance from the origin
-            --
-            positions   = randomArray (cloud (size,size) radius) (Z :. n)
-            masses      = randomArray (uniformR (1, mass)) (Z :. n)
+        -- Generate random particle positions in a disc layout centred at
+        -- the origin. Start the system rotating with particle speed
+        -- proportional to distance from the origin
+        --
+        positions      <- randomArray (cloud (size,size) radius) (Z :. n)
+        masses         <- randomArray (uniformR (1, mass)) (Z :. n)
 
-            bodies      = run backend
+        let bodies      = run backend
                         $ A.map (setStartVelOfBody . constant $ get configStartSpeed conf)
                         $ A.zipWith setMassOfBody (A.use masses)
                         $ A.map unitBody (A.use positions)

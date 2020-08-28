@@ -1,8 +1,7 @@
-{-# LANGUAGE DeriveDataTypeable    #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE ScopedTypeVariables   #-}
-{-# LANGUAGE TypeFamilies          #-}
-{-# LANGUAGE UndecidableInstances  #-}
+{-# LANGUAGE DeriveAnyClass    #-}
+{-# LANGUAGE DeriveGeneric     #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE PatternSynonyms   #-}
 
 module Scene.Light
   where
@@ -19,25 +18,18 @@ import Data.Array.Accelerate.Data.Colour.RGB
 import Data.Array.Accelerate.Linear.Metric
 import Data.Array.Accelerate.Linear.Vector
 
-import Data.Array.Accelerate.Array.Sugar                        ( Elt(..), EltRepr, Tuple(..), fromTuple, toTuple )
-import Data.Array.Accelerate.Product
-import Data.Array.Accelerate.Smart
-
--- standard library
-import Data.Typeable
-import qualified Prelude                                        as P
-
 
 -- | An omnidirectional point light source, whose intensity drops off with
 --   distance from the source.
 --
-data Light = Light Position Colour
-  deriving (P.Eq, P.Show, Typeable)
+data Light = Light_ Position Colour
+  deriving (Show, Generic, Elt)
 
 type Lights = Array DIM1 Light
 
-lightPos   :: Exp Light -> Exp Position
-lightColor :: Exp Light -> Exp Colour
+pattern Light :: Exp Position -> Exp Colour -> Exp Light
+pattern Light { lightPos, lightColor } = Pattern (lightPos, lightColor)
+{-# COMPLETE Light #-}
 
 
 -- | Compute the direct lighting contribution of all lights acting on a point on
@@ -89,28 +81,4 @@ applyLight objects point normal light
     in
     checkRay distanceToSphere spheres point dir dist || checkRay distanceToPlane planes point dir dist
       ? ( constant black, refl )
-
-
-
--- Get Lights into Accelerate --------------------------------------------------
-
-lightPos l   = Exp $ SuccTupIdx ZeroTupIdx `Prj` l
-lightColor l = Exp $ ZeroTupIdx `Prj` l
-
-type instance EltRepr Light = EltRepr (Position, Colour)
-
-instance Elt Light where
-  eltType (_ :: Light)  = eltType (undefined :: (Position, Colour))
-  toElt light           = let (p,c) = toElt light in Light p c
-  fromElt (Light p c)   = fromElt (p,c)
-
-instance IsProduct Elt Light where
-  type ProdRepr Light     = ProdRepr (Position, Colour)
-  fromProd _ (Light p c)  = fromTuple (p,c)
-  toProd _ t              = let (p,c) = toTuple t in Light p c
-  prod cst _              = prod cst (undefined :: (Position, Colour))
-
-instance Lift Exp Light where
-  type Plain Light = Light
-  lift (Light p c) = Exp . Tuple $ NilTup `SnocTup` lift p `SnocTup` lift c
 

@@ -27,7 +27,7 @@ options = []
 --
 header :: [String]
 header =
-  [ "accelerate-kmeans (c) [2014] The Accelerate Team"
+  [ "accelerate-kmeans (c) [2014..2020] The Accelerate Team"
   , ""
   , "Usage: accelerate-kmeans [OPTIONS]"
   , ""

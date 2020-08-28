@@ -104,7 +104,7 @@ inject
 inject source field =
   let (is, ps) = A.unlift source
   in A.size ps == 0
-       ?| ( field, A.permute (.+.) field (is A.!) ps )
+       ?| ( field, A.permute (.+.) field (\i -> Just_ (is A.! i)) ps )
 
 
 -- The core of the fluid flow algorithm is a finite time step simulation on the

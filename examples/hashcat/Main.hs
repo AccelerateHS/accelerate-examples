@@ -23,9 +23,9 @@ import qualified Data.ByteString.Lazy.Char8             as L
 -- ugly hack because the .cabal file is not able to specify a build
 -- dependency based on the version of a different build dependency?
 #if MIN_VERSION_criterion(1,5,0)
-import "criterion-measurement" Criterion.Measurement
+import Criterion.Measurement
 #else
-import "criterion"             Criterion.Measurement
+import "criterion" Criterion.Measurement
 #endif
 
 import Prelude                                          as P

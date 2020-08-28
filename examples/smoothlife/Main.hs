@@ -11,6 +11,7 @@ import Random.Splat
 -- system
 import Prelude                                          as P
 import Data.Array.Accelerate                            as A
+import Data.Array.Accelerate.System.Random.MWC          as A
 import Data.Array.Accelerate.Examples.Internal          as A
 import Data.Label
 import Control.Exception
@@ -41,7 +42,7 @@ main
 
         -- initialise with patches of random data
         dots    <- randomCircles dish ra rb
-        agar    <- randomArrayWithSystemRandom (splat dots) dish
+        agar    <- randomArray (splat dots) dish
 
         world   <- evaluate (advance agar)
 

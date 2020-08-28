@@ -56,7 +56,7 @@ defaults = Config
   , _configRate                 = 30
 
   , _configBodyCount            = 1000
-  , _configBodyMass             = 40
+  , _configBodyMass             = 1600
   , _configTimeStep             = 1
   , _configEpsilon              = 50
 

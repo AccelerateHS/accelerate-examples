@@ -13,16 +13,16 @@ import qualified Data.Vector.Storable            as V
 
 -- | Load the whole page graph into memory.
 loadPages
-        :: FilePath             -- ^ Pages file.
-        -> PageId               -- ^ Maximum page number
-        -> IO ( V.Vector PageId -- ^ From vector
-              , V.Vector PageId -- ^ To vector
-              , V.Vector Int    -- ^ Degrees (number of outgoing links) for each page
+        :: FilePath             -- Pages file.
+        -> PageId               -- Maximum page number
+        -> IO ( V.Vector PageId -- From vector
+              , V.Vector PageId -- To vector
+              , V.Vector Int    -- Degrees (number of outgoing links) for each page
               )
 
 loadPages filePath maxPageId
  = do
-        -- Lazilly read the pages files.
+        -- Lazily read the pages files.
         bs              <- BL.readFile filePath
 
         -- Create an initial vector to hold the pages.

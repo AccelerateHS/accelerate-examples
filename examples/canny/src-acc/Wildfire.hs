@@ -7,9 +7,7 @@
 -- This function originally written by Ben Lippmeier for Repa.
 --
 -- NOTE: for best performance this needs to be compiled with the following GHC options:
---       -fllvm -optlo-O3 -Odph -fno-liberate-case
---       -funfolding-use-threshold100 -funfolding-keeness-factor100
---
+-- {-# OPTIONS_GHC -fllvm -optlo-O3 -O3 -fmax-simplifier-iterations=20 -fsimplifier-phases=3 -fno-liberate-case -funfolding-use-threshold100 -funfolding-keeness-factor100 #-}
 
 module Wildfire where
 

@@ -1,9 +1,9 @@
 -- |
 -- Module:      : Data.Array.Accelerate.Examples.Internal.TestFramework
--- Copyright    : [2014] Trevor L. McDonell
+-- Copyright    : [2014..2020] Trevor L. McDonell
 -- License      : BSD3
 --
--- Maintainer   : Trevor L. McDonell <tmcdonell@cse.unsw.edu.au>
+-- Maintainer   : Trevor L. McDonell <trevor.mcdonell@gmail.com>
 -- Stability    : experimental
 -- Portability  : non-portable (GHC extensions)
 --
@@ -20,12 +20,12 @@ module Data.Array.Accelerate.Examples.Internal.TestFramework (
   Assertion, testCase, assertEqual,
 
   -- ** Similarity
-  module Data.Array.Accelerate.Examples.Internal.Similar,
+  module Data.Array.Accelerate.Test.Similar
 
 ) where
 
+import Data.Array.Accelerate.Test.Similar
 import Data.Array.Accelerate.Examples.Internal.ParseArgs
-import Data.Array.Accelerate.Examples.Internal.Similar
 
 import Data.Label
 import Control.Monad
